@@ -1,0 +1,821 @@
+@charset "UTF-8";
+/* CSS Document */
+body {
+	position: fixed; margin: 0; height: 100%; width: 100%; top: 0; left: 0; right:0; bottom: 0; overflow: hidden; background-color: rgb(230,230,230);
+}
+
+#Upload {
+    display: none;
+}
+
+#SVGs {
+    display: none;
+}
+
+#MainWrapper {
+	position: absolute;
+	top: 0;
+	left: 0;
+	height: 100%;
+	width: 100%;
+	transition: width .25s ease-out;
+	overflow: hidden;
+}
+
+#Toolbar {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 7.5vh;
+	background-color: rgba(62,70,87,1.00);
+}
+
+#ToolbarButtonWrapper {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 7.5vh;
+	display: grid;
+	grid-template-columns: 20% 10% 42% 7% 7% 7% 7%;
+    align-items: center;
+    justify-items: center;
+    box-shadow: 0 0 2vh 0 rgba(0,0,0, 0.1);
+}
+
+#MapName {
+    position: relative;
+    font-size: 1.75em;
+    color: white;
+    white-space: nowrap;
+    text-decoration: underline;
+}
+#DateDropdown {
+    position: absolute;
+    left: 1vw;
+    top: 1.25vh;
+    height: 5vh;
+    width: 18vw;
+    background-color: rgba(255,86,53,1.00);
+    border-radius: 2.5vh;
+    box-shadow: 0 0 0.75vh 0 rgba(0,0,0, 0.5) inset;
+    overflow: hidden;
+    transition: height 0.2s ease-out, width 0.2s ease-out;
+}
+
+#DateDropdown:hover{
+    height: 25vh;
+}
+
+#DateDropdown:hover #DropdownIcon {
+    transform: rotate(180deg);
+}
+
+
+#DateInnerWrapper{
+    position: relative;
+    top:0;
+    left:0;
+    height:25vh;
+    width:100%x;
+    display: grid;
+    align-items: center;
+    justify-items: center;
+    grid-template-rows: 5vh auto;
+    z-index: 1;
+}
+
+#DateTitle {
+    position: relative;
+    font-size: 2.25vh;
+    right:0;
+    font-family: Helvetica;
+    width: calc(100% - 10vh);
+    text-align: center;
+    font-weight: 500;
+    line-height: 90%;
+    color: white;
+}
+
+#DropdownIcon{
+    position: absolute;
+    left:1.5vh;
+    top: 0.75vh;
+    transform: rotate(90deg);
+    border-radius: 50%;
+    height: 3.5vh;
+    width:3.5vh;
+    background-color: white;
+    box-shadow: 0 0 0.25vh 0.25vh rgba(0,0,0, 0.2) inset;
+    transition: transform 0.2s ease-out;
+}
+
+#DropdownTriangle {
+    position: relative;
+    left: 50%;
+    top: 45%;
+    transform: translate(-50%, -50%);
+    width: 0;
+    height: 0;
+    border-left: 1.15vh solid transparent;
+    border-right: 1.15vh solid transparent;
+    border-bottom: 2vh solid rgba(255,86,53,1.00);
+}
+
+#DateScroller {
+    position: relative;
+    padding: 2vh;
+    height: 100%;
+    width:100%;
+    top:0;
+    left:0;
+    overflow-y: scroll;
+}
+
+.DateChoice {
+    height: 4vh;
+    width: 100%;
+    position: relative;
+    font-family: Helvetica;
+    font-size: 2.5vh;
+    line-height: 4vh;
+    opacity: 0.75;
+    text-align: center;
+    color: white;
+    transition: opacity 0.15s linear, box-shadow 0.15s linear, background-color 0.15s ease-out, color 0.15s linear;
+    text-decoration: underline;
+    box-shadow: 0 0 2vh 0 rgba(255,255,255, 0);
+}
+
+.DateChoice:hover {
+    opacity: 1;
+    box-shadow: 0 0 2vh 0 rgba(255,255,255, 0.75);
+}
+
+.DateChoice:active {
+    opacity: 1;
+    box-shadow: 0 0 2.5vh 0 rgba(255,255,255, 1);
+}
+
+#CommentSessionButton {
+    width: 100%;
+    overflow: hidden;
+}
+
+#CommentSessionButtonText {
+    font-size: 0.85em;
+    position: absolute;
+    left:0;
+    top:52.5%;
+    transform: translate(0, -50%);
+    width: 100%;
+    font-weight: 400;
+    font-family: Helvetica;
+    text-align: center;
+    line-height: 90%;
+    padding: 1%;
+}
+
+#MapWrapper {
+    position:absolute;
+    width: 100%;
+    height: calc(100% - 7.5vh);
+    top: 7.5vh;
+    left: 0;
+    overflow-y: scroll;
+}
+
+#Map {
+	position: absolute;
+	left: 0;
+	top: 50%;
+    transform: translate(0, -50%);
+	width: 100%;
+	display: grid;
+	grid-template-rows: auto;
+    transition: grid-template-rows 0.15s ease-in;
+	overflow: hidden;
+}
+
+#NodeMenu {
+	position: absolute;
+	right:0;
+	top:0;
+	height: 100%;
+	width: 0%;
+    overflow: hidden;
+	transition: width .25s ease-out;
+}
+
+#NodeFunctions {
+    position: relative;
+    height: 100%;
+    padding: 0 1vh;
+    width: calc(100% - 2vh);
+    top:0;
+    left:0;
+}
+
+#NodeDelete {
+    position: absolute;
+    height: 5vh;
+    width: 5vh;  
+    top:0;
+    left: 1vh;
+}
+
+#NodeMove {
+    position: absolute;
+    height: 5vh;
+    width: 5vh;
+    right: 1vh;
+    top: 0;
+}
+
+#NodePreview {
+	position: absolute;
+    pointer-events: all;
+	left: 2%;
+	top: 2%;
+	height: 96%;
+	width: 96%;
+    opacity: 0;
+    display: inline-grid;
+	grid-template-rows: 4% 7% 2.5% 2.5% 51% 13%;
+    grid-gap: 3%;
+    overflow: hidden;
+    font-family: Helvetica Neue;
+    align-items: center;
+    justify-items: center;
+    transition: opacity 0.15s linear;
+}
+
+#TitlePreview {
+    font-size: 5vh;
+    font-weight: 500;
+    position: relative;
+    max-width: 100%;
+    top:0;
+}
+
+#DatePreview {
+    font-size: 2vh;
+    font-weight: 300;
+    position: relative;
+    top:0;
+    left:-50%;
+    transform: translate(50%, 0);
+    white-space: nowrap;
+}
+
+#LocationPreview {
+    font-size: 2vh;
+    font-weight: 300;
+    position: relative;
+    top:0;
+    left:-50%;
+    transform: translate(50%, 0);
+    white-space: nowrap;
+}
+
+#ContentPreviewScroller{
+    position: relative;
+    top:0;
+    left:0;
+    height: 100%;
+    width: 100%;
+    overflow-y: scroll;
+    box-shadow: 0 0 0.5vh 0.5vh rgba(0,0,0, 0.075) inset;
+}
+
+#ContentPreviewWrapper {
+    position: relative;
+    top:0;
+    left:0;
+    height: 100%;
+    width: 100%;
+    display:grid;
+    grid-template-rows: 100%;
+    justify-items: center;
+    align-items: center;
+}
+
+#AddContent {
+    position: relative;
+    height: 5vh;
+    width: 25vh;
+    border-radius: 2.5vh;
+    box-shadow: 0 0 0.5vh 0.5vh rgba(0,0,0, 0.05);
+    text-align: center;
+    background-color: white;
+}
+
+#ContentPreviewOptionWrapper {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translate(0, -50%);
+    border-radius: 0 2.5vh 2.5vh 0; 
+    height: 5vh;
+    width: 5vh;
+    display: grid;
+    grid-auto-rows: auto;
+    background-color: rgba(255, 255, 255, 0.25);
+    justify-items: center;
+    align-items: center;
+}
+
+#DescriptionPreview {
+    position: relative;
+    font-size: 2.5vh;
+    top:0;
+    width: 94%;
+    height: 100%;
+    left: -50%;
+    transform: translate(50%, 0);
+}
+
+#TextPassage {
+    position: relative;
+    top:0;
+    left:0;
+    height: 100%;
+    width: 100%;
+}
+
+#NodePointer {
+	position: absolute;
+	opacity: 0.3;
+	height: 0;
+	width: 0;
+	top: 0;
+	left: 0;
+	border-radius: 15%;
+	background-color: black;
+	transition: height 0.15s ease-out, width 0.15s ease-out;
+}
+
+#RowPointer {
+	position: absolute;
+	pointer-events: none;
+	opacity: 0.3;
+	height: 5vh;
+	width: 0;
+	top: 0;
+	left: 0;
+	border-top: 2px solid black;
+	border-bottom: 2px solid black;
+	transition: width 0.15s ease-out;
+}
+
+#CommentPointer {
+    position: absolute;
+    pointer-events: none;
+    opacity: 0.3;
+    background-color: black;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    transition: height 0.15s ease-out, width 0.15s ease-out;
+}
+
+.ToolbarButton {
+	position: relative;
+	height: 5vh;
+	width: 5vh;
+	top: 0;
+	left: 0;
+	margin: 1.25vh;
+	border-radius: 0.5vh;
+	background-color: white;
+    transition: box-shadow 0.1s ease-out;
+    box-shadow: 0 0 0.25vh 0.25vh rgba(255,255,255, 0.3);
+}
+
+.ToolbarButton:hover {
+    box-shadow: 0 0 0.5vh 0.5vh rgba(255,255,255, 0.5);
+}
+
+.ToolbarButton:active {
+    box-shadow: 0 0 0.5vh 0.5vh rgba(255,255,255, 1);
+}
+
+.MapRows {
+	position: relative;
+	left: 50%;
+	top: 0%;
+	margin: 0.5vh 0;
+	height: 19vh;
+	width: 0;
+	display: grid;
+	grid-template-columns: 6vh auto;
+	grid-auto-flow: column;
+	align-items: center;
+	justify-items: center;
+	overflow: hidden;
+    transform: translate(-50%, 0);
+	transition: grid-template-columns 0.15s ease-out, grid-template-rows 0.15s ease-out, width 0.2s ease-in;
+    background-color: white;
+}
+
+.RowTitle {
+    position: absolute;
+    padding: 1vh;
+    top: 0;
+    left: 6vh;
+    outline: none;
+    transition: opacity 0.15s linear;
+    opacity: 0.3;
+    font-family: Helvetica;
+    text-decoration: underline;
+    z-index: 1;
+}
+
+.RowTitle:hover {
+    opacity: 1.0;
+}
+
+.RowTitle:focus {
+    opacity: 1.0;
+}
+
+.RowOptions {
+    position: relative;
+    left:0;
+    top:0;
+    height: 100%;
+    width: 6vh;
+    background-color: rgb(230,230,230);
+    display: grid;
+    grid-template-rows: auto auto auto;
+    grid-template-columns: auto;
+    align-items: center;
+	justify-items: center;
+}
+
+.RowButton{
+    position: relative;
+    height: 4vh;
+    width: 4vh;
+    background-color: white;
+    border-radius: 50%;
+    box-shadow: 0 0 1vh 0 rgba(0,0,0, 0.3);
+    transition: box-shadow 0.1s ease-out;
+}
+
+.RowButton:hover {
+    box-shadow: 0 0 1.25vh 0 rgba(0,0,0, 0.5);
+}
+
+.RowButton:active {
+    box-shadow: 0 0 1.5vh 0 rgba(0,0,0, 0.75);
+}
+
+.ButtonSVG {
+    position: relative;
+    height: 70%;
+    top: 50%;
+    left:50%;
+    transform: translate(-50%,-50%);
+    pointer-events: none;
+}
+
+.Node {
+	position: relative;
+	height: 0vh;
+	width: 0vh;
+	top: 0;
+	left: 0;
+	border-radius: 15%;
+	overflow: hidden;
+	background-color: black;
+	transition: height 0.15s ease-out, width 0.15s ease-out, box-shadow 0.1s linear;
+    background-position: center;
+    background-size: cover;
+    box-shadow: 0 0 0.25vh 0.25vh rgba(0,0,0, 0.15) inset;
+}
+
+.Node:hover {
+    box-shadow: 0 0 0.5vh 0.5vh rgba(255,255,255, 0.4) inset;
+}
+
+.Node:active {
+    box-shadow: 0 0 0.75vh 0.75vh rgba(255,255,255, 1) inset;
+}
+
+.EntryField {
+    padding: 1vh 2vh;
+    color: rgba(0,0,0, 0.3);
+    background: white;
+    border-bottom: 0.4vh solid red;
+    border-radius: 2vh 2vh 0 0;
+    box-shadow: 0 0 0.5vh 0 rgba(0,0,0, 0.15) inset;
+    transition: color 0.2s ease-out, width 0.1s ease-out, border-color 0.2s ease-out, box-shadow 0.1s ease-out;
+    outline: none;
+    overflow-y: scroll;
+}
+
+.EntryField:hover {
+    border-color: yellow;
+    box-shadow: 0 0 0.75vh 0 rgba(0,0,0, 0.3) inset;
+}
+
+.EntryField:focus {
+    color: black;
+    border-color: yellow;
+    box-shadow: 0 0 0.75vh 0 rgba(0,0,0, 0.5) inset;
+}
+
+.ContentPreview {
+    position: relative;
+    max-height: 100%;
+    max-width: 100%;
+}
+
+.ContentPreviewOptions {
+    position: relative;
+    height: 2.5vh;
+    width: 2.5vh;
+    background-color: rgba(0,0,0, 0.15);
+    border-radius: 50%;
+    transition: background-color 0.15s ease-out;
+    scroll-behavior: smooth;
+}
+
+.ContentPreviewOptions:hover {
+    background-color: white;
+}
+
+.Button {
+    border-radius: 50%;
+    background-color: white;
+    box-shadow: 0 0 0.75vh 0 rgba(0,0,0, 0.15);
+    transition: box-shadow 0.15s ease-out;
+}
+
+.Button:hover {
+    box-shadow: 0 0 0.9vh 0 rgba(0,0,0, 0.3);
+}
+
+.Button:active {
+    box-shadow: 0 0 1vh 0 rgba(0,0,0, 0.5);
+}
+
+#CommentWrapper {
+    position: absolute;
+    overflow: visible;
+    height:100%;
+    width:100%;
+    z-index: 1;
+    pointer-events: none;
+}
+
+#CommentPreview {
+    position:absolute;
+    pointer-events: all;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    opacity: 0;
+    transition: opacity 0.15s linear;
+}
+
+.MapComment {
+    position: absolute;
+    height: 0vh;
+    width: 0vh;
+    top:0;
+    left:0;
+    border-radius: 50%;
+    transition: height 0.2s ease-out, width 0.2s ease-out, background-color 0.1s linear;
+    background-color: rgba(255,86,53,1.00);
+    text-align: center;
+    line-height: 5vh;
+    white-space: nowrap;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 0.25vh 0.25vh rgba(0,0,0, 0.1);
+    pointer-events: all;
+}
+
+.MapComment:hover {
+    background-color: rgba(255,86,53,0.66);
+}
+
+.MapComment:active {
+    background-color: rgba(255,86,53,0.33);
+}
+
+.CommentWrapper {
+    position: relative;
+    width: calc(100% - 4vh);
+    height: 15vh;
+    top: 0;
+    left: 2vh;
+    margin-top: 2vh;
+}
+
+.CommentArrow {
+    position: absolute;
+    top:12.5%;
+    right:75%;
+    height: 50%;
+}
+
+.Comment {
+    position: absolute;
+    width: calc(100% - 0.5vh);
+    height: 100%;
+    top: 0;
+    right: 0;
+    background-color: rgb(230,230,230);
+    border-radius: 3vh 3vh 3vh 0vh;
+    border: 0.5vh solid white;
+    transition: height 0.2s ease-out, width 0.2s ease-out;
+    box-shadow: 0 0 1vh 0.5vh rgba(0,0,0, 0.025);
+    display: inline-grid;
+    grid-template-rows: 5vh auto;
+    overflow: hidden;
+}
+
+.CommentUsername {
+    position: relative;
+    top: 50%;
+    left:0;
+    padding: 0 0 0 1vh;
+    transform: translate(0,-50%);
+    font-family: Helvetica;
+    font-size: 2.75vh;
+    line-height: 5vh;
+    font-weight: 600;
+    white-space: nowrap;
+    background-color: white;
+}
+
+.ReplyButton {
+    position: absolute;
+    right: 1vh;
+    top: 0.25vh;
+    background-color: rgb(230,230,230);
+    height: 4vh;
+    width: 25%;
+    border-radius: 2vh;
+    text-align: center;
+    line-height: 4.125vh;
+    font-family: Helvetica;
+    font-size: 2.25vh;
+    font-weight: 600;
+    box-shadow: 0 0 0.25vh 0 rgba(0,0,0, 0.3) inset;
+    transition: box-shadow 0.15s ease-out;
+}
+
+.ReplyButton:hover {
+    box-shadow: 0 0 0.75vh 0 rgba(0,0,0, 0.4) inset;
+}
+
+.ReplyButton:active {
+    box-shadow: 0 0 1.25vh 0 rgba(0,0,0, 0.6) inset;
+}
+
+.CommentMessage {
+    position: relative;
+    top:0;
+    left: 0;
+    font-family: Helvetica;
+    font-size: 2vh;
+    opacity: 0.33;
+    padding: 1vh;
+    outline: none;
+    transition: opacity 0.1s linear;
+}
+.CommentMessage:hover {
+    opacity: 0.66;
+}
+
+.CommentMessage:active {
+    opacity: 1;
+}
+
+.SavedCommentMessage {
+    position: relative;
+    top:0;
+    left: 0;
+    font-family: Helvetica;
+    font-size: 2vh;
+    opacity: 1;
+    padding: 1vh;
+    outline: none;
+}
+
+#CommentOptionButtons {
+    position: relative;
+    top: 0;
+    left: 0;
+    display: grid;
+    grid-template-columns: 50% 50%;
+    height: 7.5vh;
+    width: 100%;
+    box-shadow: 0 0 2vh 0 rgba(0,0,0, 0.1);
+    transition: height 0.25s ease-out;
+    overflow: hidden;
+}
+
+.CommentOptionButton {
+    position: relative;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    height: 5vh;
+    width: calc(100% - 2.5vh);
+    border-radius: 2.5vh;
+    text-align: center;
+    line-height: 5.25vh;
+    font-family: Helvetica;
+    font-size: 2.5vh;
+    font-weight: 600;
+    box-shadow: 0 0 0.5vh 0 rgba(0,0,0, 0.3) inset;
+    transition: box-shadow 0.15s ease-out;
+}
+
+.CommentOptionButton:hover {
+    box-shadow: 0 0 0.75vh 0 rgba(0,0,0, 0.4) inset;
+}
+
+.CommentOptionButton:active {
+    box-shadow: 0 0 1.25vh 0 rgba(0,0,0, 0.6) inset;
+}
+
+#Replies {
+    position: absolute;
+    width: 75%;
+}
+
+#NotificationWrapper {
+    position: absolute;
+    opacity: 0;
+    top:0;
+    left:0;
+    height:100%;
+    width:100%;
+    z-index: 10;
+    background-color: rgba(0,0,0, 0);
+    transition: background-color 0.2s linear;
+    pointer-events: none;
+}
+
+#NotificationWindow {
+    position: absolute;
+    top:50%;
+    left:50%;
+    transform: translate(-50%,-50%);
+    height: 50vh;
+    width: 0vh;
+    background-color: white;
+    border-radius: 5vh;
+    box-shadow: 0 0 2.5vh 0 rgba(0,0,0,0.3);
+    display: grid;
+    grid-template-rows: 75% 25%;
+    overflow: hidden;
+    transition: width 0.2s ease-out;
+}
+
+#NotificationMessage {
+    position: relative;
+    top: 4vh;
+    left: 4vh;
+    height: calc(100% - 4vh);
+    width: calc(100% - 8vh);
+    font-family: Helvetica;
+    font-size: 5vh;
+    font-weight: 300;
+    line-height: 100%;
+}
+
+#NotificationChoices {
+    position: relative;
+    height: 100%;
+    width: 100%;
+    display: grid;
+    grid-template-columns: auto auto;
+}
+
+.NotificationButton {
+    position: relative;
+    left: 2vh;
+    top: 2vh;
+    height: calc(100% - 4vh);
+    width: calc(100% - 4vh);
+    border-radius: 7vh;
+    background-color: rgb(230,230,230);
+    text-align:center;
+    box-shadow: 0 0 1vh 0 rgba(0,0,0, 0.1) inset;
+    line-height: 8.75vh;
+    white-space: nowrap;
+    font-family: Helvetica;
+    font-size: 5vh;
+}
+
