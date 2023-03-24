@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "target": "ES2015",
+    "jsxFactory": "react",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "allowJs": true,
+    "outDir": "./dist",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "skipLibCheck": true 
+  },
+  "include": [
+    "**/*.tsx",
+    "**/*.ts", 
+  ],
+  "exclude": [
+    "dist",
+    "node_modules",
+    "client"
+  ]
+}

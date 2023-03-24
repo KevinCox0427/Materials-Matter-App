@@ -3,10 +3,8 @@ var session = require("express-session");
 var resolve = require("path").resolve;
 var bodyParser = require("body-parser");
 var cors = require("cors");
-var helmet = require("helmet");
 var AWS = require('aws-sdk');
-var google = require('googleapis');
-var {OAuth2Client, auth} = require('google-auth-library');
+var { OAuth2Client } = require('google-auth-library');
 
 
 
@@ -31,7 +29,7 @@ var googleConfig = {
     clientId: '551186421364-b3rg4n4170v1l8nbtfu2flf5m8fr6qd2.apps.googleusercontent.com',
     clientSecret: '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',
     redirect: 'https://teachingappdemo.herokuapp.com/callback'
-  };
+};
 
 const OAuth = new OAuth2Client(googleConfig.clientId);
 const passport = require('passport');
