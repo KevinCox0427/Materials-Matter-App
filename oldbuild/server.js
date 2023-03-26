@@ -9,25 +9,23 @@ var { OAuth2Client } = require('google-auth-library');
 
 
 var s3Client = new AWS.S3({
-    region: "us-east-2",
-    accessKeyId: 'AKIA5IORMZ6PRVKMY5H3',
-    //'AKIA5IORMZ6PUSH6ROCR',
-    secretAccessKey: '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'
-    //'C8h0EYZv1QhKRWUpX6kOg7L8mp4WHQ9k0WsFYY2J'
+    region: "",
+    accessKeyId: '',
+    secretAccessKey: ''
 });
 //For Bing
 /*
 var googleConfig = {
-  clientId: '433282840717-66j1r18fvtlicj54uajhd117u60ek643.apps.googleusercontent.com',
-  clientSecret: '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',
+  clientId: '',
+  clientSecret: '',
   redirect: 'https://materialsmattertest.herokuapp.com/Menu'
 };
 */
 
 //For personal
 var googleConfig = {
-    clientId: '551186421364-b3rg4n4170v1l8nbtfu2flf5m8fr6qd2.apps.googleusercontent.com',
-    clientSecret: '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',
+    clientId: '',
+    clientSecret: '',
     redirect: 'https://teachingappdemo.herokuapp.com/callback'
 };
 
