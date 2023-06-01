@@ -4,7 +4,9 @@
   "description": "Re-done application",
   "main": "dist/server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc && sass styles:dist/public/css && webpack && node dist/server.js",
+    "start": "tsc utils/watch.ts --outDir dist/utils && node dist/utils/watch.js",
+    "deploy": "node utils/deploy.js"
   },
   "repository": {
     "type": "git",
@@ -25,18 +27,27 @@
   },
   "homepage": "https://github.com/KevinCox0427/Materials-Matter-App#readme",
   "devDependencies": {
+    "@types/connect-pg-simple": "^7.0.0",
     "@types/dotenv": "^8.2.0",
     "@types/express": "^4.17.17",
     "@types/express-session": "^1.17.7",
+    "@types/knex": "^0.16.1",
     "@types/passport": "^1.0.12",
     "@types/passport-google-oauth2": "^0.1.5",
+    "@types/quill": "^2.0.10",
     "@types/react": "^18.0.28",
+    "@types/react-dom": "^18.2.4",
+    "connect-pg-simple": "^8.0.0",
+    "cookie-parser": "^1.4.6",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "express-session": "^1.17.3",
+    "knex": "^2.4.2",
     "passport": "^0.6.0",
     "passport-google-oauth2": "^0.2.0",
+    "pg": "^8.11.0",
     "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "sass": "^1.60.0",
     "ts-loader": "^9.4.2",
     "typescript": "^5.0.2",

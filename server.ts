@@ -25,18 +25,29 @@ app.set('etag', false);
  * Setting up user sessions via express session.
  * Also storing these sessions in a database.
  */
-import session, { MemoryStore } from "express-session";
+import session from "express-session";
+import genFunc from 'connect-pg-simple';
+
+const PostgresqlStore = genFunc(session);
+
 app.use(session({ 
     secret: process.env.SessionSecret || 'secret',
-    resave: true,
-    saveUninitialized: true,
+    resave: false,
+    saveUninitialized: false,
     cookie: { 
         secure: false, //change to true when hosting on https server
-        maxAge: 24 * 60 * 60 * 1000,
-        sameSite: true
+        maxAge: 24 * 60 * 60 * 1000
     },
-    store: new MemoryStore()
+    store: new PostgresqlStore({
+        conString: process.env.pgConnectionString,
+        createTableIfMissing: true
+    })
 }));
+
+/**
+ * Import database configuration
+ */
+import './db/__init';
 
 
 /**
@@ -50,7 +61,8 @@ import './utils/authentication';
  */
 declare global { 
     type ServerPropsType = Partial<{
-        
+        homePageProps: HomePageProps,
+        mapPageProps: MapPageProps
     }>
 }
 
@@ -59,8 +71,12 @@ declare global {
  * Declaring the routes
  */
 import index from './routes/index';
+import users from './routes/users';
+import map from './routes/map';
 
 app.use('/', index);
+app.use('/users', users);
+app.use('/map', map);
 
 
 /**

@@ -103,7 +103,7 @@ passport.use(new GoogleStrategy({
     function(request, accessToken, refreshToken, profile, done) {
         return done(null, profile);
     }
-));
+)); 
 passport.serializeUser(async function(user, done){
     done(null, user);
 });
@@ -140,7 +140,7 @@ app.get('/',
     passport.authenticate('google', {scope: ['email', 'profile']
 }));
 
-app.get( '/callback',
+app.get('/callback',
     passport.authenticate( 'google', {
         successRedirect: '/MainMenu',
         failureRedirect: '/failure'

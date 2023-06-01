@@ -3,6 +3,7 @@ import passport from 'passport';
 import { app } from '../server';
 import { Strategy } from 'passport-google-oauth2';
 import dotenv from 'dotenv';
+import User from "../db/user";
 
 dotenv.config();
 
@@ -13,12 +14,10 @@ declare global {
     namespace Express {
         interface Partial<SessionData> {
             passport?: {
-                user?: string
+                user?: UserDoc
             }
         }
-        interface User {
-            admin: boolean
-        }
+        interface User extends UserDoc {}
     }
 }
 
@@ -29,11 +28,48 @@ declare global {
 passport.use(new Strategy({
         clientID: process.env.googleClientId || '',
         clientSecret: process.env.googleClientSecret || '',
-        callbackURL: "http://localhost:3000/callback",
+        callbackURL: "http://localhost:3000/users/callback",
         passReqToCallback: true
     },
-    function(request, accessToken, refreshToken, profile, done) {
-        return done(null, profile);
+    async (request:any, accessToken:any, refreshToken:any, profile:any, done:any) => {
+        /**
+         * Rejecting any google accounts that don't contain the binghamton.edu domain.
+         */
+        if(typeof profile._json === 'undefined') return done(null, null);
+        if(!profile._json.email_verified || profile._json.domain !== 'binghamton.edu') return done(null, null);
+
+        /**
+         * Returning the data we want to store from the logged in user.
+         */
+        const googleAccount = {
+            firstName: profile._json.given_name,
+            lastName: profile._json.family_name,
+            email: profile._json.email,
+            image: profile._json.picture,
+            admin: true
+        }
+
+        /**
+         * Then we search the database to see if it has been stored
+         */
+        let userDoc:UserDoc[] | UserDoc = await User.get(googleAccount);
+
+        /**
+         * If not, create a new one
+         */
+        if(userDoc.length === 0) {
+            const createResult = await User.create(googleAccount);
+            if(createResult) userDoc = createResult;
+            else return done(null, false);
+        }
+        /**
+         * Otherwise just return the found user.
+         */
+        else {
+            userDoc = userDoc[0];
+        }
+
+        return done(null, userDoc);
     }
 ));
 
@@ -44,16 +80,17 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 /**
- * Serializing function for the user session key.
+ * Serializing function for the user session.
  */
 passport.serializeUser((user, done) => {
-    done(null, user);
+    done(null, user.id);
 });
 /**
- * Deserializing function for the user session key.
+ * Deserializing function for the user session.
  */
-passport.deserializeUser((user:Express.User, done) => {
-    done(null, user)
+passport.deserializeUser(async (userId:number, done) => {
+    const user = await User.getByID(userId);
+    done(null, user ? user : null);
 });
 
 /**
@@ -65,7 +102,7 @@ passport.deserializeUser((user:Express.User, done) => {
  */
 export function isAuth ( req:Request, res:Response, next:NextFunction ) {
     if(req.isAuthenticated()) { next() }
-    else res.status(302).redirect('/user/login');
+    else res.status(302).redirect('/users/login');
 };
 
 /**
@@ -77,5 +114,5 @@ export function isAuth ( req:Request, res:Response, next:NextFunction ) {
  */
 export function isAdmin ( req:Request, res:Response, next:NextFunction ) {
     if(req.isAuthenticated() && req.user.admin) { next() }
-    else res.status(302).redirect('/user/login');
+    else res.status(302).redirect('/users/login');
 }

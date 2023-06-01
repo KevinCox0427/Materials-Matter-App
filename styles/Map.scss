@@ -1,0 +1,468 @@
+@import './mixins';
+
+body {
+    overflow: hidden;
+}
+
+main {
+    flex-direction: row;
+    flex-wrap: wrap;
+    flex-grow: 1;
+    overflow: hidden;
+    display: flex;
+    max-height: 100vh;
+    overflow: hidden;
+
+    .Head {
+        flex-basis: 100%;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 1em 2em;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5em 1em;
+        width: calc(100% - 2em);
+        background-color: var(--black);
+        display: flex;
+
+        * {
+            display: flex;
+        }
+
+        .Comments {
+            flex-direction: row;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 2em 1em;
+
+            .SessionPlaceholder {
+                height: 2.5em;
+                width: 20em;
+            }
+            
+            .Sessions {
+                position: absolute;
+                top: 0em;
+                left: 0em;
+                background-color: salmon;
+                overflow: hidden;
+                height: 2.5em;
+                width: 20em;
+                border-radius: 1.25em;
+                transition: height 0.25s ease-in-out;
+
+                &:hover {
+                    height: 15em;
+                    z-index: 2;
+                }
+
+                .Selector {
+                    flex-direction: row;
+                    flex-wrap: wrap;
+                    gap: 2em 1em;
+                    color: var(--white);
+                    align-items: center;
+                    justify-content: center;
+                    height: 2.5em;
+                    flex-shrink: 0;
+
+                    .Triangle {
+
+                    }
+
+                    h2 {
+                        font-weight: 400;
+                    }
+                }
+
+                .Options {
+                    width: calc(100% - 2em);
+                    height: fit-content;
+                    flex-direction: row;
+                    flex-wrap: wrap;
+                    gap: 1em;
+                    padding: 1em 1em 0 1em;
+
+                    p {
+                        font-size: 1.15em;
+                        flex-basis: 10em;
+                        flex-grow: 1;
+                        justify-content: center;
+                        align-items: center;
+                        @include RoundButton(var(--white), salmon);
+                    }
+                }
+            }
+            
+            .StartSession {
+                @include RoundButton(var(--white), var(--black));
+                font-size: 1.55em;
+            }
+        }
+
+        input {
+            background: none;
+            color: var(--white);
+            font-family: var(--rubik);
+            font-weight: 400;
+            font-size: 1.5em;
+            border-bottom: 0.075em solid var(--white);
+            flex-basis: 10em;
+            flex-grow: 1;
+            max-width: 20em;
+            text-align: center;
+        }
+
+        .Buttons {
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5em 1em;
+
+            button {
+                padding: 0.5em;
+                border-radius: 10em;
+                background-color: var(--black);
+                transition: background-color 0.1s linear, transform 0.1s linear;
+
+                i {
+                    font-size: 1.75em;
+                    color: var(--white);
+                    transition: color 0.1s linear, border 0.1s linear;
+                }
+
+                &.Row {
+                    padding: 0.6em;
+
+                    i {
+                        font-size: 1.4em;
+                        border-top: 0.15em solid var(--white);
+                        border-bottom: 0.15em solid var(--white);
+                        padding: 0.1em 0.25em;
+                    }
+                }
+
+                &.Node {
+                    padding: 0.6em;
+
+                    i {
+                        font-size: 1.4em;
+                        border: 0.15em solid var(--white);
+                        border-radius: 0.5em;
+                        padding: 0.15em 0.25em;
+                    }
+                }
+
+                &:hover {
+                    background-color: var(--white);
+                    transform: scale(1.1);
+                    cursor: pointer;
+
+                    i {
+                        color: var(--black);
+                        border-color: var(--black);
+                    }
+                }
+            }
+        }
+    }
+
+    .Body {
+        height: calc(100% - 3.5em);
+        flex-basis: 0em;
+        flex-grow: 1;
+        overflow-y: scroll;
+        justify-content: center;
+        align-items: center;
+        display: flex;
+
+        * {
+            display: flex;
+        }
+
+        .Rows {
+            flex-direction: row;
+            flex-wrap: wrap;
+            width: 100%;
+            height: fit-content;
+            gap: 1em;
+
+            .Row {
+                flex-direction: row;
+                flex-wrap: wrap;
+                flex-basis: 100%;
+                width: fit-content;
+                gap: 0.5em;
+
+                .Name {
+                    padding-left: 3em;
+                    flex-basis: 100%;
+
+                    input {
+                        font-size: 1.25em;
+                        width: fit-content;
+                        background: none;
+                        border-bottom: 0.1em solid var(--black);
+                    }
+                }
+
+                .Bottom {
+                    flex-basis: 100%;
+                    flex-direction: row;
+
+                    .LeftButtons {
+                        flex-basis: 3em;
+                        align-items: center;
+                        justify-content: space-around;
+                        gap: 0.5em;
+
+                        button {
+                            background-color: var(--grey);
+                            height: 2.5em;
+                            width: 2.5em;
+                            border-radius: 10em;
+                            justify-content: center;
+                            align-items: center;
+                            transition: 0.1s linear background-color, 0.1s linear transform;
+
+                            i {
+                                font-size: 1.5em;
+                                transition: 0.1s linear color;
+                            }
+
+                            &:hover {
+                                background-color: var(--black);
+                                transform: scale(1.1);
+                                cursor: pointer;
+                                
+                                i {
+                                    color: var(--grey);
+                                }
+                            }
+                        }
+                    }
+
+                    .Nodes {
+                        background-color: var(--white);
+                        flex-grow: 1;
+                        flex-direction: row;
+                        gap: 2em;
+                        justify-content: space-around;
+                        align-items: center;
+                        padding: 0.5em 1em;
+
+                        .Node {
+                            height: 8em;
+                            width: 8em;
+                            border-radius: 1em;
+                            box-shadow: 0 0 0.25em 0 rgba(0,0,0, 0.4);
+                            overflow: hidden;
+                            transition: box-shadow 0.1s linear, transform 0.1s linear, border-radius 0.15s linear;
+
+                            &:hover {
+                                box-shadow: 0 0 0 0.1em rgba(0,0,0, 1);
+                                cursor: pointer;
+                                transform: scale(1.05);
+                                border-radius: 0;
+                            }
+
+                            img {
+                                height: 100%;
+                                width: 100%;
+                                object-fit: cover;
+                                object-position: center;
+                                pointer-events: none;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        .Comments {
+            position: absolute;
+        }
+    }
+
+    .SideMenuScroll {
+        height: calc(100% - 5.5em);
+        padding: 1em 0;
+        width: 0px;
+        overflow-y: scroll;
+        transition: width 0.25s ease-in-out;
+        display: flex;
+
+        .SideMenu {
+            height: fit-content;
+            width: 100%;
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 3em;
+
+            .Buttons {
+                display: flex;
+                flex-basis: 100%;
+                margin: 0 1em;
+
+                * {
+                    display: flex;
+                }
+
+                button {
+                    background: var(--grey);
+                    width: fit-content;
+                    padding: 0.4em;
+                    border-radius: 10em;
+                    font-size: 1.2em;
+                    justify-content: center;
+                    align-items: center;
+                    transition: 0.1s linear transform, 0.1s background-color linear;
+
+                    i {
+                        color: var(--black);
+                        transition: color 0.1s linear;
+                    }
+
+                    &:hover {
+                        background-color: var(--black);
+                        transform: scale(1.1);
+                        cursor: pointer;
+
+                        i {
+                            color: var(--white)
+                        }
+                    }
+                }
+            }
+
+            .Title {
+                display: flex;
+                flex-basis: 100%;
+                margin: 0 0.5em;
+                font-family: var(--rubik);
+                font-size: 2em;
+                font-weight: 500;
+                background: none;
+                border-bottom: 0.1em solid var(--black);
+                text-align: center;
+                min-width: 1em;
+
+                * {
+                    display: flex;
+                }
+            }
+
+            .GalleryUpload {
+                display: flex;
+                flex-basis: 100%;
+                gap: 1em;
+                margin: auto 1em;
+
+                * {
+                    display: flex;
+                }
+
+                h2 {
+                    font-size: 2em;
+                    font-weight: 400;
+                }
+
+                .FileUpload {
+                    flex-direction: row;
+
+                    label {
+                        flex-grow: 1;
+                        padding: 3em 0;
+                        border: 0.1em dashed var(--black);
+                        justify-content: center;
+                        align-items: center;
+                        font-size: 1.25em;
+                        pointer-events: none;
+                    }
+
+                    input {
+                        opacity: 0;
+                        position: absolute;
+                        left: 0;
+                        top: 0;
+                        height: 100%;
+                        width: 100%;
+                        cursor: pointer;
+
+                        &:hover ~ label {
+                            border: 0.1em solid var(--black);
+                        }
+                    }
+                }
+                
+                .Gallery {
+                    flex-direction: row;
+                    flex-wrap: wrap;
+                    gap: 1em;
+
+                    .ImageWrapper {
+                        width: 8em;
+                        height: 8em;
+                        border-radius: 0.5em;
+                        background-color: var(--white);
+                        
+                        img {
+                            height: 100%;
+                            width: 100%;
+                            object-fit: contain;
+                            object-position: center;
+                        }
+
+                        button {
+                            position: absolute;
+                            right: 0;
+                            top: 0;
+                            transform: translate(30%, -30%);
+                            background: var(--white);
+                            padding: 0.4em;
+                            border-radius: 10em;
+                            width: fit-content;
+                            font-size: 1.2em;
+                            box-shadow: 0 0 0 0.1em var(--black);
+                            justify-content: center;
+                            align-items: center;
+                            transition: 0.1s linear transform, 0.1s background-color linear;
+
+                            i {
+                                color: var(--black);
+                                transition: color 0.1s linear;
+                            }
+
+                            &:hover {
+                                background-color: var(--black);
+                                transform: translate(30%, -30%) scale(1.1);
+                                cursor: pointer;
+
+                                i {
+                                    color: var(--white)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            .TextEditorWrapper {
+                display: flex;
+                flex-basis: 100%;
+                margin: 0 1em;
+
+                h2 {
+                    font-size: 2em;
+                    font-weight: 400;
+                    margin-bottom: 0.5em;
+                }
+
+                @include QuillStyleAdjustments();
+            }
+        }
+    }
+}
