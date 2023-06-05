@@ -13,6 +13,19 @@ type Props = {
     ServerProps: ServerPropsType
 }
 
+/**
+     * An asynchronous helper function to read a file from an input
+     * @param file The File object created by the input
+     * @returns The base64 data of the file image.
+     */
+async function readFileAsDataURL(file: File): Promise<string | ArrayBuffer | null> {
+    return await new Promise((resolve) => {
+        const fileReader = new FileReader();
+        fileReader.onload = e => resolve(fileReader.result);
+        fileReader.readAsDataURL(file);
+    });
+}
+
 const Map: FunctionComponent<Props> = (props) => {
     if(!props.ServerProps.mapPageProps) return <></>;
 
@@ -26,19 +39,8 @@ const Map: FunctionComponent<Props> = (props) => {
     const [sessions, setSessions] = useState(props.ServerProps.mapPageProps.sessions);
 
     const [selectedSession, setSelectedSession] = useState(sessions[0] ? sessions[0].id : -1);
-
-    /**
-     * An asynchronous helper function to read a file from a file <input>
-     * @param file The File object created by the input
-     * @returns The base64 data of the file image.
-     */
-    async function readFileAsDataURL(file: File): Promise<string | ArrayBuffer | null> {
-        return await new Promise((resolve) => {
-            const fileReader = new FileReader();
-            fileReader.onload = e => resolve(fileReader.result);
-            fileReader.readAsDataURL(file);
-        });
-    }
+    
+    const [headerButton, setHeaderButton] = useState('');
     
     return <main>
         <header className="Head">
@@ -70,7 +72,9 @@ const Map: FunctionComponent<Props> = (props) => {
                 <button className="Comment">
                     <i className="fa-solid fa-comment"></i>
                 </button>
-                <button className="Node">
+                <button className="Node" onMouseDown={e => {
+                    setHeaderButton('node');
+                }}>
                     <i className="fa-solid fa-plus"></i>
                 </button>
                 <button className="Row">

@@ -26,9 +26,7 @@ app.set('etag', false);
  * Also storing these sessions in a database.
  */
 import session from "express-session";
-import genFunc from 'connect-pg-simple';
-
-const PostgresqlStore = genFunc(session);
+const mySqlStore = require('express-mysql-session')(session);
 
 app.use(session({ 
     secret: process.env.SessionSecret || 'secret',
@@ -38,9 +36,14 @@ app.use(session({
         secure: false, //change to true when hosting on https server
         maxAge: 24 * 60 * 60 * 1000
     },
-    store: new PostgresqlStore({
-        conString: process.env.pgConnectionString,
-        createTableIfMissing: true
+    store: new mySqlStore({
+        connectionLimit: 10,
+        host: process.env.sqlHost,
+        port: process.env.sqlPort,
+        user: process.env.sqlUser,
+        password: process.env.sqlPass,
+        database: process.env.sqlDatabase,
+        createDatabaseTable: true
     })
 }));
 

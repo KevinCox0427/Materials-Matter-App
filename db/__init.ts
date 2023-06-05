@@ -10,13 +10,13 @@ import { userTable } from "./user";
  * Initalizing the conneciton to the postgres database.
  */
 export const knex = require('knex')({
-    client: 'pg',
+    client: 'mysql',
     connection: {
-        host: 'localhost',
-        port: 5432,
-        user: 'kevin',
-        password: null,
-        database: 'materialmatter'
+        host: process.env.sqlHost,
+        port: process.env.sqlPort,
+        user: process.env.sqlUser,
+        password: process.env.sqlPass,
+        database: process.env.sqlDatabase
     }
 });
 
