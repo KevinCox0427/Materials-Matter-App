@@ -1,4 +1,4 @@
-import { isDBready, knex } from "./__init";
+import { isDBready, knex } from "./__init__";
 
 declare global {
     interface CommentType {

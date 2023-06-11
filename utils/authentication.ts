@@ -3,7 +3,7 @@ import passport from 'passport';
 import { app } from '../server';
 import { Strategy } from 'passport-google-oauth2';
 import dotenv from 'dotenv';
-import User from "../db/user";
+import User from "../models/user";
 
 dotenv.config();
 
@@ -28,7 +28,7 @@ declare global {
 passport.use(new Strategy({
         clientID: process.env.googleClientId || '',
         clientSecret: process.env.googleClientSecret || '',
-        callbackURL: "http://localhost:3000/users/callback",
+        callbackURL: process.env.googleCallbackURI || '',
         passReqToCallback: true
     },
     async (request:any, accessToken:any, refreshToken:any, profile:any, done:any) => {
@@ -85,6 +85,7 @@ app.use(passport.session());
 passport.serializeUser((user, done) => {
     done(null, user.id);
 });
+
 /**
  * Deserializing function for the user session.
  */

@@ -50,7 +50,7 @@ app.use(session({
 /**
  * Import database configuration
  */
-import './db/__init';
+import './models/__init__';
 
 
 /**
@@ -73,9 +73,9 @@ declare global {
 /**
  * Declaring the routes
  */
-import index from './routes/index';
-import users from './routes/users';
-import map from './routes/map';
+import index from './controllers/index';
+import users from './controllers/users';
+import map from './controllers/map';
 
 app.use('/', index);
 app.use('/users', users);

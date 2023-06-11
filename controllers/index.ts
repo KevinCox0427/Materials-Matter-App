@@ -15,7 +15,6 @@ index.route('/')
         const serverProps:ServerPropsType = {
             homePageProps: {
                 maps: [{
-                    id: 1,
                     name: 'The best map'
                 }]
             }
