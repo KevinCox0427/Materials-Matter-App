@@ -2,7 +2,7 @@ import React, { Fragment, FunctionComponent, useState } from "react";
 import { createRoot } from "react-dom/client";
 import Row from "./Row";
 import SideMenu from "./SideMenu";
-import Comment from "./Comment";
+import MapComment from "./MapComment";
 
 /**
  * Declaring globally what properties this page should inherited from the server under "MapPageProps".
@@ -43,7 +43,7 @@ const Map: FunctionComponent<Props> = (props) => {
     /**
      * State variable representing the index of the currently selected comment session.
      */
-    const [selectedSession, setSelectedSession] = useState(sessions[0] ? 0 : -1);
+    const [selectedSession, setSelectedSession] = useState(0);
 
     /**
      * State variable pointing to the data that's being edited in the side menu.
@@ -116,14 +116,23 @@ const Map: FunctionComponent<Props> = (props) => {
             <div className="Rows">
                 {map.rows.map((_, i) => {
                     return <Fragment key={i}>
-                        <Row map={map} setMap={setMap} rowIndex={i} setSideMenuData={setSideMenuData}></Row>
+                        <Row map={map}
+                            setMap={setMap}
+                            rowIndex={i}
+                            setSideMenuData={setSideMenuData}
+                        ></Row>
                     </Fragment>
                 })}
             </div>
             <div className="Comments">
-                {sessions[selectedSession].comments.filter(comment => comment.replyId === null).map((comment, i) => {
+                {sessions[selectedSession].comments['-1'].map((comment, i) => {
                     return <Fragment key={i}>
-                        <Comment commentData={comment} setSideMenuData={setSideMenuData}></Comment>
+                        <MapComment
+                            commentData={comment}
+                            setSideMenuData={setSideMenuData}
+                            sessionIndex={selectedSession}
+                            commentIndex={i}
+                        ></MapComment>
                     </Fragment>
                 })}
             </div>
@@ -132,7 +141,15 @@ const Map: FunctionComponent<Props> = (props) => {
             width: sideMenuData ? '25vw' : '0em'
         }}>
             {sideMenuData ?
-                <SideMenu sideMenuData={sideMenuData} setSideMenuData={setSideMenuData} map={map} setMap={setMap}></SideMenu> 
+                <SideMenu
+                    sideMenuData={sideMenuData}
+                    setSideMenuData={setSideMenuData}
+                    map={map}
+                    setMap={setMap}
+                    sessions={sessions}
+                    selectedSession={selectedSession}
+                    setSessions={setSessions}
+                ></SideMenu>
             : 
                 <></>
             }

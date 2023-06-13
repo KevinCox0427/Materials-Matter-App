@@ -322,7 +322,7 @@ main {
         transition: width 0.25s ease-in-out;
         display: flex;
 
-        .SideMenu {
+        .node {
             height: fit-content;
             width: calc(25vw - 2em);
             display: flex;
@@ -491,6 +491,95 @@ main {
                 }
 
                 @include QuillStyleAdjustments();
+            }
+        }
+
+        .comment {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            padding: 1em;
+            gap: 1.25em;
+
+            .Comment {
+                display: flex;
+                flex-direction: row;
+                flex-wrap: wrap;
+                flex-basis: 100%;
+                gap: 0.5em;
+                padding: 1em;
+                background-color: var(--white);
+                border-radius: 0.25em;
+
+                .Top {
+                    display: flex;
+                    flex-direction: row;
+                    flex-wrap: wrap;
+                    align-items: baseline;
+                    gap: 0.25em 0.5em;
+                    flex-basis: 100%;
+
+                    h3 {
+                        font-size: 1.25em;
+                    }
+
+                    .Reply {
+                        font-size: 1.07em;
+                        background: none;
+                        box-shadow: 0 0 0 0.1em var(--black);
+                        padding: 0.1em 0.5em;
+                        transform: translateY(-0.1em);
+                        border-radius: 5em;
+                        font-weight: 500;
+                        transition: background-color 0.1s linear, color 0.1s linear, transform 0.1s linear;
+
+                        &:hover {
+                            background-color: var(--black);
+                            color: var(--white);
+                            transform: scale(1.05) translateY(-0.1em);
+                            cursor: pointer;
+                        }
+                    }
+
+                    p {
+                        font-size: 1.05em;
+                        font-weight: 300;
+                        margin-left: auto;
+                        opacity: 0.5;
+                    }
+                }
+
+                .Content {
+                    font-size: 1.2em;
+                    flex-basis: 100%;
+                }
+
+                .HideReplies {
+                    border-left: 1em solid transparent;
+                    border-right: 1em solid transparent;
+                    border-top: 1.25em solid var(--black);
+                    border-radius: 0.25em;
+                    background: none;
+                    position: absolute;
+                    left: -2.8em;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    transition: transform 0.1s ease-in-out, opacity 0.1s linear;
+
+                    &.Activated {
+                        transform: translateY(-50%) rotate(-90deg);
+
+                        &:hover {
+                            transform: translateY(-50%) rotate(-75deg);
+                        }
+                    }
+
+                    &:hover {
+                        cursor: pointer;
+                        transform: translateY(-50%) rotate(-15deg);
+                        opacity: 0.7;
+                    }
+                }
             }
         }
     }

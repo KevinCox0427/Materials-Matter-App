@@ -20,15 +20,30 @@ export const knex = require('knex')({
     }
 });
 
+export let isDBready = false;
+
 /**
- * A function to see if any tables are missing from the database.
+ * Table schemas with their table names.
+ */
+const tableSchemas = {
+    users: usersTable,
+    maps: mapsTable,
+    rows: rowsTable,
+    nodes: nodesTable,
+    images: imagesTable,
+    comments: commentsTable,
+    commentsessions: commentSessionsTable
+}
+
+/**
+ * An async function that's called on boat to see if any tables are missing from the database.
  * If so, it will create all the tables necessary for the application.
  * 
  * @returns A boolean representing whether the operation of creating / checking the tables are a success.
  */
 const initializeTableSchemas = async () => {
     /**
-     * Checking to see if the table exists. If not, create it with the provided schema.
+     * Checking to see if all schemas table exists. If not, create them with the imported schemas.
      */
     const createAllTables = (await Promise.all(Object.keys(tableSchemas).map(tableName => { 
         return new Promise<boolean>(async (resolve) => {
@@ -48,18 +63,4 @@ const initializeTableSchemas = async () => {
     return createAllTables;
 }
 
-/**
- * Table schemas with their table names.
- */
-const tableSchemas = {
-    users: usersTable,
-    maps: mapsTable,
-    rows: rowsTable,
-    nodes: nodesTable,
-    images: imagesTable,
-    comments: commentsTable,
-    commentsessions: commentSessionsTable
-} 
-
-export let isDBready = false;
 initializeTableSchemas();

@@ -1,5 +1,6 @@
 import React, { FunctionComponent } from "react";
 import TextEditor from "../components/TextEditor";
+import Comment from "./Comment";
 
 type Props = {
     sideMenuData: {
@@ -8,7 +9,10 @@ type Props = {
     },
     setSideMenuData: React.Dispatch<React.SetStateAction<Props["sideMenuData"] | null>>,
     map: FullMapDoc,
-    setMap: React.Dispatch<React.SetStateAction<FullMapDoc>>
+    setMap: React.Dispatch<React.SetStateAction<FullMapDoc>>,
+    sessions: FullSessionDoc[],
+    setSessions: React.Dispatch<React.SetStateAction<FullSessionDoc[]>>,
+    selectedSession: number
 }
 
 /**
@@ -18,6 +22,8 @@ type Props = {
  * @param setSideMenuData The set state function to change what data is being pointed to.
  * @param map The state variable representing all the map's data.
  * @param setMap The set state function for the map to change the data that's being editted in the side menu.
+ * @param sessions The state variable controlling all the comments and their sessions.
+ * @param setSession The setter to edit target comments.
  */
 const SideMenu: FunctionComponent<Props> = (props) => {
     /**
@@ -153,10 +159,14 @@ const SideMenu: FunctionComponent<Props> = (props) => {
      * Setting a reference to the target data as a node.
      */ 
     const node = props.map.rows[props.sideMenuData.id[0]].nodes[props.sideMenuData.id[1]];
+    /**
+     * Setting a reference to the target as a comment;
+     */
+    const comment = props.sessions[props.selectedSession].comments['-1'][props.sideMenuData.id[0]];
 
     return <>
         {props.sideMenuData.type === 'node' ? 
-            <div className="SideMenu">
+            <div className={props.sideMenuData.type}>
                 <div className="Buttons">
                     <button onClick={handleDeleteNode}>
                         <i className="fa-solid fa-trash-can"></i>
@@ -187,8 +197,12 @@ const SideMenu: FunctionComponent<Props> = (props) => {
                 </div>
             </div>
         : 
-            <div className="SideMenu">
-                <h2>Hi comment</h2>
+            <div className={props.sideMenuData.type}>
+                <Comment
+                    comment={comment}
+                    selectedSession={props.sessions[props.selectedSession]}
+                    marginLeft={0}
+                ></Comment>
             </div>
         }
     </>

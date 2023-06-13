@@ -12,7 +12,9 @@ declare global {
     }
 
     interface FullSessionDoc extends CommentSessionDoc {
-        comments: CommentDoc[]
+        comments: {
+            [replyId: string]: CommentDoc[]
+        }
     }
 }
 

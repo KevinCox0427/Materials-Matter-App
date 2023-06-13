@@ -46,12 +46,30 @@ map.route('/:id')
         /**
          * And filling the sessions with their comments from the database.
          */
-        const fullSessions = await Promise.all(
+        const fullSessions:FullSessionDoc[] = await Promise.all(
             sessions.map(async (session) => {
+                let comments = await Comments.get({
+                    commentsessionId: session.id
+                });
+            
+                let commentMap:{
+                    [replyId: string]: CommentDoc[]
+                } = {}
+
+                comments.forEach(comment => {
+                    const key = '' + (comment.replyId ? comment.replyId : -1);
+
+                    if(!Object.keys(commentMap).includes(key)) {
+                        commentMap = {...commentMap,
+                            [key]: []
+                        }
+                    }
+
+                    commentMap[key].push(comment);
+                })
+
                 return {...session,
-                    comments: await Comments.get({
-                        commentsessionId: session.id
-                    })
+                    comments: commentMap
                 }
             })
         );

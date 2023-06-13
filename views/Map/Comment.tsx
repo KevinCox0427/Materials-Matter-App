@@ -1,29 +1,48 @@
-import React, { FunctionComponent } from "react";
+import React, { Fragment, FunctionComponent, useState } from "react";
 
 type Props = {
-    commentData: CommentDoc,
-    setSideMenuData: React.Dispatch<React.SetStateAction<{
-        type: 'node' | 'comment';
-        id: [number, number];
-    } | null>>
+    comment: CommentDoc,
+    selectedSession: FullSessionDoc
+    marginLeft: number
 }
 
 const Comment: FunctionComponent<Props> = (props) => {
+    const [showReplies, setShowReplies] = useState(true);
 
-    function handleOpenComment() {
-        props.setSideMenuData({
-            type: 'comment',
-            id: [props.commentData.commentsessionId, props.commentData.id]
-        })
+    function toggleReplies() {
+        setShowReplies(!showReplies);
     }
-    
-    return <button className="Comment" onClick={handleOpenComment} style={{
-        //backgroundImage: `url("${props.commentData.image}")`,
-        left: `${props.commentData.x}%`,
-        top: `${props.commentData.y}%`
-    }}>
-        {props.commentData.firstName.charAt(0)}{props.commentData.lastName.charAt(0)}
-    </button>
+
+    return <>
+        <div className="Comment" style={{
+            marginLeft: `${props.marginLeft}em`
+        }}>
+            <div className="Top">
+                <h3>{props.comment.firstName} {props.comment.lastName}</h3>
+                <button className="Reply">reply</button>
+                <p>{props.comment.timestamp.split('T')[0]}</p>
+            </div>
+            <p className="Content">{props.comment.content}</p>
+            {props.comment.replyId !== null && typeof props.selectedSession.comments[props.comment.id] !== 'undefined' ?
+                <button className={`HideReplies ${showReplies ? ' ' : 'Activated'}`} onClick={toggleReplies}></button>
+            :   
+                <></>
+            }
+        </div>
+        {showReplies && typeof props.selectedSession.comments[props.comment.id] !== 'undefined' ?
+            props.selectedSession.comments[props.comment.id].map((reply, i) => {
+                return <Fragment key={i}>
+                    <Comment
+                        comment={reply}
+                        selectedSession={props.selectedSession}
+                        marginLeft={props.marginLeft + 3}
+                    ></Comment>
+                </Fragment>
+            })
+        :
+            <></>
+        }
+    </>
 }
 
 export default Comment;

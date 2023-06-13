@@ -50,7 +50,9 @@ const Comments = {
         else return false;
     },
 
-    get: async (query: Partial<CommentDoc> = {}): Promise<CommentDoc[]> => {
+    get: async (query: Partial<CommentDoc> = {}, options?: {
+        orderBy: string
+    }): Promise<CommentDoc[]> => {
         if(!isDBready) return [];
 
         /**
@@ -59,7 +61,12 @@ const Comments = {
         const result = await knex('comments')
             .select('comments.*', 'users.firstName', 'users.lastName', 'users.image')
             .leftJoin('users', 'comments.userId', 'users.id')
-            .where(query);
+            .where(query)
+            .modify((queryBuilder:any) => {
+                if(options?.orderBy) {
+                    queryBuilder.orderBy(options.orderBy)
+                }
+            })
 
         return result;
     },
