@@ -1,33 +1,34 @@
 import { isDBready, knex } from "./__init__";
 
 declare global {
-    interface NodeType {
+    interface RowType {
         name: string,
         index: number,
-        rowId: number,
-        gallery: string[],
-        htmlContent: string
+        mapId: number
     } 
 
-    interface NodeDoc extends NodeType {
+    interface RowDoc extends RowType {
         id: number
+    }
+
+    interface FullRowDoc extends RowDoc {
+        nodes: NodeDoc[]
     }
 }
 
-export const nodeTable = (table:any) => {
+export const rowsTable = (table:any) => {
     table.increments("id").primary();
     table.string('name');
     table.integer('index').unsigned();
-    table.text('htmlContent');
-    table.integer('rowId').unsigned().nullable();
-    table.foreign('rowId').references('id').inTable('row').onDelete('CASCADE').onUpdate('CASCADE');
+    table.integer('mapId').unsigned().nullable();
+    table.foreign('mapId').references('id').inTable('map').onDelete('CASCADE').onUpdate('CASCADE');
 }
 
-const Node = {
-    getById: async (id: number): Promise<NodeDoc | false> => {
+const Rows = {
+    getById: async (id: number): Promise<RowDoc | false> => {
         if(!isDBready) return false;
 
-        const result = await knex('node')
+        const result = await knex('rows')
             .where('id', id)
             .first();
 
@@ -35,19 +36,19 @@ const Node = {
         else return false;
     },
     
-    get: async (query: Partial<NodeDoc> = {}): Promise<NodeDoc[]> => {
+    get: async (query: Partial<RowDoc> = {}): Promise<RowDoc[]> => {
         if(!isDBready) return [];
 
-        const result = await knex('node')
+        const result = await knex('rows')
             .where(query);
 
         return result;
     },
 
-    create: async (data: NodeType): Promise<NodeDoc | false> => {
+    create: async (data: RowType): Promise<RowDoc | false> => {
         if(!isDBready) return false;
 
-        const result = await knex('node')
+        const result = await knex('rows')
             .returning('*')
             .insert(data);
 
@@ -55,10 +56,10 @@ const Node = {
         else return false;
     },
 
-    update: async (id:number, data: Partial<NodeType>): Promise<NodeDoc | false> => {
+    update: async (id:number, data: Partial<RowType>): Promise<RowDoc | false> => {
         if(!isDBready) return false;
 
-        const result = await knex('node')
+        const result = await knex('rows')
             .where('id', id)
             .returning('*')
             .update(data);
@@ -70,7 +71,7 @@ const Node = {
     delete: async (id:number): Promise<boolean> => {
         if(!isDBready) return false;
 
-        const result = await knex('node')
+        const result = await knex('rows')
             .where('id', id)
             .del();
 
@@ -79,4 +80,4 @@ const Node = {
     }
 }
 
-export default Node;
+export default Rows;

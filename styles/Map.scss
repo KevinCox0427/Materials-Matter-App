@@ -245,6 +245,7 @@ main {
 
                     .Nodes {
                         background-color: var(--white);
+                        height: 8em;
                         flex-grow: 1;
                         flex-direction: row;
                         gap: 2em;
@@ -256,12 +257,13 @@ main {
                             height: 8em;
                             width: 8em;
                             border-radius: 1em;
-                            box-shadow: 0 0 0.25em 0 rgba(0,0,0, 0.4);
+                            box-shadow: 0 0 0.5em 0 rgba(0,0,0, 0.2) inset, 0 0 0 0em var(--black);
+                            background-color: var(--grey);
                             overflow: hidden;
                             transition: box-shadow 0.1s linear, transform 0.1s linear, border-radius 0.15s linear;
 
                             &:hover {
-                                box-shadow: 0 0 0 0.1em rgba(0,0,0, 1);
+                                box-shadow: 0 0 0.5em 0 rgba(0,0,0, 0) inset, 0 0 0 0.1em var(--black);
                                 cursor: pointer;
                                 transform: scale(1.05);
                                 border-radius: 0;
@@ -282,6 +284,32 @@ main {
 
         .Comments {
             position: absolute;
+            height: 100%;
+            width: 100%;
+            left: 0;
+            top: 0;
+            pointer-events: none;
+
+            .Comment {
+                font-size: 1.25em;
+                height: 2em;
+                width: 2em;
+                background-position: center;
+                background-size: cover;
+                background-color: blueviolet;
+                color: var(--white);
+                border-radius: 10em;
+                justify-content: center;
+                align-items: center;
+                pointer-events: all;
+                transition: transform 0.1s linear, opacity 0.1s linear;
+
+                &:hover {
+                    transform: scale(1.1);
+                    opacity: 0.5;
+                    cursor: pointer;
+                }
+            }
         }
     }
 
@@ -290,12 +318,13 @@ main {
         padding: 1em 0;
         width: 0px;
         overflow-y: scroll;
+        overflow-x: hidden;
         transition: width 0.25s ease-in-out;
         display: flex;
 
         .SideMenu {
             height: fit-content;
-            width: 100%;
+            width: calc(25vw - 2em);
             display: flex;
             flex-direction: row;
             flex-wrap: wrap;

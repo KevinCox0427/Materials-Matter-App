@@ -21,7 +21,7 @@ declare global {
 /**
  * The function for creating the table schema based on the typings above.
  */
-export const userTable = (table:any) => {
+export const usersTable = (table:any) => {
     table.increments("id").primary();
     table.string('firstName');
     table.string('lastName');
@@ -33,7 +33,7 @@ export const userTable = (table:any) => {
 /**
  * An abstracted object to interact with the User's data.
  */
-const User = {
+const Users = {
     /**
      * A get operation using an id as a parameter.
      * 
@@ -43,7 +43,7 @@ const User = {
     getByID: async (id:number): Promise<UserDoc | false> => {
         if(!isDBready) return false;
 
-        const result = await knex('user')
+        const result = await knex('users')
             .where('id', id)
             .first();
 
@@ -60,7 +60,7 @@ const User = {
     get: async (query: Partial<UserDoc> = {}): Promise<UserDoc[]> => {
         if(!isDBready) return [];
         
-        const result = await knex('user')
+        const result = await knex('users')
             .where(query);
 
         return result;
@@ -77,7 +77,7 @@ const User = {
     create: async (newUser:UserType): Promise<UserDoc | false> => {
         if(!isDBready) return false;
 
-        const createResult = await knex('user')
+        const createResult = await knex('users')
             .returning('*')
             .insert(newUser);
 
@@ -97,7 +97,7 @@ const User = {
     update: async(id:number, userData:Partial<UserType>): Promise<UserDoc | false> => {
         if(!isDBready) return false;
 
-        const updateResult = await knex('user')
+        const updateResult = await knex('users')
             .where('id', id)
             .returning('*')
             .update(userData);
@@ -115,7 +115,7 @@ const User = {
     delete: async(id: number[]): Promise<boolean> => {
         if(!isDBready) return false;
 
-        const deletedUser = await knex('user')
+        const deletedUser = await knex('users')
             .where('id', id)
             .del();
         
@@ -124,4 +124,4 @@ const User = {
     }
 }
 
-export default User;
+export default Users;

@@ -53,13 +53,35 @@ const SideMenu: FunctionComponent<Props> = (props) => {
        /**
         * If the image is not the correct format, return.
         */
-       if(!image || (!image.toString().includes('image/png') && !image.toString().includes('image/jpg') && !image.toString().includes('image/jpeg') && !image.toString().includes('image/webp') && !image.toString().includes('image/gif') && !image.toString().includes('image/svg'))) {
-           return;
-       }
+        if(!image || (!image.toString().includes('image/png') && !image.toString().includes('image/jpg') && !image.toString().includes('image/jpeg') && !image.toString().includes('image/webp') && !image.toString().includes('image/gif') && !image.toString().includes('image/svg'))) {
+            return;
+        }
 
+        /**
+         * Making a POST request to upload the image.
+         */
+        const response = await (await fetch('/image', {
+            method: 'POST',
+            body: JSON.stringify({
+                image: image.toString(),
+                nodeId: props.sideMenuData.id[1]
+            })
+        })).json();
+
+        /**
+         * If the upload failures, just log to console.
+         */
+        if(!response.success) {
+            console.log(response.error);
+            return;
+        }
+
+        /**
+         * Otherwise update state with the returned id.
+         */
         props.setMap(oldMap => {
             const newRows = [...oldMap.rows];
-            newRows[props.sideMenuData.id[0]].nodes[props.sideMenuData.id[1]].gallery.push(image.toString());
+            newRows[props.sideMenuData.id[0]].nodes[props.sideMenuData.id[1]].gallery.push(response.url);
 
             return {...oldMap,
                 rows: newRows
@@ -99,7 +121,6 @@ const SideMenu: FunctionComponent<Props> = (props) => {
 
     /**
      * Event handler to change the name of the node.
-     * @param e 
      */
     function handleChangeNodeName(e:React.ChangeEvent<HTMLInputElement>) {
         props.setMap(oldMap => {
@@ -112,6 +133,11 @@ const SideMenu: FunctionComponent<Props> = (props) => {
         })
     }
 
+    /**
+     * Event handler to change the text a node.
+     * 
+     * @param newContent The new html string to set.
+     */
     function handleTextChange(newContent: string) {
         props.setMap(oldMap => {
             const oldRows = [...oldMap.rows];
@@ -123,10 +149,14 @@ const SideMenu: FunctionComponent<Props> = (props) => {
         });
     }
 
+    /**
+     * Setting a reference to the target data as a node.
+     */ 
+    const node = props.map.rows[props.sideMenuData.id[0]].nodes[props.sideMenuData.id[1]];
+
     return <>
-        {props.sideMenuData.type === 'node' ? () => {
-            const node = props.map.rows[props.sideMenuData.id[0]].nodes[props.sideMenuData.id[1]];
-            return <div className="SideMenu">
+        {props.sideMenuData.type === 'node' ? 
+            <div className="SideMenu">
                 <div className="Buttons">
                     <button onClick={handleDeleteNode}>
                         <i className="fa-solid fa-trash-can"></i>
@@ -156,11 +186,11 @@ const SideMenu: FunctionComponent<Props> = (props) => {
                     <TextEditor content={node.htmlContent} setContent={handleTextChange}></TextEditor>
                 </div>
             </div>
-        } : () => {
-            return <div className="SideMenu">
-            
+        : 
+            <div className="SideMenu">
+                <h2>Hi comment</h2>
             </div>
-        }}
+        }
     </>
 }
 

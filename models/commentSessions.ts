@@ -16,7 +16,7 @@ declare global {
     }
 }
 
-export const commentSessionTable = (table:any) => {
+export const commentSessionsTable = (table:any) => {
     table.increments("id").primary();
     table.timestamp('start').defaultTo(knex.fn.now(0));
     table.timestamp('expires');
@@ -24,11 +24,11 @@ export const commentSessionTable = (table:any) => {
     table.foreign('mapId').references('id').inTable('map').onDelete('CASCADE').onUpdate('CASCADE');
 }
 
-const CommentSession = {
+const CommentSessions = {
     getById: async (id: number): Promise<CommentSessionDoc | false> => {
         if(!isDBready) return false;
 
-        const result = await knex('commentsession')
+        const result = await knex('commentsessions')
             .where('id', id)
             .first();
 
@@ -39,7 +39,7 @@ const CommentSession = {
     get: async (query: Partial<CommentSessionDoc> = {}): Promise<CommentSessionDoc[]> => {
         if(!isDBready) return [];
 
-        const result = await knex('commentsession')
+        const result = await knex('commentsessions')
             .where(query);
 
         return result;
@@ -48,7 +48,7 @@ const CommentSession = {
     create: async (data: CommentSessionType): Promise<CommentSessionDoc | false> => {
         if(!isDBready) return false;
 
-        const result = await knex('commentsession')
+        const result = await knex('commentsessions')
             .returning('*')
             .insert(data);
 
@@ -59,7 +59,7 @@ const CommentSession = {
     update: async (id:number, data: Partial<CommentSessionType>): Promise<CommentSessionDoc | false> => {
         if(!isDBready) return false;
 
-        const result = await knex('commentsession')
+        const result = await knex('commentsessions')
             .where('id', id)
             .returning('*')
             .update(data);
@@ -71,7 +71,7 @@ const CommentSession = {
     delete: async (id:number): Promise<boolean> => {
         if(!isDBready) return false;
 
-        const result = await knex('commentsession')
+        const result = await knex('commentsessions')
             .where('id', id)
             .del();
 
@@ -80,4 +80,4 @@ const CommentSession = {
     }
 }
 
-export default CommentSession;
+export default CommentSessions;

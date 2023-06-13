@@ -22,7 +22,7 @@ function scanDirectory(directory) {
     /**
      * If the file ends with .tsx and calls the hydrateRoot() function, then we must bundle it.
      */
-    if(pointer.endsWith('.tsx') && readFileSync(`${directory}/${pointer}`).includes('hydrateRoot(')) {
+    if(pointer.endsWith('.tsx') && readFileSync(`${directory}/${pointer}`).includes('createRoot(')) {
       /**
        * Getting the file name
        */

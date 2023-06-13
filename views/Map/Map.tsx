@@ -2,6 +2,7 @@ import React, { Fragment, FunctionComponent, useState } from "react";
 import { createRoot } from "react-dom/client";
 import Row from "./Row";
 import SideMenu from "./SideMenu";
+import Comment from "./Comment";
 
 /**
  * Declaring globally what properties this page should inherited from the server under "MapPageProps".
@@ -42,7 +43,7 @@ const Map: FunctionComponent<Props> = (props) => {
     /**
      * State variable representing the index of the currently selected comment session.
      */
-    const [selectedSession, setSelectedSession] = useState(sessions[0] ? sessions[0].id : -1);
+    const [selectedSession, setSelectedSession] = useState(sessions[0] ? 0 : -1);
 
     /**
      * State variable pointing to the data that's being edited in the side menu.
@@ -74,10 +75,10 @@ const Map: FunctionComponent<Props> = (props) => {
      * @param e The click event.
      */
     function handleCloseSideMenu(e:React.MouseEvent) {
-        if((e.target as HTMLElement).classList.contains('Node')) return;
+        if((e.target as HTMLElement).classList.contains('Node') || (e.target as HTMLElement).classList.contains('Comment')) return;
         setSideMenuData(null);
     }
-    
+
     return <main>
         <header className="Head">
             <div className="Comments">
@@ -120,7 +121,11 @@ const Map: FunctionComponent<Props> = (props) => {
                 })}
             </div>
             <div className="Comments">
-
+                {sessions[selectedSession].comments.filter(comment => comment.replyId === null).map((comment, i) => {
+                    return <Fragment key={i}>
+                        <Comment commentData={comment} setSideMenuData={setSideMenuData}></Comment>
+                    </Fragment>
+                })}
             </div>
         </div>
         <div className="SideMenuScroll" style={{

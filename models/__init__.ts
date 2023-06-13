@@ -1,10 +1,10 @@
-import { commentTable } from "./comment";
-import { commentSessionTable } from "./commentSession";
-import { imageTable } from "./image";
-import { mapTable } from "./map";
-import { nodeTable } from "./node";
-import { rowTable } from "./row";
-import { userTable } from "./user";
+import { commentsTable } from "./comments";
+import { commentSessionsTable } from "./commentSessions";
+import { imagesTable } from "./images";
+import { mapsTable } from "./maps";
+import { nodesTable } from "./nodes";
+import { rowsTable } from "./rows";
+import { usersTable } from "./users";
 
 /**
  * Initalizing the conneciton to the postgres database.
@@ -52,13 +52,13 @@ const initializeTableSchemas = async () => {
  * Table schemas with their table names.
  */
 const tableSchemas = {
-    user: userTable,
-    map: mapTable,
-    row: rowTable,
-    node: nodeTable,
-    image: imageTable,
-    comment: commentTable,
-    commentsession: commentSessionTable
+    users: usersTable,
+    maps: mapsTable,
+    rows: rowsTable,
+    nodes: nodesTable,
+    images: imagesTable,
+    comments: commentsTable,
+    commentsessions: commentSessionsTable
 } 
 
 export let isDBready = false;

@@ -30,7 +30,7 @@ const Node: FunctionComponent<Props> = (props) => {
     }
     
     return <div className="Node" onClick={handleClick}>
-        <img src={props.nodeData.gallery[0]}></img>
+        {props.nodeData.gallery[0] ? <img src={props.nodeData.gallery[0]}></img> : <></>}
     </div>
 }
 

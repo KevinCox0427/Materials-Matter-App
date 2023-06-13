@@ -12,6 +12,9 @@ const index = express.Router();
  */
 index.route('/')
     .get(isAuth, (req, res) => {
+        /**
+         * Loading the server properties to pass to the client.
+         */
         const serverProps:ServerPropsType = {
             homePageProps: {
                 maps: [{
@@ -21,6 +24,9 @@ index.route('/')
             }
         }
 
+        /**
+         * Serving the react page.
+         */
         res.status(200).send(serveHTML('Home', serverProps))
     });
 

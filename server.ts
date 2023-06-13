@@ -76,10 +76,12 @@ declare global {
 import index from './controllers/index';
 import users from './controllers/users';
 import map from './controllers/map';
+import image from './controllers/image';
 
 app.use('/', index);
 app.use('/users', users);
 app.use('/map', map);
+app.use('/image', image);
 
 
 /**

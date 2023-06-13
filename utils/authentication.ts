@@ -3,7 +3,7 @@ import passport from 'passport';
 import { app } from '../server';
 import { Strategy } from 'passport-google-oauth2';
 import dotenv from 'dotenv';
-import User from "../models/user";
+import User from "../models/users";
 
 dotenv.config();
 

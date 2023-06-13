@@ -12,11 +12,14 @@ declare global {
 
     interface CommentDoc extends CommentType {
         id: number,
-        timestamp: string
+        timestamp: string,
+        firstName: string,
+        lastName: string,
+        image: string
     }
 }
 
-export const commentTable = (table:any) => {
+export const commentsTable = (table:any) => {
     table.increments("id").primary();
     table.timestamp('timestamp').defaultTo(knex.fn.now(0));
     table.text('content');
@@ -30,11 +33,16 @@ export const commentTable = (table:any) => {
     table.foreign('replyId').references('id').inTable('comment').onDelete('CASCADE').onUpdate('CASCADE');
 }
 
-const Comment = {
+const Comments = {
     getById: async (id: number): Promise<CommentDoc | false> => {
         if(!isDBready) return false;
 
-        const result = await knex('comment')
+        /**
+         * Left joining user information to comment
+         */
+        const result = await knex('comments')
+            .select('comments.*', 'users.firstName', 'users.lastName', 'users.image')
+            .leftJoin('users', 'comments.userId', 'users.id')
             .where('id', id)
             .first();
 
@@ -45,7 +53,12 @@ const Comment = {
     get: async (query: Partial<CommentDoc> = {}): Promise<CommentDoc[]> => {
         if(!isDBready) return [];
 
-        const result = await knex('comment')
+        /**
+         * Left joining user information to comment
+         */
+        const result = await knex('comments')
+            .select('comments.*', 'users.firstName', 'users.lastName', 'users.image')
+            .leftJoin('users', 'comments.userId', 'users.id')
             .where(query);
 
         return result;
@@ -54,7 +67,7 @@ const Comment = {
     create: async (data: CommentType): Promise<CommentDoc | false> => {
         if(!isDBready) return false;
 
-        const result = await knex('comment')
+        const result = await knex('comments')
             .returning('*')
             .insert(data);
 
@@ -65,7 +78,7 @@ const Comment = {
     update: async (id:number, data: Partial<CommentType>): Promise<CommentDoc | false> => {
         if(!isDBready) return false;
 
-        const result = await knex('comment')
+        const result = await knex('comments')
             .where('id', id)
             .returning('*')
             .update(data);
@@ -77,7 +90,7 @@ const Comment = {
     delete: async (id:number): Promise<boolean> => {
         if(!isDBready) return false;
 
-        const result = await knex('comment')
+        const result = await knex('comments')
             .where('id', id)
             .del();
 
@@ -86,4 +99,4 @@ const Comment = {
     }
 }
 
-export default Comment;
+export default Comments;
