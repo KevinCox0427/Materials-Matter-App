@@ -12,6 +12,7 @@ type Props = {
 
 const MapComment: FunctionComponent<Props> = (props) => {
     function handleOpenComment() {
+        console.log(props.sessionIndex, props.commentIndex)
         props.setSideMenuData({
             type: 'comment',
             id: [props.sessionIndex, props.commentIndex]

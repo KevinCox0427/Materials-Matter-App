@@ -57,6 +57,7 @@ const Maps = {
                 .where('maps.id', id)
                 .leftJoin('rows', 'rows.mapId', 'maps.id')
                 .leftJoin('nodes', 'nodes.rowId', 'rows.id')
+                .orderBy(['rowIndex', 'nodeIndex'])
 
             if(!getResult || getResult.length < 1) return false;
 

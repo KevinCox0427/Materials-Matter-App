@@ -85,14 +85,9 @@ const SideMenu: FunctionComponent<Props> = (props) => {
         /**
          * Otherwise update state with the returned id.
          */
-        props.setMap(oldMap => {
-            const newRows = [...oldMap.rows];
-            newRows[props.sideMenuData.id[0]].nodes[props.sideMenuData.id[1]].gallery.push(response.url);
-
-            return {...oldMap,
-                rows: newRows
-            }
-        });
+        const newMap = {...props.map};
+        newMap.rows[props.sideMenuData.id[0]].nodes[props.sideMenuData.id[1]].gallery.push(response.url);
+        props.setMap(newMap);
     }
 
     /**
@@ -162,7 +157,7 @@ const SideMenu: FunctionComponent<Props> = (props) => {
     /**
      * Setting a reference to the target as a comment;
      */
-    const comment = props.sessions[props.selectedSession].comments['-1'][props.sideMenuData.id[0]];
+    const comment = props.sessions[props.selectedSession].comments['-1'][props.sideMenuData.id[1]];
 
     return <>
         {props.sideMenuData.type === 'node' ? 

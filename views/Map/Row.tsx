@@ -108,7 +108,7 @@ const Row: FunctionComponent<Props> = (props) => {
                     <i className="fa-solid fa-arrow-down"></i>
                 </button>
             </div>
-            <div className="Nodes">
+            <div className="Nodes" id={'' + props.rowIndex}>
                 {rowData.nodes.map((node, i) => {
                     return <Fragment key={i}>
                         <Node nodeData={node} nodeIndex={i} rowIndex={props.rowIndex} setSideMenuData={props.setSideMenuData}></Node>

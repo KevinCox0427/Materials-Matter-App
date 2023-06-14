@@ -33,7 +33,6 @@
         flex-wrap: wrap;
         gap: 0.25em 1em;
         background-color: var(--black);
-        border: 0.1em solid var(--black);
         border-radius: 0.5em 0.5em 0 0;
 
         .ql-formats {
@@ -156,7 +155,6 @@
 
     .ql-container {
         background-color: var(--white);
-        border: 0.1em solid var(--black);
         border-radius: 0 0 0.5em 0.5em;
 
         .ql-editor {

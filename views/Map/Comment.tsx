@@ -24,7 +24,9 @@ const Comment: FunctionComponent<Props> = (props) => {
             </div>
             <p className="Content">{props.comment.content}</p>
             {props.comment.replyId !== null && typeof props.selectedSession.comments[props.comment.id] !== 'undefined' ?
-                <button className={`HideReplies ${showReplies ? ' ' : 'Activated'}`} onClick={toggleReplies}></button>
+                <button className={`HideReplies ${showReplies ? ' ' : 'Activated'}`} onClick={toggleReplies}>
+                    <div className="Triangle"></div>
+                </button>
             :   
                 <></>
             }

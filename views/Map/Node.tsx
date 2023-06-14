@@ -29,8 +29,12 @@ const Node: FunctionComponent<Props> = (props) => {
         });
     }
     
-    return <div className="Node" onClick={handleClick}>
-        {props.nodeData.gallery[0] ? <img src={props.nodeData.gallery[0]}></img> : <></>}
+    return <div className="Node" id={`${props.rowIndex}.${props.nodeIndex}`} onClick={handleClick}>
+        {props.nodeData.gallery[0] ? 
+            <img src={props.nodeData.gallery[0]}></img>
+        : 
+            <h3>{props.nodeData.name}</h3>
+        }
     </div>
 }
 

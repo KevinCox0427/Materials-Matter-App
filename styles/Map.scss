@@ -4,21 +4,16 @@ body {
     overflow: hidden;
 }
 
-main {
-    flex-direction: row;
-    flex-wrap: wrap;
+#Map {
     flex-grow: 1;
     overflow: hidden;
     display: flex;
     max-height: 100vh;
-    overflow: hidden;
 
     .Head {
-        flex-basis: 100%;
         flex-direction: row;
         flex-wrap: wrap;
         gap: 1em 2em;
-        justify-content: space-between;
         align-items: center;
         padding: 0.5em 1em;
         width: calc(100% - 2em);
@@ -100,17 +95,45 @@ main {
             }
         }
 
+        .Back {
+            padding: 0.5em 0.75em;
+            border-radius: 0.9em;
+            background-color: var(--black);
+            transition: background-color 0.1s linear, transform 0.1s linear;
+
+            i {
+                font-size: 1.6em;
+                color: var(--white);
+                transition: color 0.1s linear, border 0.1s linear;
+            }
+
+            &:hover {
+                background-color: var(--white);
+                transform: scale(1.1);
+                cursor: pointer;
+
+                i {
+                    color: var(--black);
+                    border-color: var(--black);
+                }
+            }
+        }
+
         input {
             background: none;
             color: var(--white);
             font-family: var(--rubik);
             font-weight: 400;
             font-size: 1.5em;
-            border-bottom: 0.075em solid var(--white);
+            border-bottom: 0.075em dashed var(--white);
             flex-basis: 10em;
             flex-grow: 1;
             max-width: 20em;
-            text-align: center;
+            margin-right: auto;
+
+            &:hover, &:focus {
+                border-bottom: 0.07em solid var(--white);
+            }
         }
 
         .Buttons {
@@ -121,15 +144,25 @@ main {
             gap: 0.5em 1em;
 
             button {
+                flex-direction: row;
+                align-items: center;
+                gap: 0.5em;
                 padding: 0.5em;
-                border-radius: 0.9em;
+                border-radius: 0.5em;
                 background-color: var(--black);
+                color: var(--white);
+                border-color: var(--white);
                 transition: background-color 0.1s linear, transform 0.1s linear;
 
                 i {
                     font-size: 1.75em;
-                    color: var(--white);
+                    border-color: inherit !important;
                     transition: color 0.1s linear, border 0.1s linear;
+                }
+
+                p {
+                    font-size: 1.2em;
+                    font-weight: 500;
                 }
 
                 &.Row {
@@ -154,430 +187,477 @@ main {
                     }
                 }
 
-                &:hover {
+                &:hover, &.Activated {
+                    color: var(--black);
+                    border-color: var(--black);
                     background-color: var(--white);
                     transform: scale(1.1);
                     cursor: pointer;
-
-                    i {
-                        color: var(--black);
-                        border-color: var(--black);
-                    }
                 }
             }
         }
     }
 
-    .Body {
-        height: calc(100% - 3.5em);
-        flex-basis: 0em;
+    .MenuSplit {
+        flex-direction: row;
+        flex-basis: 1em;
         flex-grow: 1;
-        overflow-y: scroll;
-        justify-content: center;
-        align-items: center;
+        overflow: hidden;
         display: flex;
 
-        * {
-            display: flex;
+        @media (max-width: 1000px) {
+            flex-direction: column-reverse;
         }
 
-        .Rows {
-            flex-direction: row;
-            flex-wrap: wrap;
-            width: 100%;
-            height: fit-content;
-            gap: 1em;
+        .BodyScroll {
+            height: 100%;
+            flex-basis: 0em;
+            flex-grow: 1;
+            overflow-y: scroll;
+            display: flex;
 
-            .Row {
+            * {
+                display: flex;
+            }
+
+            .Body {
+                height: fit-content;
+                width: 100%;
+        
+                .Rows {
+                    width: 100%;
+                    height: fit-content;
+                    margin: auto 0;
+                    padding: 2em 0;
+                    gap: 1.5em;
+        
+                    .Row {
+                        flex-direction: row;
+                        flex-wrap: wrap;
+                        width: 100%;
+                        gap: 0.5em;
+    
+                        &:first-child {
+                            margin-top: auto;
+                        }
+    
+                        &:last-child {
+                            margin-bottom: auto;
+                        }
+        
+                        .Name {
+                            padding-left: 3em;
+                            flex-basis: 100%;
+        
+                            input {
+                                font-size: 1.25em;
+                                font-weight: 600;
+                                width: fit-content;
+                                background: none;
+                                border-bottom: 0.1em dashed var(--black);
+        
+                                &:hover, &:focus {
+                                    border-bottom: 0.1em solid var(--black)
+                                }
+                            }
+                        }
+        
+                        .Bottom {
+                            width: 100%;
+                            flex-direction: row;
+        
+                            .LeftButtons {
+                                flex-basis: 3em;
+                                flex-shrink: 0;
+                                align-items: center;
+                                justify-content: space-around;
+                                gap: 0.5em;
+                                padding-bottom: 1em;
+        
+                                button {
+                                    background-color: var(--grey);
+                                    height: 2.5em;
+                                    width: 2.5em;
+                                    border-radius: 10em;
+                                    justify-content: center;
+                                    align-items: center;
+                                    transition: 0.1s linear background-color, 0.1s linear transform;
+        
+                                    i {
+                                        font-size: 1.5em;
+                                        transition: 0.1s linear color;
+                                    }
+        
+                                    &:hover {
+                                        background-color: var(--black);
+                                        transform: scale(1.1);
+                                        cursor: pointer;
+                                        
+                                        i {
+                                            color: var(--grey);
+                                        }
+                                    }
+                                }
+                            }
+        
+                            .Nodes {
+                                background-color: var(--white);
+                                height: fit-content;
+                                min-height: 8em;
+                                flex-grow: 1;
+                                flex-direction: row;
+                                gap: 2em;
+                                align-items: center;
+                                padding: 0.5em 1em;
+                                overflow-x: scroll;
+                                overflow-y: hidden;
+        
+                                .Node {
+                                    height: 8em;
+                                    width: 8em;
+                                    flex-shrink: 0;
+                                    border-radius: 1em;
+                                    box-shadow: 0 0 0.3em 0 rgba(0,0,0, 0.2) inset, 0 0 0 0em var(--black);
+                                    background-color: var(--grey);
+                                    margin: auto;
+                                    overflow: hidden;
+                                    transition: box-shadow 0.1s linear, transform 0.1s linear, border-radius 0.15s linear;
+        
+                                    &:hover {
+                                        box-shadow: 0 0 0.5em 0 rgba(0,0,0, 0) inset, 0 0 0 0.1em var(--black);
+                                        cursor: pointer;
+                                        transform: scale(1.03);
+                                        border-radius: 0.25em;
+                                    }
+        
+                                    img {
+                                        height: 100%;
+                                        width: 100%;
+                                        object-fit: cover;
+                                        object-position: center;
+                                        pointer-events: none;
+                                    }
+    
+                                    h3 {
+                                        font-weight: 400;
+                                        margin: auto;
+                                        text-align: center;
+                                        pointer-events: none;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+    
+                .Comment {
+                    position: absolute;
+                    font-size: 1.25em;
+                    height: 2em;
+                    width: 2em;
+                    background-position: center;
+                    background-size: cover;
+                    background-color: blueviolet;
+                    color: var(--white);
+                    border-radius: 10em;
+                    justify-content: center;
+                    align-items: center;
+                    pointer-events: all;
+                    z-index: 1;
+                    transform: translate(-50%, -50%);
+                    transition: transform 0.1s linear, opacity 0.1s linear;
+    
+                    &:hover {
+                        transform: translate(-50%, -50%) scale(1.1);
+                        opacity: 0.5;
+                        cursor: pointer;
+                    }
+                }
+            }
+        }
+
+        .SideMenuScroll {
+            flex-basis: 0px;
+            overflow-y: scroll;
+            overflow-x: hidden;
+            transition: width 0.25s ease-in-out, flex-basis 0.25s ease-in-out;
+            display: flex;
+            box-shadow: 0 0 0 0.15em var(--black);
+    
+            .node {
+                margin: 1em 0;
+                height: fit-content;
+                display: flex;
                 flex-direction: row;
                 flex-wrap: wrap;
-                flex-basis: 100%;
-                width: fit-content;
-                gap: 0.5em;
-
-                .Name {
-                    padding-left: 3em;
+                justify-content: space-between;
+                gap: 2.5em;
+    
+                .Buttons {
+                    display: flex;
                     flex-basis: 100%;
-
-                    input {
-                        font-size: 1.25em;
+                    margin: 0 1em;
+    
+                    * {
+                        display: flex;
+                    }
+    
+                    button {
+                        background: var(--grey);
                         width: fit-content;
-                        background: none;
+                        padding: 0.4em;
+                        border-radius: 10em;
+                        font-size: 1.2em;
+                        justify-content: center;
+                        align-items: center;
+                        transition: 0.1s linear transform, 0.1s background-color linear;
+    
+                        i {
+                            color: var(--black);
+                            transition: color 0.1s linear;
+                        }
+    
+                        &:hover {
+                            background-color: var(--black);
+                            transform: scale(1.1);
+                            cursor: pointer;
+    
+                            i {
+                                color: var(--white)
+                            }
+                        }
+                    }
+                }
+    
+                .Title {
+                    display: flex;
+                    flex-basis: 100%;
+                    margin: 0 0.5em;
+                    font-family: var(--rubik);
+                    font-size: 1.75em;
+                    font-weight: 500;
+                    background: none;
+                    border-bottom: 0.1em dashed var(--black);
+                    text-align: center;
+                    min-width: 1em;
+    
+                    * {
+                        display: flex;
+                    }
+
+                    &:hover, &:focus {
                         border-bottom: 0.1em solid var(--black);
                     }
                 }
-
-                .Bottom {
+    
+                .GalleryUpload {
+                    display: flex;
                     flex-basis: 100%;
-                    flex-direction: row;
-
-                    .LeftButtons {
-                        flex-basis: 3em;
-                        align-items: center;
-                        justify-content: space-around;
-                        gap: 0.5em;
-
-                        button {
-                            background-color: var(--grey);
-                            height: 2.5em;
-                            width: 2.5em;
-                            border-radius: 10em;
+                    gap: 1em;
+                    margin: auto 1em;
+    
+                    * {
+                        display: flex;
+                    }
+    
+                    h2 {
+                        font-size: 1.6em;
+                        font-weight: 400;
+                    }
+    
+                    .FileUpload {
+                        flex-direction: row;
+    
+                        label {
+                            flex-grow: 1;
+                            padding: 3em 0;
+                            border: 0.1em dashed var(--black);
                             justify-content: center;
                             align-items: center;
-                            transition: 0.1s linear background-color, 0.1s linear transform;
-
-                            i {
-                                font-size: 1.5em;
-                                transition: 0.1s linear color;
-                            }
-
-                            &:hover {
-                                background-color: var(--black);
-                                transform: scale(1.1);
-                                cursor: pointer;
-                                
-                                i {
-                                    color: var(--grey);
-                                }
+                            font-size: 1.25em;
+                            pointer-events: none;
+                        }
+    
+                        input {
+                            opacity: 0;
+                            position: absolute;
+                            left: 0;
+                            top: 0;
+                            height: 100%;
+                            width: 100%;
+                            cursor: pointer;
+    
+                            &:hover ~ label {
+                                border: 0.1em solid var(--black);
                             }
                         }
                     }
-
-                    .Nodes {
-                        background-color: var(--white);
-                        height: 8em;
-                        flex-grow: 1;
+                    
+                    .Gallery {
                         flex-direction: row;
-                        gap: 2em;
-                        justify-content: space-around;
-                        align-items: center;
-                        padding: 0.5em 1em;
-
-                        .Node {
-                            height: 8em;
+                        flex-wrap: wrap;
+                        gap: 1em;
+    
+                        .ImageWrapper {
                             width: 8em;
-                            border-radius: 1em;
-                            box-shadow: 0 0 0.5em 0 rgba(0,0,0, 0.2) inset, 0 0 0 0em var(--black);
-                            background-color: var(--grey);
-                            overflow: hidden;
-                            transition: box-shadow 0.1s linear, transform 0.1s linear, border-radius 0.15s linear;
-
-                            &:hover {
-                                box-shadow: 0 0 0.5em 0 rgba(0,0,0, 0) inset, 0 0 0 0.1em var(--black);
-                                cursor: pointer;
-                                transform: scale(1.05);
-                                border-radius: 0;
-                            }
-
+                            height: 8em;
+                            border-radius: 0.5em;
+                            background-color: var(--white);
+                            
                             img {
                                 height: 100%;
                                 width: 100%;
-                                object-fit: cover;
+                                object-fit: contain;
                                 object-position: center;
-                                pointer-events: none;
                             }
-                        }
-                    }
-                }
-            }
-        }
-
-        .Comments {
-            position: absolute;
-            height: 100%;
-            width: 100%;
-            left: 0;
-            top: 0;
-            pointer-events: none;
-
-            .Comment {
-                font-size: 1.25em;
-                height: 2em;
-                width: 2em;
-                background-position: center;
-                background-size: cover;
-                background-color: blueviolet;
-                color: var(--white);
-                border-radius: 10em;
-                justify-content: center;
-                align-items: center;
-                pointer-events: all;
-                transition: transform 0.1s linear, opacity 0.1s linear;
-
-                &:hover {
-                    transform: scale(1.1);
-                    opacity: 0.5;
-                    cursor: pointer;
-                }
-            }
-        }
-    }
-
-    .SideMenuScroll {
-        height: calc(100% - 5.5em);
-        padding: 1em 0;
-        width: 0px;
-        overflow-y: scroll;
-        overflow-x: hidden;
-        transition: width 0.25s ease-in-out;
-        display: flex;
-
-        .node {
-            height: fit-content;
-            width: calc(25vw - 2em);
-            display: flex;
-            flex-direction: row;
-            flex-wrap: wrap;
-            justify-content: space-between;
-            gap: 3em;
-
-            .Buttons {
-                display: flex;
-                flex-basis: 100%;
-                margin: 0 1em;
-
-                * {
-                    display: flex;
-                }
-
-                button {
-                    background: var(--grey);
-                    width: fit-content;
-                    padding: 0.4em;
-                    border-radius: 10em;
-                    font-size: 1.2em;
-                    justify-content: center;
-                    align-items: center;
-                    transition: 0.1s linear transform, 0.1s background-color linear;
-
-                    i {
-                        color: var(--black);
-                        transition: color 0.1s linear;
-                    }
-
-                    &:hover {
-                        background-color: var(--black);
-                        transform: scale(1.1);
-                        cursor: pointer;
-
-                        i {
-                            color: var(--white)
-                        }
-                    }
-                }
-            }
-
-            .Title {
-                display: flex;
-                flex-basis: 100%;
-                margin: 0 0.5em;
-                font-family: var(--rubik);
-                font-size: 2em;
-                font-weight: 500;
-                background: none;
-                border-bottom: 0.1em solid var(--black);
-                text-align: center;
-                min-width: 1em;
-
-                * {
-                    display: flex;
-                }
-            }
-
-            .GalleryUpload {
-                display: flex;
-                flex-basis: 100%;
-                gap: 1em;
-                margin: auto 1em;
-
-                * {
-                    display: flex;
-                }
-
-                h2 {
-                    font-size: 2em;
-                    font-weight: 400;
-                }
-
-                .FileUpload {
-                    flex-direction: row;
-
-                    label {
-                        flex-grow: 1;
-                        padding: 3em 0;
-                        border: 0.1em dashed var(--black);
-                        justify-content: center;
-                        align-items: center;
-                        font-size: 1.25em;
-                        pointer-events: none;
-                    }
-
-                    input {
-                        opacity: 0;
-                        position: absolute;
-                        left: 0;
-                        top: 0;
-                        height: 100%;
-                        width: 100%;
-                        cursor: pointer;
-
-                        &:hover ~ label {
-                            border: 0.1em solid var(--black);
-                        }
-                    }
-                }
-                
-                .Gallery {
-                    flex-direction: row;
-                    flex-wrap: wrap;
-                    gap: 1em;
-
-                    .ImageWrapper {
-                        width: 8em;
-                        height: 8em;
-                        border-radius: 0.5em;
-                        background-color: var(--white);
-                        
-                        img {
-                            height: 100%;
-                            width: 100%;
-                            object-fit: contain;
-                            object-position: center;
-                        }
-
-                        button {
-                            position: absolute;
-                            right: 0;
-                            top: 0;
-                            transform: translate(30%, -30%);
-                            background: var(--white);
-                            padding: 0.4em;
-                            border-radius: 10em;
-                            width: fit-content;
-                            font-size: 1.2em;
-                            box-shadow: 0 0 0 0.1em var(--black);
-                            justify-content: center;
-                            align-items: center;
-                            transition: 0.1s linear transform, 0.1s background-color linear;
-
-                            i {
-                                color: var(--black);
-                                transition: color 0.1s linear;
-                            }
-
-                            &:hover {
-                                background-color: var(--black);
-                                transform: translate(30%, -30%) scale(1.1);
-                                cursor: pointer;
-
+    
+                            button {
+                                position: absolute;
+                                right: 0;
+                                top: 0;
+                                transform: translate(30%, -30%);
+                                background: var(--white);
+                                padding: 0.4em;
+                                border-radius: 10em;
+                                width: fit-content;
+                                font-size: 1.2em;
+                                box-shadow: 0 0 0 0.1em var(--black);
+                                justify-content: center;
+                                align-items: center;
+                                transition: 0.1s linear transform, 0.1s background-color linear;
+    
                                 i {
-                                    color: var(--white)
+                                    color: var(--black);
+                                    transition: color 0.1s linear;
+                                }
+    
+                                &:hover {
+                                    background-color: var(--black);
+                                    transform: translate(30%, -30%) scale(1.1);
+                                    cursor: pointer;
+    
+                                    i {
+                                        color: var(--white)
+                                    }
                                 }
                             }
                         }
                     }
                 }
-            }
-
-            .TextEditorWrapper {
-                display: flex;
-                flex-basis: 100%;
-                margin: 0 1em;
-
-                h2 {
-                    font-size: 2em;
-                    font-weight: 400;
-                    margin-bottom: 0.5em;
+    
+                .TextEditorWrapper {
+                    display: flex;
+                    flex-basis: 100%;
+                    margin: 0 1em;
+    
+                    h2 {
+                        font-size: 1.6em;
+                        font-weight: 400;
+                        margin-bottom: 0.5em;
+                    }
+    
+                    @include QuillStyleAdjustments();
                 }
-
-                @include QuillStyleAdjustments();
             }
-        }
-
-        .comment {
-            display: flex;
-            flex-direction: row;
-            flex-wrap: wrap;
-            padding: 1em;
-            gap: 1.25em;
-
-            .Comment {
+    
+            .comment {
                 display: flex;
                 flex-direction: row;
                 flex-wrap: wrap;
-                flex-basis: 100%;
-                gap: 0.5em;
                 padding: 1em;
-                background-color: var(--white);
-                border-radius: 0.25em;
-
-                .Top {
+                gap: 1.25em;
+    
+                .Comment {
                     display: flex;
                     flex-direction: row;
                     flex-wrap: wrap;
-                    align-items: baseline;
-                    gap: 0.25em 0.5em;
                     flex-basis: 100%;
-
-                    h3 {
-                        font-size: 1.25em;
-                    }
-
-                    .Reply {
-                        font-size: 1.07em;
-                        background: none;
-                        box-shadow: 0 0 0 0.1em var(--black);
-                        padding: 0.1em 0.5em;
-                        transform: translateY(-0.1em);
-                        border-radius: 5em;
-                        font-weight: 500;
-                        transition: background-color 0.1s linear, color 0.1s linear, transform 0.1s linear;
-
-                        &:hover {
-                            background-color: var(--black);
-                            color: var(--white);
-                            transform: scale(1.05) translateY(-0.1em);
-                            cursor: pointer;
-                        }
-                    }
-
-                    p {
-                        font-size: 1.05em;
-                        font-weight: 300;
-                        margin-left: auto;
-                        opacity: 0.5;
-                    }
-                }
-
-                .Content {
-                    font-size: 1.2em;
-                    flex-basis: 100%;
-                }
-
-                .HideReplies {
-                    border-left: 1em solid transparent;
-                    border-right: 1em solid transparent;
-                    border-top: 1.25em solid var(--black);
+                    gap: 0.5em;
+                    padding: 1em;
+                    background-color: var(--white);
                     border-radius: 0.25em;
-                    background: none;
-                    position: absolute;
-                    left: -2.8em;
-                    top: 50%;
-                    transform: translateY(-50%);
-                    transition: transform 0.1s ease-in-out, opacity 0.1s linear;
-
-                    &.Activated {
-                        transform: translateY(-50%) rotate(-90deg);
-
-                        &:hover {
-                            transform: translateY(-50%) rotate(-75deg);
+    
+                    .Top {
+                        display: flex;
+                        flex-direction: row;
+                        flex-wrap: wrap;
+                        align-items: baseline;
+                        gap: 0.25em 0.5em;
+                        flex-basis: 100%;
+    
+                        h3 {
+                            font-size: 1.25em;
+                        }
+    
+                        .Reply {
+                            font-size: 1.07em;
+                            background: none;
+                            box-shadow: 0 0 0 0.1em var(--black);
+                            padding: 0.1em 0.5em;
+                            transform: translateY(-0.1em);
+                            border-radius: 5em;
+                            font-weight: 500;
+                            transition: background-color 0.1s linear, color 0.1s linear, transform 0.1s linear;
+    
+                            &:hover {
+                                background-color: var(--black);
+                                color: var(--white);
+                                transform: scale(1.05) translateY(-0.1em);
+                                cursor: pointer;
+                            }
+                        }
+    
+                        p {
+                            font-size: 1.05em;
+                            font-weight: 300;
+                            margin-left: auto;
+                            opacity: 0.5;
                         }
                     }
-
-                    &:hover {
-                        cursor: pointer;
-                        transform: translateY(-50%) rotate(-15deg);
-                        opacity: 0.7;
+    
+                    .Content {
+                        font-size: 1.2em;
+                        flex-basis: 100%;
+                    }
+    
+                    .HideReplies {
+                        background: var(--white);
+                        position: absolute;
+                        height: 2.25em;
+                        width: 2.25em;
+                        border-radius: 10em;
+                        left: -3em;
+                        top: 50%;
+                        transform: translateY(-50%);
+                        transition: opacity 0.1s linear, transform 0.1s linear;
+    
+                        &.Activated {
+                            transform: translateY(-50%) rotate(-90deg);
+    
+                            &:hover {
+                                transform: translateY(-50%) rotate(-75deg);
+                            }
+                        }
+    
+                        &:hover {
+                            transform: translateY(-50%) rotate(-15deg);
+                            cursor: pointer;
+    
+                            .Triangle {
+                                opacity: 0.7;
+                            }
+                        }
+    
+                        .Triangle {
+                            position: absolute;
+                            left: 50%;
+                            top: 55%;
+                            transform: translate(-50%, -50%);
+                            border-left: 0.8em solid transparent;
+                            border-right: 0.8em solid transparent;
+                            border-top: 1em solid var(--black);
+                            border-radius: 0.25em;
+                        }
                     }
                 }
             }
