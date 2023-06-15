@@ -3,8 +3,8 @@ import React, { FunctionComponent } from "react";
 type Props = {
     commentData: CommentDoc,
     setSideMenuData: React.Dispatch<React.SetStateAction<{
-        type: 'node' | 'comment';
-        id: [number, number];
+        type: 'node' | 'comment' | 'sessions';
+        dataPointer: [number, number];
     } | null>>,
     sessionIndex: number, 
     commentIndex: number
@@ -12,10 +12,9 @@ type Props = {
 
 const MapComment: FunctionComponent<Props> = (props) => {
     function handleOpenComment() {
-        console.log(props.sessionIndex, props.commentIndex)
         props.setSideMenuData({
             type: 'comment',
-            id: [props.sessionIndex, props.commentIndex]
+            dataPointer: [props.commentData.replyId ? props.commentData.replyId : 0, props.commentIndex]
         })
     }
     

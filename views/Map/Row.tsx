@@ -6,8 +6,8 @@ type Props = {
     map: FullMapDoc,
     setMap: React.Dispatch<React.SetStateAction<FullMapDoc>>,
     setSideMenuData: React.Dispatch<React.SetStateAction<null | {
-        type: 'node' | 'comment';
-        id: [number, number];
+        type: 'node' | 'comment' | 'sessions';
+        dataPointer: [number, number];
     }>>
 }
 
@@ -27,17 +27,15 @@ const Row: FunctionComponent<Props> = (props) => {
      * @param e The change event of the Input element
      */
     function handleNameChange(e:React.ChangeEvent<HTMLInputElement>) {
-        props.setMap(oldMap => {
-            const oldRows = [...oldMap.rows];
+        const newRows = [...props.map.rows];
 
-            oldRows[props.rowIndex] = {...oldRows[props.rowIndex],
-                name: e.target.value
-            }
+        newRows[props.rowIndex] = {...newRows[props.rowIndex],
+            name: e.target.value
+        };
 
-            return {...oldMap,
-                rows: oldRows
-            }
-        })
+        props.setMap({...props.map,
+            rows: newRows
+        });
     }
 
     /**
@@ -46,16 +44,20 @@ const Row: FunctionComponent<Props> = (props) => {
     function handleMoveUp() {
         if(props.rowIndex === 0) return;
 
-        props.setMap(oldMap => {
-            const newRows = [...oldMap.rows];
-            const currentRow = oldMap.rows[props.rowIndex];
+        let newRows = [...props.map.rows];
+        const currentRow = props.map.rows[props.rowIndex];
 
-            newRows.splice(props.rowIndex, 1);
-            newRows.splice(props.rowIndex - 1, 0, currentRow);
+        newRows.splice(props.rowIndex, 1);
+        newRows.splice(props.rowIndex - 1, 0, currentRow);
 
-            return {...oldMap,
-                rows: newRows
+        newRows = newRows.map((row, i) => {
+            return {...row,
+                index: i
             }
+        });
+
+        props.setMap({...props.map,
+            rows: newRows
         })
     }
 
@@ -63,15 +65,19 @@ const Row: FunctionComponent<Props> = (props) => {
      * An event handler to remove the row from the map.
      */
     function handleDelete() {
-        props.setMap(oldMap => {
-            const oldRows = [...oldMap.rows];
-            oldRows.splice(props.rowIndex, 1);
+        let newRows = [...props.map.rows];
+        newRows.splice(props.rowIndex, 1);
 
-            return {...oldMap,
-                rows: oldRows
+        newRows = newRows.map((row, i) => {
+            return {...row,
+                index: i
             }
         });
-    }
+
+        props.setMap({...props.map,
+            rows: newRows
+        });
+}
 
     /**
      * An event handler to move the row down an index.
@@ -79,20 +85,24 @@ const Row: FunctionComponent<Props> = (props) => {
     function handleMoveDown() {
         if(props.rowIndex >= props.map.rows.length - 1) return;
 
-        props.setMap(oldMap => {
-            const newRows = [...oldMap.rows];
-            const currentRow = oldMap.rows[props.rowIndex];
+        let newRows = [...props.map.rows];
+        const currentRow = props.map.rows[props.rowIndex];
 
-            newRows.splice(props.rowIndex, 1);
-            newRows.splice(props.rowIndex + 1, 0, currentRow);
+        newRows.splice(props.rowIndex, 1);
+        newRows.splice(props.rowIndex + 1, 0, currentRow);
 
-            return {...oldMap,
-                rows: newRows
+        newRows = newRows.map((row, i) => {
+            return {...row,
+                index: i
             }
+        });
+
+        props.setMap({...props.map,
+            rows: newRows
         })
     }
     
-    return <div className="Row">
+    return <div className="Row" id={'' + props.rowIndex}>
         <div className="Name">
             <input value={rowData.name} onChange={handleNameChange}></input>
         </div>
@@ -108,10 +118,15 @@ const Row: FunctionComponent<Props> = (props) => {
                     <i className="fa-solid fa-arrow-down"></i>
                 </button>
             </div>
-            <div className="Nodes" id={'' + props.rowIndex}>
+            <div className="Nodes">
                 {rowData.nodes.map((node, i) => {
                     return <Fragment key={i}>
-                        <Node nodeData={node} nodeIndex={i} rowIndex={props.rowIndex} setSideMenuData={props.setSideMenuData}></Node>
+                        <Node
+                            nodeData={node}
+                            nodeIndex={i}
+                            rowIndex={props.rowIndex}
+                            setSideMenuData={props.setSideMenuData}
+                        ></Node>
                     </Fragment>
                 })}
             </div>

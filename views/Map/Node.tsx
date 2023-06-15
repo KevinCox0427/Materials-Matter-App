@@ -5,8 +5,8 @@ type Props = {
     nodeIndex: number,
     nodeData: NodeDoc,
     setSideMenuData: React.Dispatch<React.SetStateAction<null | {
-        type: 'node' | 'comment';
-        id: [number, number];
+        type: 'node' | 'comment' | 'sessions';
+        dataPointer: [number, number];
     }>>
 }
 
@@ -25,7 +25,7 @@ const Node: FunctionComponent<Props> = (props) => {
     function handleClick() {
         props.setSideMenuData({
             type: 'node',
-            id: [props.rowIndex, props.nodeIndex]
+            dataPointer: [props.rowIndex, props.nodeIndex]
         });
     }
     

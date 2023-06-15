@@ -2,6 +2,7 @@ import { isDBready, knex } from "./__init__";
 
 declare global {
     interface CommentSessionType {
+        name: string,
         start: string,
         expires: string,
         mapId: number
@@ -20,6 +21,7 @@ declare global {
 
 export const commentSessionsTable = (table:any) => {
     table.increments("id").primary();
+    table.text('name');
     table.timestamp('start').defaultTo(knex.fn.now(0));
     table.timestamp('expires');
     table.integer('mapId').unsigned().nullable();

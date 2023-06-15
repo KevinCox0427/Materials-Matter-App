@@ -1,18 +1,30 @@
-import React, { FunctionComponent } from "react";
+import React, { Fragment, FunctionComponent } from "react";
 import TextEditor from "../components/TextEditor";
 import Comment from "./Comment";
+import SessionOption from "./SessionOption";
 
 type Props = {
     sideMenuData: {
-        type: 'node' | 'comment';
-        id: [number, number];
+        type: 'node' | 'comment' | 'sessions';
+        dataPointer: [number, number];
     },
     setSideMenuData: React.Dispatch<React.SetStateAction<Props["sideMenuData"] | null>>,
     map: FullMapDoc,
     setMap: React.Dispatch<React.SetStateAction<FullMapDoc>>,
     sessions: FullSessionDoc[],
     setSessions: React.Dispatch<React.SetStateAction<FullSessionDoc[]>>,
-    selectedSession: number
+    tempComment: {
+        replyId: number;
+        commentIndex: number;
+    } | null
+    setTempComment:  React.Dispatch<React.SetStateAction<Props['tempComment']>>,
+    selectedSession: number,
+    userData: {
+        userId: number,
+        firstName: string,
+        lastName: string,
+        image: string
+    }
 }
 
 /**
@@ -70,7 +82,7 @@ const SideMenu: FunctionComponent<Props> = (props) => {
             method: 'POST',
             body: JSON.stringify({
                 image: image.toString(),
-                nodeId: props.sideMenuData.id[1]
+                nodeId: props.sideMenuData.dataPointer[1]
             })
         })).json();
 
@@ -86,7 +98,7 @@ const SideMenu: FunctionComponent<Props> = (props) => {
          * Otherwise update state with the returned id.
          */
         const newMap = {...props.map};
-        newMap.rows[props.sideMenuData.id[0]].nodes[props.sideMenuData.id[1]].gallery.push(response.url);
+        newMap.rows[props.sideMenuData.dataPointer[0]].nodes[props.sideMenuData.dataPointer[1]].gallery.push(response.url);
         props.setMap(newMap);
     }
 
@@ -97,7 +109,7 @@ const SideMenu: FunctionComponent<Props> = (props) => {
     function handleFileDelete(index:number) {
         props.setMap(oldMap => {
             const newRows = [...oldMap.rows];
-            newRows[props.sideMenuData.id[0]].nodes[props.sideMenuData.id[1]].gallery.splice(index, 1);
+            newRows[props.sideMenuData.dataPointer[0]].nodes[props.sideMenuData.dataPointer[1]].gallery.splice(index, 1);
 
             return {...oldMap,
                 rows: newRows
@@ -111,7 +123,7 @@ const SideMenu: FunctionComponent<Props> = (props) => {
     function handleDeleteNode() {
         props.setMap(oldMap => {
             const newRows = [...oldMap.rows];
-            newRows[props.sideMenuData.id[0]].nodes.splice(props.sideMenuData.id[1], 1);
+            newRows[props.sideMenuData.dataPointer[0]].nodes.splice(props.sideMenuData.dataPointer[1], 1);
 
             return {...oldMap,
                 rows: newRows
@@ -126,7 +138,7 @@ const SideMenu: FunctionComponent<Props> = (props) => {
     function handleChangeNodeName(e:React.ChangeEvent<HTMLInputElement>) {
         props.setMap(oldMap => {
             const oldRows = [...oldMap.rows];
-            oldRows[props.sideMenuData.id[0]].nodes[props.sideMenuData.id[1]].name = e.target.value;
+            oldRows[props.sideMenuData.dataPointer[0]].nodes[props.sideMenuData.dataPointer[1]].name = e.target.value;
 
             return {...oldMap,
                 rows: oldRows
@@ -142,7 +154,7 @@ const SideMenu: FunctionComponent<Props> = (props) => {
     function handleTextChange(newContent: string) {
         props.setMap(oldMap => {
             const oldRows = [...oldMap.rows];
-            oldRows[props.sideMenuData.id[0]].nodes[props.sideMenuData.id[1]].htmlContent = newContent;
+            oldRows[props.sideMenuData.dataPointer[0]].nodes[props.sideMenuData.dataPointer[1]].htmlContent = newContent;
 
             return {...oldMap,
                 rows: oldRows
@@ -153,14 +165,14 @@ const SideMenu: FunctionComponent<Props> = (props) => {
     /**
      * Setting a reference to the target data as a node.
      */ 
-    const node = props.map.rows[props.sideMenuData.id[0]].nodes[props.sideMenuData.id[1]];
+    const node = props.map.rows[props.sideMenuData.dataPointer[0]] ? props.map.rows[props.sideMenuData.dataPointer[0]].nodes[props.sideMenuData.dataPointer[1]] : undefined;
     /**
      * Setting a reference to the target as a comment;
      */
-    const comment = props.sessions[props.selectedSession].comments['-1'][props.sideMenuData.id[1]];
+    const comment = props.sessions[props.selectedSession].comments['' + props.sideMenuData.dataPointer[0]] ? props.sessions[props.selectedSession].comments['' + props.sideMenuData.dataPointer[0]][props.sideMenuData.dataPointer[1]] : undefined;
 
     return <>
-        {props.sideMenuData.type === 'node' ? 
+        {props.sideMenuData.type === 'node' && node ? 
             <div className={props.sideMenuData.type}>
                 <div className="Buttons">
                     <button onClick={handleDeleteNode}>
@@ -191,15 +203,33 @@ const SideMenu: FunctionComponent<Props> = (props) => {
                     <TextEditor content={node.htmlContent} setContent={handleTextChange}></TextEditor>
                 </div>
             </div>
-        : 
+        : <></>}
+        {props.sideMenuData.type === 'comment' && comment ?
             <div className={props.sideMenuData.type}>
                 <Comment
                     comment={comment}
-                    selectedSession={props.sessions[props.selectedSession]}
+                    sessions={props.sessions}
+                    selectedSession={props.selectedSession}
+                    setSessions={props.setSessions}
+                    tempComment={props.tempComment}
+                    setTempComment={props.setTempComment}
                     marginLeft={0}
+                    userData={props.userData}
                 ></Comment>
             </div>
-        }
+        : <></>}
+        {props.sideMenuData.type === 'sessions' ? 
+            <div className={props.sideMenuData.type}>
+                <h2>Comment Sessions:</h2>
+                {props.sessions.map((session, i) => {
+                    return <Fragment key={i}>
+                        <SessionOption
+                            session={session}
+                        ></SessionOption>
+                    </Fragment>
+                })}
+            </div>
+        : <></>}
     </>
 }
 

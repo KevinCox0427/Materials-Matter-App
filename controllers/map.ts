@@ -57,7 +57,7 @@ map.route('/:id')
                 } = {}
 
                 comments.forEach(comment => {
-                    const key = '' + (comment.replyId ? comment.replyId : -1);
+                    const key = '' + (comment.replyId ? comment.replyId : 0);
 
                     if(!Object.keys(commentMap).includes(key)) {
                         commentMap = {...commentMap,
@@ -80,7 +80,13 @@ map.route('/:id')
         const serverProps:ServerPropsType = {
             mapPageProps: {
                 map: map,
-                sessions: fullSessions
+                sessions: fullSessions,
+                userData: {
+                    userId: req.user!.id,
+                    firstName: req.user!.firstName,
+                    lastName: req.user!.lastName,
+                    image: req.user!.image
+                }
             }
         }
 
