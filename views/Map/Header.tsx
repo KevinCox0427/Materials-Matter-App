@@ -1,6 +1,8 @@
-import React, { FunctionComponent, useEffect, useState } from "react";
+import React, { FunctionComponent, useEffect } from "react";
 
 type Props = {
+    headerButton: 'AddComment' | 'AddNode' | 'AddRow' | '',
+    setHeaderButton: React.Dispatch<React.SetStateAction<Props["headerButton"]>>,
     map: FullMapDoc,
     setMap: React.Dispatch<React.SetStateAction<FullMapDoc>>,
     sessions: FullSessionDoc[],
@@ -15,8 +17,9 @@ type Props = {
         replyId: number;
         commentIndex: number;
     } | null
-    setTempComment:  React.Dispatch<React.SetStateAction<Props['tempComment']>>,
-    userData: {
+    setTempComment: React.Dispatch<React.SetStateAction<Props['tempComment']>>,
+    setNotification: React.Dispatch<React.SetStateAction<string>>
+    userData?: {
         userId: number,
         firstName: string,
         lastName: string,
@@ -25,10 +28,6 @@ type Props = {
 }
 
 const Header: FunctionComponent<Props> = (props) => {
-    /**
-     * State variable representing what button on the header is currently selected.
-     */
-    const [headerButton, setHeaderButton] = useState('');
 
     /**
      * Event handler to change the name of the map
@@ -46,24 +45,24 @@ const Header: FunctionComponent<Props> = (props) => {
      * Function to start the header button's event listeners to the map.
      * @param name The header button to start.
      */
-    function handleHeaderButtonStart(name:string) {
-        setHeaderButton(name);
+    function handleHeaderButtonStart(name:'AddComment' | 'AddNode' | 'AddRow' | '') {
+        props.setHeaderButton(name);
     }
 
     /**
      * Adding event listeners the old fashion way becuase I don't want to move all these functions up the component tree.
      */
     useEffect(() => {
-        if(!headerButton) return;
+        if(!props.headerButton) return;
         (document.getElementById('Map') as HTMLDivElement).addEventListener('touchend', handleHeaderButtonEnd);
         (document.getElementById('Map') as HTMLDivElement).addEventListener('mouseup', handleHeaderButtonEnd);
-    }, [headerButton]);
+    }, [props.headerButton]);
 
     /**
      * Event handler to add whatever content is specified by the header button.
      */
     function handleHeaderButtonEnd(e:MouseEvent | TouchEvent) {
-        if(!headerButton) return;
+        if(!props.headerButton) return;
 
         /**
          * Getting the target element that the cursor was on when mouse up.
@@ -74,7 +73,7 @@ const Header: FunctionComponent<Props> = (props) => {
             /**
              * If the header button is being clicked, ignore.
              */
-            if(target.classList.contains(headerButton)) return;
+            if(target.classList.contains(props.headerButton)) return;
             target = target.parentElement as HTMLElement;
         }
 
@@ -87,7 +86,7 @@ const Header: FunctionComponent<Props> = (props) => {
         /**
          * Determining what action to do based on the header button selected.
          */
-        switch(headerButton) {
+        switch(props.headerButton) {
             /**
              * If we're adding a node, we'll add one to the row ID found on the target element.
              */
@@ -111,7 +110,7 @@ const Header: FunctionComponent<Props> = (props) => {
         /**
          * Resetting header button and event listeners.
          */
-        setHeaderButton('');
+        props.setHeaderButton('');
         (document.getElementById('Map') as HTMLDivElement).removeEventListener('touchend', handleHeaderButtonEnd);
         (document.getElementById('Map') as HTMLDivElement).removeEventListener('mouseup', handleHeaderButtonEnd);
     }
@@ -223,6 +222,22 @@ const Header: FunctionComponent<Props> = (props) => {
      * @param y The y coordinate of the mouse loation.
      */
     function addComment(x:number, y:number) {
+        /**
+         * If there's no current session to add the comment to, notify the user.
+         */
+        if(!props.sessions[props.selectedSession]) {
+            props.setNotification('You must have an active session to comment.')
+            return;
+        }
+
+        /**
+         * If there's no user logged in, then you can't comment.
+         */
+        if(!props.userData) {
+            props.setNotification('You must be logged in to comment.')
+            return;
+        }
+
         const mapBody = document.getElementsByClassName('Body')[0] as HTMLDivElement;
         const newSessions = [...props.sessions];
 
@@ -266,11 +281,23 @@ const Header: FunctionComponent<Props> = (props) => {
         props.setSessions(newSessions)
     }
 
-    function openSessions() {
-        props.setSideMenuData({
+    /**
+     * Event handler to toggle opening the comment sessions on the side menu.
+     */
+    function toggleSessions() {
+        props.setSideMenuData(props.sideMenuData && props.sideMenuData.type === 'sessions' ? null : {
             type: 'sessions',
             dataPointer: [0, 0]     // doesn't really matter
-        })
+        });
+    }
+
+    function handleSaveMap() {
+        if(props.userData) {
+
+        }
+        else {
+            props.setNotification('You must have a registered Binghamton University account to save.')
+        }
     }
     
     return <header className="Head">
@@ -279,23 +306,23 @@ const Header: FunctionComponent<Props> = (props) => {
         </a>
         <input value={props.map.name} onChange={handleNameChange}></input>
         <div className="Buttons">
-            <button className={`AddComment ${headerButton === 'AddComment' ? 'Activated' : ' '}`} onMouseDown={e => {handleHeaderButtonStart('AddComment')}} onTouchStart={e => {handleHeaderButtonStart('AddComment')}}>
+            <button className={`AddComment ${props.headerButton === 'AddComment' ? 'Activated' : ' '}`} onMouseDown={e => {handleHeaderButtonStart('AddComment')}} onTouchStart={e => {handleHeaderButtonStart('AddComment')}}>
                 <i className="fa-solid fa-comment"></i>
                 <p>Add Comment</p>
             </button>
-            <button className={`AddNode ${headerButton === 'AddNode' ? 'Activated' : ' '}`} onMouseDown={e => {handleHeaderButtonStart('AddNode')}} onTouchStart={e => {handleHeaderButtonStart('AddNode')}}>
+            <button className={`AddNode ${props.headerButton === 'AddNode' ? 'Activated' : ' '}`} onMouseDown={e => {handleHeaderButtonStart('AddNode')}} onTouchStart={e => {handleHeaderButtonStart('AddNode')}}>
                 <i className="fa-solid fa-plus"></i>
                 <p>Add Node</p>
             </button>
-            <button className={`AddRow ${headerButton === 'AddRow' ? 'Activated' : ' '}`} onMouseDown={e => {handleHeaderButtonStart('AddRow')}} onTouchStart={e => {handleHeaderButtonStart('AddRow')}}>
+            <button className={`AddRow ${props.headerButton === 'AddRow' ? 'Activated' : ' '}`} onMouseDown={e => {handleHeaderButtonStart('AddRow')}} onTouchStart={e => {handleHeaderButtonStart('AddRow')}}>
                 <i className="fa-solid fa-plus"></i>
                 <p>Add Row</p>
             </button>
-            <button className="Save">
+            <button className="Save" onClick={handleSaveMap}>
                 <i className="fa-solid fa-floppy-disk"></i>
                 <p>Save</p>
             </button>
-            <button className="Sessions" onClick={openSessions}>
+            <button className="Sessions" onClick={toggleSessions}>
                 <i className="fa-solid fa-bars"></i>
                 <p>Sessions</p>
             </button>

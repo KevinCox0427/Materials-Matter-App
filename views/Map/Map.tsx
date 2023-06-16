@@ -1,9 +1,11 @@
 import React, { Fragment, FunctionComponent, useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import Row from "./Row";
-import SideMenu from "./SideMenu";
 import MapComment from "./MapComment";
 import Header from "./Header";
+import NodeEditor from "./NodeEditor";
+import Comment from "./Comment";
+import SessionOption from "./SessionOption";
 
 /**
  * Declaring globally what properties this page should inherited from the server under "MapPageProps".
@@ -17,7 +19,7 @@ declare global {
             firstName: string,
             lastName: string,
             image: string
-        }
+        } | undefined
     }
 }
 
@@ -50,7 +52,9 @@ const Map: FunctionComponent<Props> = (props) => {
     /**
      * State variable representing the index of the currently selected comment session.
      */
-    const [selectedSession, setSelectedSession] = useState(0);
+    const [selectedSession, setSelectedSession] = useState(pageProps.sessions.reduce((selectedSession, session, i) => {
+        return (new Date()) > new Date(session.start) && (new Date()) < new Date(session.expires) ? i : selectedSession
+    }, -1));
 
     /**
      * State variable pointing to the data that's being edited in the side menu.
@@ -70,20 +74,74 @@ const Map: FunctionComponent<Props> = (props) => {
 
     /**
      * Callback function to remove the temp comment if it wasn't posted when the side menu or comment session changes.
+     * Also will remove temp session if it wasn't finished being saved.
      */
     useEffect(() => {
-        if(!tempComment) return;
-        /**
-         * If we're currently editting the comment, ignore.
-         */
-        if(sideMenuData && sideMenuData.type === 'comment' && tempComment.replyId === sideMenuData.dataPointer[0] && tempComment.commentIndex === sideMenuData.dataPointer[1]) return;
-        
         const newSessions = [...sessions];
-        newSessions[selectedSession].comments[tempComment.replyId].splice(tempComment.commentIndex, 1);
-        setSessions(newSessions);
 
-        setTempComment(null);
+        /**
+         * Removing temp session if it exists.
+         */
+        if(
+            newSessions[newSessions.length-1] &&
+            newSessions[newSessions.length-1].id === -1 && (
+                !sideMenuData || (
+                    sideMenuData &&
+                    sideMenuData.type !== 'sessions'
+                )
+            )
+        ) {
+            newSessions.splice(newSessions.length-1, 1);
+        }
+
+        /**
+         * If we're not editting the temp comment, remove it.
+         */
+        if(
+            newSessions[selectedSession] &&
+            tempComment && (
+                !sideMenuData || (
+                    sideMenuData && (
+                        sideMenuData.type !== 'comment' ||
+                        sideMenuData.dataPointer[0] !== tempComment.replyId ||
+                        sideMenuData.dataPointer[1] !== tempComment.commentIndex
+                    )
+                )
+            )
+        ) {
+            newSessions[selectedSession].comments[tempComment.replyId].splice(tempComment.commentIndex, 1);
+            setTempComment(null);
+        }
+
+        setSessions(newSessions);
     }, [sideMenuData, selectedSession]);
+
+    /**
+     * State variable representing what button on the header is currently selected.
+     */
+    const [headerButton, setHeaderButton] = useState<'AddComment' | 'AddNode' | 'AddRow' | ''>('');
+
+    /**
+     * Setting state for a notification pop-up and a reference to close it.
+     */
+    const [notification, setNotification] = useState('');
+    const notificationTimeout = useRef<NodeJS.Timeout | null>(null)
+
+    /**
+     * Automatically closing the notification after 10s.
+     */
+    useEffect(() => {
+        if(notificationTimeout.current) clearTimeout(notificationTimeout.current);
+        notificationTimeout.current = setTimeout(() => setNotification(''), 10000);
+    }, [notification]);
+
+    /**
+     * Event handler to cancel a notification instantly
+     */
+    function handleCancelNotificaiton() {
+        if(notificationTimeout.current) clearTimeout(notificationTimeout.current);
+        setNotification('');
+    }
     
     /**
      * An event handler to close the side menu when a node isn't clicked.
@@ -94,8 +152,56 @@ const Map: FunctionComponent<Props> = (props) => {
         setSideMenuData(null);
     }
 
+    /**
+     * Event handler to create a new temporary session in the side menu
+     */
+    function handleNewSession() {
+        const newSessions = [...sessions];
+
+        /**
+         * If there's already a temporary session, then delete it.
+         */
+        if(newSessions[newSessions.length - 1] && newSessions[newSessions.length - 1].id === -1) {
+            newSessions.splice(newSessions.length - 1, 1);
+        }
+
+        /**
+         * Adding an extra day to the expiration date by default.
+         */
+        const expirationDate = new Date();
+        expirationDate.setDate(expirationDate.getDate() + 1);
+
+        /**
+         * Pushing an empty session and setting state.
+         */
+        newSessions.push({
+            id: -1,
+            mapId: map.id,
+            name: `New Session - ${(new Date()).toLocaleDateString()}`,
+            start: (new Date()).toISOString(),
+            expires: expirationDate.toISOString(),
+            comments: {}
+        });
+
+        setSessions(newSessions);
+    }
+
     return <main id="Map">
+        <div className="Notification" style={notification ? {
+            opacity: 1,
+            pointerEvents: 'all'
+        } : {
+            opacity: 0,
+            pointerEvents: 'none'
+        }}>
+            <p>{notification}</p>
+            <button onClick={handleCancelNotificaiton}>
+                <i className="fa-solid fa-x"></i>
+            </button>
+        </div>
         <Header
+            headerButton={headerButton}
+            setHeaderButton={setHeaderButton}
             map={map}
             setMap={setMap}
             sessions={sessions}
@@ -105,23 +211,30 @@ const Map: FunctionComponent<Props> = (props) => {
             setSideMenuData={setSideMenuData}
             tempComment={tempComment}
             setTempComment={setTempComment}
+            setNotification={setNotification}
             userData={pageProps.userData}
         ></Header>
         <div className="MenuSplit">
-            <div className="BodyScroll">
-                <div className="Body" onMouseDown={handleCloseSideMenu} onTouchStart={handleCloseSideMenu}>
+            <div className="BodyScroll" onMouseDown={handleCloseSideMenu} onTouchStart={handleCloseSideMenu} style={{
+                cursor: headerButton !== '' ? 'copy' : 'auto'
+            }}>
+                <div className="Body">
                     <div className="Rows">
-                        {map.rows.map((_, i) => {
-                            return <Fragment key={i}>
-                                <Row map={map}
-                                    setMap={setMap}
-                                    rowIndex={i}
-                                    setSideMenuData={setSideMenuData}
-                                ></Row>
-                            </Fragment>
-                        })}
+                        {map.rows.length > 0 ?
+                            map.rows.map((_, i) => {
+                                return <Fragment key={i}>
+                                    <Row map={map}
+                                        setMap={setMap}
+                                        rowIndex={i}
+                                        setSideMenuData={setSideMenuData}
+                                    ></Row>
+                                </Fragment>
+                            })
+                        :
+                            <p className="StartText">Start by adding your first row...</p>
+                        }
                     </div>
-                    {sessions[selectedSession].comments['0'].map((comment, i) => {
+                    {selectedSession > -1 ? sessions[selectedSession].comments['0'].map((comment, i) => {
                         return <Fragment key={i}>
                             <MapComment
                                 commentData={comment}
@@ -130,28 +243,58 @@ const Map: FunctionComponent<Props> = (props) => {
                                 commentIndex={i}
                             ></MapComment>
                         </Fragment>
-                    })}
+                    }) : <></>}
                 </div>
             </div>
-            <div className="SideMenuScroll" style={{
-                flexBasis: sideMenuData ? 'clamp(15em, 30vw, 30em)' : '0em'
-            }}>
-                {sideMenuData ?
-                    <SideMenu
-                        sideMenuData={sideMenuData}
-                        setSideMenuData={setSideMenuData}
-                        tempComment={tempComment}
-                        setTempComment={setTempComment}
-                        map={map}
-                        setMap={setMap}
-                        sessions={sessions}
-                        selectedSession={selectedSession}
-                        setSessions={setSessions}
-                        userData={pageProps.userData}
-                    ></SideMenu>
-                : 
-                    <></>
-                }
+            <div className={`SideMenuScroll ${sideMenuData ? 'Opened' : ' '}`}>
+                {sideMenuData ? <>
+                    {sideMenuData.type === 'node' ? 
+                        <NodeEditor
+                            node={map.rows[sideMenuData.dataPointer[0]] ? map.rows[sideMenuData.dataPointer[0]].nodes[sideMenuData.dataPointer[1]] : undefined}
+                            map={map}
+                            setMap={setMap}
+                            sideMenuData={sideMenuData}
+                            setSideMenuData={setSideMenuData}
+                            sessions={sessions}
+                            selectedSession={selectedSession}
+                            setSessions={setSessions}
+                            userData={pageProps.userData}
+                        ></NodeEditor>
+                    : <></>}
+                    {sideMenuData.type === 'comment' ?
+                        <div className="comment">
+                            <Comment
+                                comment={selectedSession > -1 && sessions[selectedSession].comments['' + sideMenuData.dataPointer[0]] ? 
+                                sessions[selectedSession].comments['' + sideMenuData.dataPointer[0]][sideMenuData.dataPointer[1]] : undefined}
+                                sessions={sessions}
+                                selectedSession={selectedSession}
+                                setSessions={setSessions}
+                                tempComment={tempComment}
+                                setTempComment={setTempComment}
+                                setNotification={setNotification}
+                                marginLeft={0}
+                                userData={pageProps.userData}
+                            ></Comment>
+                        </div>
+                    : <></>}
+                    {sideMenuData.type === 'sessions' ? 
+                        <div className="sessions">
+                            <h2>Comment Sessions:</h2>
+                            <button className="AddSession" onClick={handleNewSession}>+ New Session</button>
+                            {sessions.map((_, i) => {
+                                return <Fragment key={i}>
+                                    <SessionOption
+                                        index={i}
+                                        sessions={sessions}
+                                        setSessions={setSessions}
+                                        setSelectedSession={setSelectedSession}
+                                        isSelected={selectedSession === i}
+                                    ></SessionOption>
+                                </Fragment>
+                            })}
+                        </div>
+                    : <></>}
+                </> : <></>}
             </div>
         </div>
     </main>

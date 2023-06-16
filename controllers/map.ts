@@ -13,8 +13,39 @@ const map = express.Router();
 /**
  * Setting up a GET endpoint to serve the map page React file.
  */
+map.route('/new')
+    .get(async (req, res) => {
+        /**
+         * Loading the server properties to pass to the client.
+         */
+        const serverProps:ServerPropsType = {
+            mapPageProps: {
+                map: {
+                    id: -1,
+                    name: 'New Map',
+                    rows: []
+                },
+                sessions: [],
+                userData: req.user ? {
+                    userId: req.user.id,
+                    firstName: req.user.firstName,
+                    lastName: req.user.lastName,
+                    image: req.user.image
+                } : undefined
+            }
+        }
+
+        /**
+         * Serving the react page.
+         */
+        res.status(200).send(serveHTML('Map', serverProps));
+    });
+
+/**
+ * Setting up a GET endpoint to serve the map page React file.
+ */
 map.route('/:id')
-    .get(isAuth, async (req, res) => {
+    .get(async (req, res) => {
         /**
          * Guard clause to make sure the id is a number.
          */
@@ -81,12 +112,12 @@ map.route('/:id')
             mapPageProps: {
                 map: map,
                 sessions: fullSessions,
-                userData: {
-                    userId: req.user!.id,
-                    firstName: req.user!.firstName,
-                    lastName: req.user!.lastName,
-                    image: req.user!.image
-                }
+                userData: req.user ? {
+                    userId: req.user.id,
+                    firstName: req.user.firstName,
+                    lastName: req.user.lastName,
+                    image: req.user.image
+                } : undefined
             }
         }
 

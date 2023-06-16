@@ -1,19 +1,74 @@
 @import './mixins';
 
-main {
+#root * {
     display: flex;
+}
+
+header {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    width: calc(100% - 4em);
+    color: var(--white);
+    background-color: var(--black);
+    padding: 1.25em 2em;
+
+    h1 {
+        font-weight: 300;
+        font-size: 2.75em;
+    }
+
+    .Profile {
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5em;
+
+        p {
+            font-size: 1.75em;
+        }
+    
+        img {
+            height: 2.75em;
+            width: auto;
+            border-radius: 10em;
+            margin-left: 1.5em;
+        }
+    
+        a {
+            border-radius: 0.25em;
+            padding: 0.25em 0.5em;
+            font-size: 1.4em;
+            flex-direction: row;
+            align-items: center;
+            text-decoration: none;
+            gap: 0.5em;
+            color: var(--white);
+            transition: color 0.1s linear, background-color 0.1s linear, transform 0.1s linear;
+
+            i {
+                font-size: 1.4em;
+                color: inherit;
+            }
+
+            &:hover {
+                background-color: var(--white);
+                color: var(--black);
+                transform: scale(1.05);
+                cursor: pointer;
+            }
+        }
+    }
+}
+
+main {
     width: fit-content;
     margin: auto;
     flex-direction: row;
     flex-wrap: wrap;
     justify-content: center;
     align-items: center;
-
-    h1 {
-        font-weight: 400;
-        margin-bottom: 2em;
-        font-size: 3em;
-    }
     
     .Title {
         flex-direction: row;

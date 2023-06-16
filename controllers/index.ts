@@ -11,7 +11,7 @@ const index = express.Router();
  * Setting up a GET endpoint to serve the homepage React file.
  */
 index.route('/')
-    .get(isAuth, (req, res) => {
+    .get((req, res) => {
         /**
          * Loading the server properties to pass to the client.
          */
@@ -20,7 +20,13 @@ index.route('/')
                 maps: [{
                     id: 1,
                     name: 'The best map'
-                }]
+                }],
+                userData: req.user ? {
+                    userId: req.user.id,
+                    firstName: req.user.firstName,
+                    lastName: req.user.lastName,
+                    image: req.user.image
+                } : undefined
             }
         }
 

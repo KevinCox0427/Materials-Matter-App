@@ -13,6 +13,16 @@ users.route('/login')
     .get(passport.authenticate('google', { scope: ['email', 'profile'] }));
 
 /**
+ * Setting up a GET endpoint to logout of a user's google account.
+ */
+users.route('/logout')
+    .get(async (req, res) => {
+        req.logout(() => {
+            res.status(302).redirect('/');
+        });
+    });
+
+/**
  * The callback URI if the google authentication fails
  */
 users.route('/failure')

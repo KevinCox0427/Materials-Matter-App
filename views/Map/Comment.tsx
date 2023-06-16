@@ -1,7 +1,7 @@
 import React, { Fragment, FunctionComponent, useEffect, useRef, useState } from "react";
 
 type Props = {
-    comment: CommentDoc,
+    comment: CommentDoc | undefined,
     sessions: FullSessionDoc[],
     selectedSession: number,
     setSessions: React.Dispatch<React.SetStateAction<FullSessionDoc[]>>,
@@ -10,8 +10,9 @@ type Props = {
         commentIndex: number;
     } | null
     setTempComment:  React.Dispatch<React.SetStateAction<Props['tempComment']>>,
+    setNotification: React.Dispatch<React.SetStateAction<string>>,
     marginLeft: number,
-    userData: {
+    userData?: {
         userId: number,
         firstName: string,
         lastName: string,
@@ -20,6 +21,8 @@ type Props = {
 }
 
 const Comment: FunctionComponent<Props> = (props) => {
+    if(!props.comment) return <></>;
+
     /**
      * State variables to keep track of a comment's content and whether its replies are visible.
      */
@@ -49,14 +52,22 @@ const Comment: FunctionComponent<Props> = (props) => {
      * Event handler to create a reply comment
      */
     function handleReply() {
+        /**
+         * A user must be logged in to reply
+         */
+        if(!props.userData) {
+            props.setNotification('You must be logged in to comment.');
+            return;
+        }
+
         const newSessions = [...props.sessions];
 
         /**
          * If the reply array doesn't exist in the session, create one.
          */
-        if(!newSessions[props.selectedSession].comments["" + props.comment.id]) {
+        if(!newSessions[props.selectedSession].comments["" + props.comment!.id]) {
             newSessions[props.selectedSession].comments = {...newSessions[props.selectedSession].comments,
-                [props.comment.id]: []
+                [props.comment!.id]: []
             }
         }
 
@@ -71,18 +82,18 @@ const Comment: FunctionComponent<Props> = (props) => {
          * Setting the temp comment state variable.
          */
         props.setTempComment({
-            replyId: props.comment.id,
+            replyId: props.comment!.id,
             commentIndex: 0
         })
 
         /**
          * Adding a temporary comment at the first index into the reply array.
          */
-        newSessions[props.selectedSession].comments["" + props.comment.id].splice(0, 0, {
+        newSessions[props.selectedSession].comments["" + props.comment!.id].splice(0, 0, {
             ...props.userData,
             id: -1,
             commentsessionId: newSessions[props.selectedSession].id,
-            replyId: props.comment.id,
+            replyId: props.comment!.id,
             timestamp: (new Date()).toLocaleString().split(', ')[0],
             content: '',
             x: null,
@@ -140,10 +151,11 @@ const Comment: FunctionComponent<Props> = (props) => {
                         sessions={props.sessions}
                         selectedSession={props.selectedSession}
                         setSessions={props.setSessions}
-                        marginLeft={props.marginLeft + 3}
-                        userData={props.userData}
                         tempComment={props.tempComment}
                         setTempComment={props.setTempComment}
+                        setNotification={props.setNotification}
+                        marginLeft={props.marginLeft + 3}
+                        userData={props.userData}
                     ></Comment>
                 </Fragment>
             })

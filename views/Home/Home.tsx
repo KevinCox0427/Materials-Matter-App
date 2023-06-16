@@ -6,7 +6,13 @@ import { createRoot } from 'react-dom/client';
  */
 declare global {
     type HomePageProps = {
-        maps: MapDoc[]
+        maps: MapDoc[],
+        userData?: {
+            userId: number
+            firstName: string,
+            lastName: string,
+            image: string
+        } | undefined
     }
 }
 
@@ -26,21 +32,42 @@ const Home: FunctionComponent<Props> = (props) => {
     const pageProps = props.ServerProps.homePageProps;
     if(!pageProps) return <></>
     
-    return <main>
-        <h1>Materials Matter Prototype</h1>
-        <div className="Title">
-            <h2>Maps:</h2>
-            <a href="/map/new">+ New Map</a>
-        </div>
-        <div className="Maps">
-            {pageProps.maps.map((map, i) => {
-                return <div className="Map" key={i}>
-                    <a href={`/map/${map.id}`}>{map.name}</a>
-                    <i className="fa-solid fa-trash-can"></i>
+    return <>
+        <header>
+            <h1>Materials Matter Prototype</h1>
+            {pageProps.userData ? 
+                <div className="Profile">
+                    <a href="/users/logout">
+                        <i className="fa-solid fa-arrow-right-from-bracket"></i>
+                        Logout
+                    </a>
+                    <img src={pageProps.userData.image} alt={`${pageProps.userData.firstName} ${pageProps.userData.lastName}'s Profile Picture`}></img>
+                    <p>{pageProps.userData.firstName} {pageProps.userData.lastName}</p>
+                </div> 
+            : 
+                <div className="Profile">
+                    <a href="/users/login">
+                        <i className="fa-solid fa-user"></i>
+                        Login
+                    </a>
                 </div>
-            })}
-        </div>
-    </main>
+            }
+        </header>
+        <main>
+            <div className="Title">
+                <h2>Maps:</h2>
+                <a href="/map/new">+ New Map</a>
+            </div>
+            <div className="Maps">
+                {pageProps.maps.map((map, i) => {
+                    return <div className="Map" key={i}>
+                        <a href={`/map/${map.id}`}>{map.name}</a>
+                        <i className="fa-solid fa-trash-can"></i>
+                    </div>
+                })}
+            </div>
+        </main>
+    </>
 }
 
 /**

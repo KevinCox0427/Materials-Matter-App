@@ -90,6 +90,10 @@
                         fill: var(--yellow);
                     }
                 }
+
+                .ql-picker-options {
+                    background-color: var(--black);
+                }
             }
 
             .ql-picker-options {
@@ -168,5 +172,80 @@
                 color: var(--grey);
             }
         }
+    }
+}
+
+@mixin QuillDisplayStyles {
+    display: inline-block !important;
+    font-family: var(--openSans);
+
+    .ql-align-right {
+        text-align: right;
+    }
+    .ql-align-center {
+        text-align: center;
+    }
+
+    @for $i from 1 through 8 {
+        .ql-indent-#{$i} {
+            padding-left: $i*2em;
+        }
+    }
+
+    .ql-color-yellow {
+        color: var(--yellow);
+    }
+    .ql-color-green {
+        color: var(--green);
+    }
+    .ql-color-lightRed {
+        color: var(--lightRed);
+    }
+    .ql-color-lightPurple {
+        color: var(--lightPurple);
+    }
+    .ql-color-blue {
+        color: var(--blue);
+    }
+    .ql-color-grey {
+        color: var(--grey);
+    }
+
+    h3 {
+        display: block !important;
+        font-weight: 500;
+        font-size: 2em;
+        margin: 0.2em 0;
+    }
+
+    p, ol, ul {
+        display: block !important;
+        margin: 0.625em 0;
+        font-size: 1.5em;
+    }
+
+    blockquote {
+        display: block !important;
+        margin: 0.625em 0;
+        font-family: var(--cairo);
+        font-weight: 300;
+        font-size: 1.35em;
+        line-height: 130%;
+        border-left: 0.15em solid var(--yellow);
+        padding-left: 1em;
+        margin-left: 1.5em !important;
+    }
+
+    ol, ul {
+        flex-direction: column;
+        gap: 1em;
+    }
+
+    li {
+        margin: 0.625em 0;
+    }
+
+    span, sub, sup, strong, em, a, u, s {
+        display: inline !important;
     }
 }

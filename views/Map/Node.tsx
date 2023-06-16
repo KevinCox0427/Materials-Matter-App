@@ -29,12 +29,10 @@ const Node: FunctionComponent<Props> = (props) => {
         });
     }
     
-    return <div className="Node" id={`${props.rowIndex}.${props.nodeIndex}`} onClick={handleClick}>
-        {props.nodeData.gallery[0] ? 
-            <img src={props.nodeData.gallery[0]}></img>
-        : 
-            <h3>{props.nodeData.name}</h3>
-        }
+    return <div className="Node" id={`${props.rowIndex}.${props.nodeIndex}`} onClick={handleClick} style={{
+        backgroundImage: props.nodeData.gallery[0] ? `url("${props.nodeData.gallery[0]}")` : 'none'
+    }}>
+        <h3>{props.nodeData.name}</h3>
     </div>
 }
 
