@@ -23,7 +23,8 @@ type Props = {
         userId: number,
         firstName: string,
         lastName: string,
-        image: string
+        image: string,
+        isAdmin: boolean
     }
 }
 
@@ -128,6 +129,7 @@ const Header: FunctionComponent<Props> = (props) => {
          * Finding the index position of the new node based on the X position of the cursor.
          * Since the wrapper has "space-around" for its justify-content, the space inbetween the nodes are not even.
          */
+        const newMap = {...props.map}
 
         // Gettitng reference to the element responsible for wrapping the nodes and having a horiozontal scroll.
         const scrollElement = target.getElementsByClassName('Nodes')[0] as HTMLDivElement
@@ -136,18 +138,17 @@ const Header: FunctionComponent<Props> = (props) => {
         // Percent of the spacing inbetween nodes for "space-around." This will be twice the length of the array.
         const indexPercent = 100 / (props.map.rows[parseInt(target.id)].nodes.length * 2);
         // Finding the mouse position in one of these spacing columns. This will be used to find the index of the new node.
-        const newIndex = Math.ceil(Math.floor(xPercent / indexPercent) / 2);
+        const nodeIndex = Math.ceil(Math.floor(xPercent / indexPercent) / 2);
+        const rowIndex = parseInt(target.id);
 
         /**
          * Adding a new node at the found index.
          */
-        const newMap = {...props.map}
-
-        newMap.rows[parseInt(target.id)].nodes.splice(newIndex, 0, {
+        newMap.rows[parseInt(target.id)].nodes.splice(nodeIndex, 0, {
             id: -1,
-            rowId: newMap.rows[parseInt(target.id)].id,
+            rowId: newMap.rows[rowIndex].id,
             name: 'New Node',
-            index: newIndex,
+            index: nodeIndex,
             gallery: [],
             htmlContent: ''  
         });
@@ -162,7 +163,7 @@ const Header: FunctionComponent<Props> = (props) => {
          */
         props.setSideMenuData({
             type: 'node',
-            dataPointer: [newMap.rows[parseInt(target.id)].index, newIndex] 
+            dataPointer: [rowIndex, nodeIndex] 
         });
     }
 
@@ -246,6 +247,15 @@ const Header: FunctionComponent<Props> = (props) => {
          */
         if(props.tempComment) {
             newSessions[props.selectedSession].comments[props.tempComment.replyId].splice(props.tempComment.commentIndex, 1);
+        }
+
+        /**
+         * If the array of map comments doesn't exits, then create it.
+         */
+        if(!newSessions[props.selectedSession].comments['0']) {
+            newSessions[props.selectedSession].comments = {...newSessions[props.selectedSession].comments,
+                ['0']: []
+            }
         }
 
         /**

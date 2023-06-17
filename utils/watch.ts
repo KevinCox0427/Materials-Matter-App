@@ -32,7 +32,7 @@ try {
     /**
      * Copying assets from the public directory.
      */
-    copyPublicFiles('public/assets');
+    copyPublicFiles('public');
 
     /**
      * Recursively watching each folder for changes.

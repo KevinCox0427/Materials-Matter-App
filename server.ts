@@ -25,10 +25,10 @@ app.set('etag', false);
  * Setting up user sessions via express session.
  * Also storing these sessions in a database.
  */
-import session from "express-session";
-const mySqlStore = require('express-mysql-session')(session);
+import expressSession from "express-session";
+const mySqlStore = require('express-mysql-session')(expressSession);
 
-app.use(session({ 
+export const session = expressSession({ 
     secret: process.env.SessionSecret || 'secret',
     resave: false,
     saveUninitialized: false,
@@ -45,7 +45,10 @@ app.use(session({
         database: process.env.sqlDatabase,
         createDatabaseTable: true
     })
-}));
+})
+
+app.use(session);
+
 
 /**
  * Import database configuration
@@ -54,9 +57,10 @@ import './models/__init__';
 
 
 /**
- * Importing the authentication configuration.
+ * Importing the authentication and socket.io configuration
  */
 import './utils/authentication';
+import './utils/socketIO';
 
 
 /**
@@ -87,12 +91,12 @@ app.use('/image', image);
 /**
  * Declaring static files in the public folder.
  */
-app.use('/assets', express.static('dist/puclic/assets'));
-app.use('/css', express.static('dist/public/css'));
-app.use('/js', express.static('dist/public/js'));
+app.use('/public', express.static('dist/public'));
 
 
 /**
+ * Importing the server from the socket.io configuration.
  * Listening server to declared port.
  */
-app.listen(process.env.PORT || 3000);
+import { server } from './utils/socketIO';
+server.listen(process.env.PORT || 3000);

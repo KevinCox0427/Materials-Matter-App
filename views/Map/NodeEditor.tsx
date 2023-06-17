@@ -1,109 +1,25 @@
-import React, { FunctionComponent, useEffect, useRef, useState } from "react";
+import React, { FunctionComponent } from "react";
 import TextEditor from "../components/TextEditor";
-import parse from "html-react-parser";
 
 type Props = {
-    node: NodeDoc | undefined,
+    node: NodeDoc,
+    setNode: React.Dispatch<React.SetStateAction<NodeDoc>>,
+    setMap: React.Dispatch<React.SetStateAction<FullMapDoc>>,
     sideMenuData: {
         type: 'node' | 'comment' | 'sessions';
         dataPointer: [number, number];
     },
-    setSideMenuData: React.Dispatch<React.SetStateAction<Props["sideMenuData"] | null>>,
-    map: FullMapDoc,
-    setMap: React.Dispatch<React.SetStateAction<FullMapDoc>>,
-    sessions: FullSessionDoc[],
-    setSessions: React.Dispatch<React.SetStateAction<FullSessionDoc[]>>,
-    selectedSession: number,
     userData?: {
         userId: number
         firstName: string,
         lastName: string,
-        image: string
-    }
+        image: string,
+        isAdmin: boolean
+    },
+    setNotification: React.Dispatch<React.SetStateAction<string>>
 }
 
-/**
- * The React component for the side menu to be able to edit and view nodes.
- * 
- * @param sideMenuData A pointer to the contents data that's being editted.
- * @param setSideMenuData The set state function to change what data is being pointed to.
- * @param map The state variable representing all the map's data.
- * @param setMap The set state function for the map to change the data that's being editted in the side menu.
- * @param sessions The state variable controlling all the comments and their sessions.
- * @param setSession The setter to edit target comments.
- */
 const NodeEditor: FunctionComponent<Props> = (props) => {
-    if(!props.node) return <></>;
-
-    /**
-     * Setting state for the node's content to be editted.
-     */
-    const [node, setNode] = useState(props.node);
-    useEffect(() => setNode(props.node!), [props.node])
-
-    /**
-     * State variable to keep track of when the node is being edited
-     */
-    const [isEditing, setIsEditing] = useState(false);
-
-    /**
-     * Event handler to toggle between the editor and viewer.
-     */
-    function toggleIsEditing() {
-        setIsEditing(!isEditing);
-        /**
-         * Removing any toolbars the Quill created.
-         */
-        const qlToolbars = Array.from(document.getElementsByClassName('ql-toolbar')) as HTMLDivElement[];
-        qlToolbars.forEach(toolbar => {
-            toolbar.remove();
-        })
-    }
-
-    /**
-     * State variable and reference to keep track of the gallery slider's position.
-     */
-    const galleryEl = useRef<HTMLDivElement>(null);
-    const [galleryPosition, setGalleryPosition] = useState(0);
-
-    useEffect(adjustGallery, [galleryPosition]);
-
-    function adjustGallery() {
-        if(!galleryEl.current) return;
-        const newPosition = Math.round((galleryEl.current.scrollWidth / node.gallery.length) * galleryPosition) + (2 * galleryPosition-1);
-        galleryEl.current.scrollTo(newPosition, 0);
-    }
-
-    const resizeBuffer = useRef<NodeJS.Timeout | null>(null);
-
-    useEffect(() => {
-        if(!galleryEl.current) return;
-
-        window.addEventListener('resize', () => {
-            if(resizeBuffer.current) clearTimeout(resizeBuffer.current);
-            resizeBuffer.current = setTimeout(adjustGallery, 200);
-        });
-        
-        galleryEl.current.addEventListener('scroll', () => {
-            if(resizeBuffer.current) clearTimeout(resizeBuffer.current);
-            resizeBuffer.current = setTimeout(() => {
-                if(!galleryEl.current) return;
-                const newIndex = Math.round(node.gallery.length * (galleryEl.current.scrollLeft / galleryEl.current.scrollWidth));
-
-                if(newIndex !== galleryPosition) handleMoveGallery(newIndex);
-                else adjustGallery();
-            }, 500);
-        })
-    }, [adjustGallery, galleryEl]);
-
-    /**
-     * Event handler to move the gallery based on the image's index
-     * @param index The index of the image in the node's gallery array.
-     */
-    function handleMoveGallery(index: number) {
-        setGalleryPosition(index);
-    }
-
     /**
      * An asynchronous helper function to read a file from an input
      * @param file The File object created by the input
@@ -118,28 +34,31 @@ const NodeEditor: FunctionComponent<Props> = (props) => {
     }
 
     /**
-     * Event handler to parse an uploaded file into a base64 string and add it to the node's gallery array.
+     * Event handler to parse an uploaded file into a base64 string and add it to the props.node's gallery array.
      */
-    async function handleFileUpload(e:React.ChangeEvent<HTMLInputElement>) {
-        const newMap = {...props.map};
+    async function uploadFile(e: React.ChangeEvent<HTMLInputElement>) {
+        const newGallery = [...props.node.gallery];
 
         /**
         * If it's file size is greater than 1MB, do nothing.
         */
-        if(e.target.files![0].size > 1048576) {
-            //setLogoErrorMessage('Image cannot be larger than 1MB.')
+        if(e.target.files![0].size > 1000000) {
+            props.setNotification('Image cannot be larger than 1MB.')
             return;
         }
 
-       /**
+        /**
         * Parsing the uploaded file into base64
         */
-       const image = await readFileAsDataURL(e.target.files![0]);
+        const base64image = await readFileAsDataURL(e.target.files![0]);
+        if(!base64image) return;
+        let image = base64image.toString();
        
-       /**
+        /**
         * If the image is not the correct format, return.
         */
-        if(!image || (!image.toString().includes('image/png') && !image.toString().includes('image/jpg') && !image.toString().includes('image/jpeg') && !image.toString().includes('image/webp') && !image.toString().includes('image/gif') && !image.toString().includes('image/svg'))) {
+        if(!image.toString().includes('image/png') && !image.toString().includes('image/jpg') && !image.toString().includes('image/jpeg') && !image.toString().includes('image/webp') && !image.toString().includes('image/gif') && !image.toString().includes('image/svg')) {
+            props.setNotification('Image must be .png, .jpg, .jpeg, .webp, .gif, or .svg');
             return;
         }
 
@@ -153,7 +72,7 @@ const NodeEditor: FunctionComponent<Props> = (props) => {
             const response = await (await fetch('/image', {
                 method: 'POST',
                 body: JSON.stringify({
-                    image: image.toString(),
+                    image: image,
                     nodeId: props.sideMenuData.dataPointer[1]
                 })
             })).json();
@@ -167,25 +86,22 @@ const NodeEditor: FunctionComponent<Props> = (props) => {
             }
 
             /**
-             * Otherwise update state with the returned id.
+             * Otherwise update image to be its url.
              */
-            newMap.rows[props.sideMenuData.dataPointer[0]].nodes[props.sideMenuData.dataPointer[1]].gallery.push(response.url);
+            image = response.url;
         }
-        /**
-         * If they're unregistered, then just use the base64.
-         */
-        else {
-            newMap.rows[props.sideMenuData.dataPointer[0]].nodes[props.sideMenuData.dataPointer[1]].gallery.push(image.toString());
-        }
-
-        props.setMap(newMap);
+        
+        newGallery.push(image);
+        props.setNode({...props.node,
+            gallery: newGallery
+        })
     }
 
     /**
-     * Event handler to remove a file from the node's gallery array.
+     * Event handler to remove a file from the props.node's gallery array.
      * @param index The index of the file in the array.
      */
-    function handleFileDelete(index:number) {
+    function deleteImage(index: number) {
         props.setMap(oldMap => {
             const newRows = [...oldMap.rows];
             newRows[props.sideMenuData.dataPointer[0]].nodes[props.sideMenuData.dataPointer[1]].gallery.splice(index, 1);
@@ -197,151 +113,87 @@ const NodeEditor: FunctionComponent<Props> = (props) => {
     }
 
     /**
-     * Event handler to remove this node from the row.
+     * Event handler to move an image in the gallery up one index.
+     * @param index Index of the image being moved.
      */
-    function handleDeleteNode() {
-        props.setMap(oldMap => {
-            const newRows = [...oldMap.rows];
-            newRows[props.sideMenuData.dataPointer[0]].nodes.splice(props.sideMenuData.dataPointer[1], 1);
+    function moveImageUp(index: number) {
+        if(index === 0) return;
+        const targetImage = props.node.gallery[index]
+        const newGallery = [...props.node.gallery];
 
-            return {...oldMap,
-                rows: newRows
-            };
+        newGallery.splice(index, 1);
+        newGallery.splice(index - 1, 0, targetImage);
+        props.setNode({...props.node,
+            gallery: newGallery
         });
-        props.setSideMenuData(null);
     }
 
     /**
-     * Event handler to change the name of the node.
+     * Event handler to move an image in the gallery down one index.
+     * @param index Index of the image being moved.
      */
-    function handleChangeNodeName(e:React.ChangeEvent<HTMLInputElement>) {
-        props.setMap(oldMap => {
-            const oldRows = [...oldMap.rows];
-            oldRows[props.sideMenuData.dataPointer[0]].nodes[props.sideMenuData.dataPointer[1]].name = e.target.value;
+    function moveImageDown(index: number) {
+        if(index === props.node.gallery.length - 1) return;
+        const targetImage = props.node.gallery[index]
+        const newGallery = [...props.node.gallery];
 
-            return {...oldMap,
-                rows: oldRows
-            };
-        })
+        newGallery.splice(index, 1);
+        newGallery.splice(index + 1, 0, targetImage);
+        props.setNode({...props.node,
+            gallery: newGallery
+        });
     }
 
     /**
-     * Event handler to change the text a node.
-     * 
+     * Event handler to change the name of the props.node.
+     */
+    function changeName(e: React.ChangeEvent<HTMLInputElement>) {
+        props.setNode({...props.node,
+            name: e.target.value
+        });
+    }
+
+    /**
+     * Event handler to change the text a props.node.
      * @param newContent The new html string to set.
      */
-    function handleTextChange(newContent: string) {
-        props.setMap(oldMap => {
-            const oldRows = [...oldMap.rows];
-            oldRows[props.sideMenuData.dataPointer[0]].nodes[props.sideMenuData.dataPointer[1]].htmlContent = newContent;
-
-            return {...oldMap,
-                rows: oldRows
-            };
+    function changeText(newContent: string) {
+        props.setNode({...props.node,
+            htmlContent: newContent
         });
     }
 
-    return <div className="node">
-        <div className="Buttons">
-            {isEditing ? 
-                <button onClick={toggleIsEditing}>
-                    <i className="fa-solid fa-floppy-disk"></i>
-                    Save
-                </button>
-            :
-                <button>
-                    <i className="fa-solid fa-arrows-up-down-left-right"></i>
-                    Move
-                </button>
-            }
-            {isEditing ? 
-                <button className="Activated" onClick={toggleIsEditing}>
-                    <i className="fa-solid fa-x"></i>
-                    Cancel
-                </button>
-            :
-                <button onClick={toggleIsEditing}>
-                    <i className="fa-solid fa-pen-to-square"></i>
-                    Edit
-                </button>
-            }
-            <button onClick={handleDeleteNode}>
-                <i className="fa-solid fa-trash-can"></i>
-                Delete
-            </button>
+    return <>
+        <input className="Title" value={props.node.name} onChange={changeName}></input>
+        <div className="GalleryUpload">
+            <h3>Gallery:</h3>
+            <div className="FileUpload">
+                <input type="file" accept="image/png, image/jpg, image/jpeg, image/webp, image/svg,
+                image/gif" onChange={uploadFile}></input>
+                <label>Click or drag to upload +</label>
+            </div>
+            <div className="GalleryEdit">
+                {props.node.gallery.map((image, i) => {
+                    return <div key={i} className="ImageWrapper">
+                        <img src={image} alt={`${props.node.name} Gallery Image ${i+1}`}></img>
+                        <button onClick={() => moveImageUp(i)}>
+                            <i className="fa-solid fa-arrow-up"></i>
+                        </button>
+                        <button onClick={() => deleteImage(i)}>
+                            <i className="fa-solid fa-trash-can"></i>
+                        </button>
+                        <button onClick={() => moveImageDown(i)}>
+                            <i className="fa-solid fa-arrow-down"></i>
+                        </button>
+                    </div>
+                })}
+            </div>
         </div>
-        {isEditing ? 
-            <input className="Title" value={node.name} onChange={handleChangeNodeName}></input>
-        :
-            <h2 className="Title">{node.name}</h2>
-        }
-        {isEditing ? 
-            <div className="GalleryUpload">
-                <h3>Gallery:</h3>
-                <div className="FileUpload">
-                    <input type="file" accept="image/png, image/jpg, image/jpeg, image/webp, image/svg,
-                    image/gif" onChange={handleFileUpload}></input>
-                    <label>Click or drag to upload +</label>
-                </div>
-                <div className="GalleryEdit">
-                    {node.gallery.map((image, i) => {
-                        return <div key={i} className="ImageWrapper">
-                            <img src={image} alt={`${node.name} Gallery Image ${i+1}`}></img>
-                            <button onClick={() => {handleFileDelete(i)}}>
-                                <i className="fa-solid fa-trash-can"></i>
-                            </button>
-                        </div>
-                    })}
-                </div>
-            </div>
-        :
-            node.gallery.length > 0 ?
-                <div className="GalleryPaginationWrapper">
-                    <div ref={galleryEl} className="GalleryWrapper">
-                        <div className="Gallery">
-                            {node.gallery.map((image, i) => {
-                                return <div key={i} className="ImageWrapper">
-                                    <img src={image} alt={`${node.name} Gallery Image ${i+1}`}></img>
-                                </div>
-                            })}
-                        </div>
-                    </div>
-                    <div className="Pagination">
-                        {node.gallery.map((_, i) => {
-                            return <button key={i} className={galleryPosition === i ? 'Activated' : ' '} onClick={() => handleMoveGallery(i)}></button>
-                        })}
-                    </div>
-                </div>
-            : 
-                <></>
-        }
-        {isEditing ?
-            <div className="TextEditorWrapper">
-                <h3>Content:</h3>
-                <TextEditor content={node.htmlContent} setContent={handleTextChange}></TextEditor>
-            </div>
-        :
-            node.htmlContent ? 
-                <div className="NodeContent">{
-                    /**
-                     * An imported function that will convert HTML strings into React elements
-                     */
-                    parse(node.htmlContent, {
-                        /**
-                         * A callback function to filter only accepted HTML elements.
-                         */
-                        replace: (node) => {
-                            const validTags = ['P', 'H3', 'A', 'SPAN', 'EM', 'STRONG', 'SMALL', 'IMAGE'];
-                            if(!(node instanceof Element)) return node;
-                            if(validTags.includes(node.tagName)) return node;
-                            return false;
-                        }
-                    })
-                }</div>
-            :
-                <></>
-        }
-    </div>
+        <div className="TextEditorWrapper">
+            <h3>Content:</h3>
+            <TextEditor content={props.node.htmlContent ? props.node.htmlContent : ''} setContent={changeText}></TextEditor>
+        </div>
+    </>
 }
 
 export default NodeEditor;

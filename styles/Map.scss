@@ -437,6 +437,8 @@ body {
     
                 .GalleryUpload {
                     display: flex;
+                    flex-direction: row;
+                    flex-wrap: wrap;
                     flex-basis: 100%;
                     gap: 1em;
                     margin: auto 0;
@@ -446,12 +448,15 @@ body {
                     }
     
                     h3 {
+                        flex-basis: 100%;
                         font-size: 1.6em;
                         font-weight: 400;
                     }
     
                     .FileUpload {
                         flex-direction: row;
+                        flex-basis: 10em;
+                        flex-grow: 1;
     
                         label {
                             flex-grow: 1;
@@ -460,6 +465,7 @@ body {
                             border-radius: 0.5em;
                             justify-content: center;
                             align-items: center;
+                            text-align: center;
                             font-size: 1.25em;
                             pointer-events: none;
                             transition: border-radius 0.1s linear;
@@ -484,7 +490,11 @@ body {
                     .GalleryEdit {
                         flex-direction: row;
                         flex-wrap: wrap;
-                        gap: 1em;
+                        gap: 1.5em;
+                        flex-basis: 10em;
+                        flex-grow: 10;
+                        justify-content: center;
+                        align-items: center;
     
                         .ImageWrapper {
                             width: 8em;
@@ -501,18 +511,27 @@ body {
     
                             button {
                                 position: absolute;
-                                right: 0;
-                                top: 0;
-                                transform: translate(30%, -30%);
+                                left: 0;
+                                transform: translate(-50%, -50%);
                                 background: var(--white);
-                                padding: 0.4em;
+                                height: 1.5em;
+                                width: 1.5em;
                                 border-radius: 10em;
-                                width: fit-content;
                                 font-size: 1.2em;
                                 box-shadow: 0 0 0 0.1em var(--black);
                                 justify-content: center;
                                 align-items: center;
                                 transition: 0.1s linear transform, 0.1s background-color linear;
+
+                                &:nth-child(2) {
+                                    top: calc(50% - 2.15em);
+                                }
+                                &:nth-child(3) {
+                                    top: 50%;
+                                }
+                                &:nth-child(4) {
+                                    top: calc(50% + 2.15em);
+                                }
     
                                 i {
                                     color: var(--black);
@@ -521,7 +540,7 @@ body {
     
                                 &:hover {
                                     background-color: var(--black);
-                                    transform: translate(30%, -30%) scale(1.05);
+                                    transform: translate(-50%, -50%) scale(1.1);
                                     cursor: pointer;
     
                                     i {

@@ -3,9 +3,15 @@ import { createRoot } from "react-dom/client";
 import Row from "./Row";
 import MapComment from "./MapComment";
 import Header from "./Header";
-import NodeEditor from "./NodeEditor";
 import Comment from "./Comment";
 import SessionOption from "./SessionOption";
+import NodeSideMenu from "./NodeSideMenu";
+
+/**
+ * Setting up the socket.io server.
+ */
+import io from "socket.io-client";
+export const socket = io("localhost:3000");
 
 /**
  * Declaring globally what properties this page should inherited from the server under "MapPageProps".
@@ -18,7 +24,8 @@ declare global {
             userId: number
             firstName: string,
             lastName: string,
-            image: string
+            image: string,
+            isAdmin: boolean
         } | undefined
     }
 }
@@ -55,6 +62,43 @@ const Map: FunctionComponent<Props> = (props) => {
     const [selectedSession, setSelectedSession] = useState(pageProps.sessions.reduce((selectedSession, session, i) => {
         return (new Date()) > new Date(session.start) && (new Date()) < new Date(session.expires) ? i : selectedSession
     }, -1));
+
+    useEffect(() => {
+        socket.on('recieveComment', (newComment: CommentDoc) => {
+            console.log(newComment)
+
+            const sessionIndex = sessions.reduce((previousIndex, session, i) => {
+                return newComment.commentsessionId === session.id ? i : previousIndex;
+            }, -1);
+            if(sessionIndex === -1) return;
+            
+            const newSessions = [...sessions];
+            const replyId = newComment.replyId ? newComment.replyId : 0;
+
+            if(!newSessions[sessionIndex].comments[newComment.id]) {
+                newSessions[sessionIndex].comments = {...newSessions[sessionIndex].comments,
+                    ['' + newComment.id]: []
+                }
+            }
+
+            console.log(newSessions[sessionIndex].comments[replyId].length, newSessions[sessionIndex].comments[replyId])
+            
+            for(let i = 0; i < newSessions[sessionIndex].comments[replyId].length; i++) {
+                if(!newSessions[sessionIndex].comments[replyId][i]) {
+                    continue;
+                }
+                if(newSessions[sessionIndex].comments[replyId][i].id === -1) {
+                    newSessions[sessionIndex].comments[replyId].splice(i, 1);
+                }
+                if(newSessions[sessionIndex].comments[replyId][i].id === newComment.id) {
+                    return;
+                }
+            }
+
+            newSessions[sessionIndex].comments[replyId].push(newComment);
+            setSessions(newSessions);
+        })
+    }, [socket]);
 
     /**
      * State variable pointing to the data that's being edited in the side menu.
@@ -156,6 +200,12 @@ const Map: FunctionComponent<Props> = (props) => {
      * Event handler to create a new temporary session in the side menu
      */
     function handleNewSession() {
+        // Only admins can edit, add, or delete sessions
+        if(!pageProps!.userData || (pageProps!.userData && !pageProps!.userData.isAdmin)) {
+            setNotification('You must be an administrator to add comment sessions.');
+            return;
+        }
+
         const newSessions = [...sessions];
 
         /**
@@ -234,7 +284,7 @@ const Map: FunctionComponent<Props> = (props) => {
                             <p className="StartText">Start by adding your first row...</p>
                         }
                     </div>
-                    {selectedSession > -1 ? sessions[selectedSession].comments['0'].map((comment, i) => {
+                    {selectedSession > -1 && sessions[selectedSession].comments['0'] ? sessions[selectedSession].comments['0'].map((comment, i) => {
                         return <Fragment key={i}>
                             <MapComment
                                 commentData={comment}
@@ -249,7 +299,7 @@ const Map: FunctionComponent<Props> = (props) => {
             <div className={`SideMenuScroll ${sideMenuData ? 'Opened' : ' '}`}>
                 {sideMenuData ? <>
                     {sideMenuData.type === 'node' ? 
-                        <NodeEditor
+                        <NodeSideMenu
                             node={map.rows[sideMenuData.dataPointer[0]] ? map.rows[sideMenuData.dataPointer[0]].nodes[sideMenuData.dataPointer[1]] : undefined}
                             map={map}
                             setMap={setMap}
@@ -259,7 +309,8 @@ const Map: FunctionComponent<Props> = (props) => {
                             selectedSession={selectedSession}
                             setSessions={setSessions}
                             userData={pageProps.userData}
-                        ></NodeEditor>
+                            setNotification={setNotification}
+                        ></NodeSideMenu>
                     : <></>}
                     {sideMenuData.type === 'comment' ?
                         <div className="comment">
@@ -289,6 +340,8 @@ const Map: FunctionComponent<Props> = (props) => {
                                         setSessions={setSessions}
                                         setSelectedSession={setSelectedSession}
                                         isSelected={selectedSession === i}
+                                        setNotification={setNotification}
+                                        userData={pageProps.userData}
                                     ></SessionOption>
                                 </Fragment>
                             })}

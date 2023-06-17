@@ -9,6 +9,7 @@ dotenv.config();
 
 /**
  * Declaration merging the types for our user sessions to add user information.
+ * Also doing so for our socket.io server.
  */
 declare global {
     namespace Express {
@@ -78,7 +79,6 @@ passport.use(new Strategy({
  */
 app.use(passport.initialize());
 app.use(passport.session());
-
 /**
  * Serializing function for the user session.
  */

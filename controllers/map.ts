@@ -4,6 +4,7 @@ import { isAuth } from '../utils/authentication';
 import Maps from '../models/maps';
 import CommentSessions from '../models/commentSessions';
 import Comments from '../models/comments';
+import { io } from '../utils/socketIO';
 
 /**
  * Setting up a router for our index route.
@@ -30,7 +31,8 @@ map.route('/new')
                     userId: req.user.id,
                     firstName: req.user.firstName,
                     lastName: req.user.lastName,
-                    image: req.user.image
+                    image: req.user.image,
+                    isAdmin: req.user.admin
                 } : undefined
             }
         }
@@ -116,7 +118,8 @@ map.route('/:id')
                     userId: req.user.id,
                     firstName: req.user.firstName,
                     lastName: req.user.lastName,
-                    image: req.user.image
+                    image: req.user.image,
+                    isAdmin: req.user.admin
                 } : undefined
             }
         }
@@ -126,5 +129,28 @@ map.route('/:id')
          */
         res.status(200).send(serveHTML('Map', serverProps));
     });
+
+/**
+ * Creating a socket.io connection to post and recieve comments.
+ */
+io.on("connect", (socket) => {
+    socket.on("postComment", async (requestData) => {
+        const createResult = await Comments.create(requestData as CommentType);
+
+        if(!createResult) {
+            socket.to(socket.id).emit('Comment failed to be inserted into the database');
+            return
+        }
+
+        const newComment = await Comments.getById(createResult);
+
+        if(!newComment) {
+            socket.to(socket.id).emit('Comment failed to be retrieved from the database');
+            return;
+        }
+
+        io.sockets.emit("recieveComment", newComment);
+    });
+});
 
 export default map;

@@ -1,4 +1,5 @@
 import React, { Fragment, FunctionComponent, useEffect, useRef, useState } from "react";
+import { socket } from './Map';
 
 type Props = {
     comment: CommentDoc | undefined,
@@ -16,7 +17,8 @@ type Props = {
         userId: number,
         firstName: string,
         lastName: string,
-        image: string
+        image: string,
+        isAdmin: boolean
     }
 }
 
@@ -27,7 +29,7 @@ const Comment: FunctionComponent<Props> = (props) => {
      * State variables to keep track of a comment's content and whether its replies are visible.
      */
     const [showReplies, setShowReplies] = useState(true);
-    const [commentEditText, setCommentEditText] = useState('');
+    const [commentMessage, setCommentMessage] = useState('');
 
     /**
      * Event handler to toggle whether the replies are visible or not.
@@ -39,8 +41,8 @@ const Comment: FunctionComponent<Props> = (props) => {
     /**
      * Event handler to change the text of a comment.
      */
-    function handleCommentTextChange(e:React.ChangeEvent<HTMLTextAreaElement>) {
-        setCommentEditText(e.target.value);
+    function changeMessage(e:React.ChangeEvent<HTMLTextAreaElement>) {
+        setCommentMessage(e.target.value);
         /**
          * Making text area wrap content.
          */
@@ -49,9 +51,9 @@ const Comment: FunctionComponent<Props> = (props) => {
     }
 
     /**
-     * Event handler to create a reply comment
+     * Event handler to create an empty reply comment.
      */
-    function handleReply() {
+    function reply() {
         /**
          * A user must be logged in to reply
          */
@@ -102,8 +104,18 @@ const Comment: FunctionComponent<Props> = (props) => {
         props.setSessions(newSessions);
     }
 
-    function handlePost() {
-        
+    /**
+     * Event handler to send the comment to the server to be stored in the database.
+     */
+    function post() {
+        socket.emit("postComment", {
+            content: commentMessage,
+            x: props.comment!.x,
+            y: props.comment!.y,
+            userId: props.comment!.userId,
+            commentsessionId: props.comment!.commentsessionId,
+            replyId: props.comment!.replyId
+        });
     }
 
     /**
@@ -124,14 +136,14 @@ const Comment: FunctionComponent<Props> = (props) => {
             <div className="Top">
                 <h3>{props.comment.firstName} {props.comment.lastName}</h3>
                 {props.comment.id === -1 ? 
-                    <button className="Reply" onClick={handlePost}>post</button>
+                    <button className="Reply" onClick={post}>post</button>
                 :
-                    <button className="Reply" onClick={handleReply}>reply</button>
+                    <button className="Reply" onClick={reply}>reply</button>
                 }
                 <p>{new Date(props.comment.timestamp).toLocaleString().split(', ')[0]}</p>
             </div>
             {props.comment.id === -1 ? 
-                <textarea className="EditContent" placeholder="Enter your comment..." value={commentEditText} onChange={handleCommentTextChange}></textarea>
+                <textarea className="EditContent" placeholder="Enter your comment..." value={commentMessage} onChange={changeMessage}></textarea>
             :
                 <p className="Content">{props.comment.content}</p>
             }

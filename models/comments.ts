@@ -43,7 +43,7 @@ const Comments = {
         const result = await knex('comments')
             .select('comments.*', 'users.firstName', 'users.lastName', 'users.image')
             .leftJoin('users', 'comments.userId', 'users.id')
-            .where('id', id)
+            .where('comments.id', id)
             .first();
 
         if(result) return result;
@@ -71,27 +71,23 @@ const Comments = {
         return result;
     },
 
-    create: async (data: CommentType): Promise<CommentDoc | false> => {
+    create: async (data: CommentType): Promise<number | false> => {
         if(!isDBready) return false;
 
         const result = await knex('comments')
-            .returning('*')
             .insert(data);
 
-        if(result[0]) return result[0];
-        else return false;
+        return result[0] ? result[0] : false;
     },
 
-    update: async (id:number, data: Partial<CommentType>): Promise<CommentDoc | false> => {
+    update: async (id:number, data: Partial<CommentType>): Promise<number | false> => {
         if(!isDBready) return false;
 
         const result = await knex('comments')
             .where('id', id)
-            .returning('*')
             .update(data);
 
-        if(result[0]) return result[0];
-        else return false;
+        return result[0] ? result[0] : false;
     },
 
     delete: async (id:number): Promise<boolean> => {
@@ -101,8 +97,7 @@ const Comments = {
             .where('id', id)
             .del();
 
-        if(result === 0) return false;
-        else return true;
+        return result === 0 ? false : true;
     }
 }
 

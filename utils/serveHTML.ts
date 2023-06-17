@@ -48,16 +48,16 @@ function serveHTML(fileName:string, inputServerProps:ServerPropsType = {}, seoOp
             <meta property="og:image" content="${seoOptions.image}">
             <link rel="canonical" href="${seoOptions.url}">
             <link rel="icon" href="#" />
-            <link rel="stylesheet" type="text/css" href="/css/${fileName}.css">
-            <link rel="stylesheet" type="text/css" href="/css/globals.css">
-            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-            <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
-            <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet"></link>
+            <link rel="stylesheet" type="text/css" href="/public/css/${fileName}.css">
+            <link rel="stylesheet" type="text/css" href="/public/css/globals.css">
+            <link rel="stylesheet" href="/public/css/fontawesome.css" />
+            <script src="/public/js/quill.js"></script>
+            <link href="/public/css/quill.css" rel="stylesheet"></link>
             <script>window.ServerProps=${JSON.stringify(inputServerProps)}</script>
         </head>
         <body>
             <div id="root"></div>
-            <script src="/js/${fileName}.js"></script>
+            <script src="/public/js/${fileName}.js"></script>
             <noscript>JavaScript must be enabled for this app to run.</noscript>
         </body>
         </html>

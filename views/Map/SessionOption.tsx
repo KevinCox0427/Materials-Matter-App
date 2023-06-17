@@ -5,10 +5,21 @@ type Props = {
     index: number
     sessions: FullSessionDoc[],
     setSessions: React.Dispatch<React.SetStateAction<FullSessionDoc[]>>,
-    setSelectedSession: React.Dispatch<React.SetStateAction<number>>
+    setSelectedSession: React.Dispatch<React.SetStateAction<number>>,
+    setNotification: React.Dispatch<React.SetStateAction<string>>,
+    userData?: {
+        userId: number
+        firstName: string,
+        lastName: string,
+        image: string,
+        isAdmin: boolean
+    }
 }
 
 const SessionOption: FunctionComponent<Props> = (props) => {
+    /**
+     * State variable keeping track of whether the user is editing, and to keep track of the data on the session.
+     */
     const [isEditing, setIsEditing] = useState(props.sessions[props.index].id === -1);
     const [session, setSession] = useState(props.sessions[props.index]);
 
@@ -20,7 +31,16 @@ const SessionOption: FunctionComponent<Props> = (props) => {
         setSession(props.sessions[props.index]);
     }, [props.sessions]);
 
+    /**
+     * Event handler to toggle between editing and viewing.
+     */
     function toggleIsEditing() {
+        // Only admins can edit, add, or delete sessions
+        if(!props.userData || (props.userData && !props.userData.isAdmin)) {
+            props.setNotification('You must be an administrator to change comment sessions.');
+            return;
+        }
+
         // This means it's being cancelled.
         if(isEditing) {
             /**
@@ -41,30 +61,59 @@ const SessionOption: FunctionComponent<Props> = (props) => {
         setIsEditing(!isEditing);
     }
 
-    function toggleSessionSelection() {
+    /**
+     * Event handler to select this session on the map.
+     */
+    function selectSession() {
         props.setSelectedSession(props.isSelected ? -1 : props.index);
     }
 
-    function handleChangeName(e:React.ChangeEvent<HTMLInputElement>) {
+    /**
+     * Event handler to change the session's name from the input element.
+     */
+    function changeName(e:React.ChangeEvent<HTMLInputElement>) {
         setSession({...session,
             name: e.target.value
         })
     }
 
-    function handleDeleteSession() {
+    /**
+     * Event handler to remove this session from the map.
+     */
+    function deleteSession() {
+        // Only admins can edit, add, or delete sessions
+        if(!props.userData || (props.userData && !props.userData.isAdmin)) {
+            props.setNotification('You must be an administrator to delete comment sessions.');
+            return;
+        }
+
         let newSessions = [...props.sessions];
         newSessions.splice(props.index, 1);
         props.setSessions(newSessions);
     }
 
-    function handleSaveSession() {
+    /**
+     * Event handler to save the edits done to this session.
+     */
+    function saveSession() {
+        // Only admins can edit, add, or delete sessions
+        if(!props.userData || (props.userData && !props.userData.isAdmin)) {
+            props.setNotification('You must be an administrator to change comment sessions.');
+            return;
+        }
+
         let newSessions = [...props.sessions];
         newSessions[props.index] = {...session};
         props.setSessions(newSessions);
         setIsEditing(false);
     }
 
-    function handleDateChange(e:React.ChangeEvent<HTMLInputElement>, key:'start' | 'expires', type:'date' | 'time') {
+    /**
+     * Event handler to change the start and expiration times based on the time and date input elements.
+     * @param key Whether the start or expiration time is being changed
+     * @param type Whether the date or time of day is being changed.
+     */
+    function changeTimes(e:React.ChangeEvent<HTMLInputElement>, key:'start' | 'expires', type:'date' | 'time') {
         const newDate = type === 'date' ? `${e.target.value}T${session[key].split('T')[1]}` : `${session[key].split('T')[0]}T${e.target.value}Z`;
         setSession({...session,
             [key]: newDate
@@ -77,10 +126,10 @@ const SessionOption: FunctionComponent<Props> = (props) => {
         <div className="Row">
             <button className={props.isSelected && !isEditing ? 'Activated' : ' '} onClick={() => {
                 if(isEditing) {
-                    handleSaveSession();
+                    saveSession();
                 }
                 else {
-                    toggleSessionSelection();
+                    selectSession();
                 }
             }}>
                 {isEditing ? <>
@@ -105,14 +154,14 @@ const SessionOption: FunctionComponent<Props> = (props) => {
                     Edit
                 </>}
             </button>
-            <button onClick={() => {handleDeleteSession()}}>
+            <button onClick={deleteSession}>
                 <i className="fa-solid fa-trash-can"></i>
                 Delete
             </button>
         </div>
         <div className="Row">
             {isEditing ?
-                <input className="TitleInput" value={session.name} onChange={handleChangeName}></input>
+                <input className="TitleInput" value={session.name} onChange={changeName}></input>
             :
                 <h3>{props.sessions[props.index].name}</h3>
             }
@@ -122,8 +171,8 @@ const SessionOption: FunctionComponent<Props> = (props) => {
                 <p>Starts:</p>
                 {isEditing ?
                     <>
-                        <input value={session.start.split('T')[1].replace('Z', '')} type="time" onChange={e => handleDateChange(e, 'start', 'time')}></input>
-                        <input value={session.start.split('T')[0]} type="date" onChange={e => handleDateChange(e, 'start', 'date')}></input>
+                        <input value={session.start.split('T')[1].replace('Z', '')} type="time" onChange={e => changeTimes(e, 'start', 'time')}></input>
+                        <input value={session.start.split('T')[0]} type="date" onChange={e => changeTimes(e, 'start', 'date')}></input>
                     </>
                 :
                     <p>
@@ -137,8 +186,8 @@ const SessionOption: FunctionComponent<Props> = (props) => {
                 <p>Ends:</p>
                 {isEditing ? 
                     <>
-                        <input value={session.expires.split('T')[1].replace('Z', '')} type="time" onChange={e => handleDateChange(e, 'expires', 'time')}></input>
-                        <input value={session.expires.split('T')[0]} type="date" onChange={e => handleDateChange(e, 'expires', 'date')}></input>
+                        <input value={session.expires.split('T')[1].replace('Z', '')} type="time" onChange={e => changeTimes(e, 'expires', 'time')}></input>
+                        <input value={session.expires.split('T')[0]} type="date" onChange={e => changeTimes(e, 'expires', 'date')}></input>
                     </>
                 :
                     <p>
