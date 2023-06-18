@@ -15,6 +15,19 @@ declare global {
     interface FullMapDoc extends MapDoc {
         rows: FullRowDoc[]
     }
+
+    interface MapNodeList {
+        id: number,
+        name: string,
+        rowId: number | null,
+        rowName: string | null,
+        rowIndex: number | null,
+        nodeId: number | null,
+        nodeIndex: number | null,
+        nodeName: string | null,
+        nodeHtmlContent: string | null,
+        nodeGallery: string | null
+    }
 }
 
 /**
@@ -36,7 +49,7 @@ const Maps = {
      * @param id the id of the map.
      * @returns If successful, returns the map found. Otherwise returns false.
      */
-    getById: async (id: number): Promise<FullMapDoc | false> => {
+    getById: async (id: number): Promise<MapNodeList[] | false> => {
         if(!isDBready) return false;
 
         try {
@@ -59,46 +72,7 @@ const Maps = {
                 .leftJoin('nodes', 'nodes.rowId', 'rows.id')
                 .orderBy(['rowIndex', 'nodeIndex'])
 
-            if(!getResult || getResult.length < 1) return false;
-
-            /**
-             * Now we'll structure all these SQL rows into a JSON object.
-             */
-            let map:FullMapDoc = {
-                id: getResult[0].id,
-                name: getResult[0].name,
-                rows: []
-            }
-
-            /**
-             * Looping through each node and adding it to the correct row.
-             */
-            getResult.forEach((node:any) => {
-                /**
-                 * If the row doesn't exist, then we have to add it.
-                 */
-                if(!map.rows[node.rowIndex]) map.rows.push({
-                    id: node.rowId,
-                    mapId: node.id,
-                    index: node.rowIndex,
-                    name: node.rowName,
-                    nodes: []
-                });
-
-                /**
-                 * Pushing the node into the row if it exists.
-                 */
-                if(node.nodeId) map.rows[node.rowIndex].nodes.push({
-                    id: node.nodeId,
-                    rowId: node.rowId,
-                    index: node.nodeIndex,
-                    name: node.nodeName,
-                    htmlContent: node.nodeHtmlContent,
-                    gallery: JSON.parse(node.nodeGallery)
-                })
-            });
-
-            return map;
+            return getResult && getResult.length > 0 ? getResult : false;
         }
         catch(e) {
             console.log(e);
@@ -152,7 +126,7 @@ const Maps = {
      * @param data The data to create the map with.
      * @returns A boolean representing the success of the operation.
      */
-    create: async (data: MapType): Promise<number | boolean> => {
+    create: async (data: MapType): Promise<number | false> => {
         if(!isDBready) return false;
 
         try {

@@ -25,7 +25,7 @@ export const commentSessionsTable = (table:any) => {
     table.timestamp('start').defaultTo(knex.fn.now(0));
     table.timestamp('expires');
     table.integer('mapId').unsigned().nullable();
-    table.foreign('mapId').references('id').inTable('map').onDelete('CASCADE').onUpdate('CASCADE');
+    table.foreign('mapId').references('id').inTable('maps').onDelete('CASCADE').onUpdate('CASCADE');
 }
 
 const CommentSessions = {
@@ -79,8 +79,7 @@ const CommentSessions = {
             .where('id', id)
             .del();
 
-        if(result === 0) return false;
-        else return true;
+        return result !== 0;
     }
 }
 

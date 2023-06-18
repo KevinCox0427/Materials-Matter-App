@@ -37,7 +37,7 @@ export const imagesTable = (table:any) => {
     table.increments("id").primary();
     table.string("extension");
     table.integer('nodeId').unsigned().nullable();
-    table.foreign('nodeId').references('id').inTable('node').onDelete('SET NULL').onUpdate('SET NULL');
+    table.foreign('nodeId').references('id').inTable('nodes').onDelete('SET NULL').onUpdate('SET NULL');
 }
 
 /**

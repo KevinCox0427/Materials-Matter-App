@@ -63,43 +63,6 @@ const Map: FunctionComponent<Props> = (props) => {
         return (new Date()) > new Date(session.start) && (new Date()) < new Date(session.expires) ? i : selectedSession
     }, -1));
 
-    useEffect(() => {
-        socket.on('recieveComment', (newComment: CommentDoc) => {
-            console.log(newComment)
-
-            const sessionIndex = sessions.reduce((previousIndex, session, i) => {
-                return newComment.commentsessionId === session.id ? i : previousIndex;
-            }, -1);
-            if(sessionIndex === -1) return;
-            
-            const newSessions = [...sessions];
-            const replyId = newComment.replyId ? newComment.replyId : 0;
-
-            if(!newSessions[sessionIndex].comments[newComment.id]) {
-                newSessions[sessionIndex].comments = {...newSessions[sessionIndex].comments,
-                    ['' + newComment.id]: []
-                }
-            }
-
-            console.log(newSessions[sessionIndex].comments[replyId].length, newSessions[sessionIndex].comments[replyId])
-            
-            for(let i = 0; i < newSessions[sessionIndex].comments[replyId].length; i++) {
-                if(!newSessions[sessionIndex].comments[replyId][i]) {
-                    continue;
-                }
-                if(newSessions[sessionIndex].comments[replyId][i].id === -1) {
-                    newSessions[sessionIndex].comments[replyId].splice(i, 1);
-                }
-                if(newSessions[sessionIndex].comments[replyId][i].id === newComment.id) {
-                    return;
-                }
-            }
-
-            newSessions[sessionIndex].comments[replyId].push(newComment);
-            setSessions(newSessions);
-        })
-    }, [socket]);
-
     /**
      * State variable pointing to the data that's being edited in the side menu.
      */
@@ -163,7 +126,7 @@ const Map: FunctionComponent<Props> = (props) => {
     /**
      * State variable representing what button on the header is currently selected.
      */
-    const [headerButton, setHeaderButton] = useState<'AddComment' | 'AddNode' | 'AddRow' | ''>('');
+    const [action, setAction] = useState<'AddComment' | 'AddNode' | 'MoveNode' | 'AddRow' | ''>('');
 
     /**
      * Setting state for a notification pop-up and a reference to close it.
@@ -236,22 +199,61 @@ const Map: FunctionComponent<Props> = (props) => {
         setSessions(newSessions);
     }
 
+    /**
+     * Callback function for when the client recieves a new comment from the server.
+     */
+    useEffect(() => {
+        socket.on('recieveComment', addServerComment);
+    }, [socket]);
+
+    /**
+     * Helper function to add a new comment to the correct session from the server.
+     * @param newComment The comment or error message from the server.
+     */
+    function addServerComment(newComment: CommentDoc | string)  {
+        // If it's a string, that means it's an error message.
+        if(typeof newComment === 'string') {
+            setNotification(newComment);
+            return;
+        }
+
+        // Finding the session for the new comment.
+        const sessionIndex = sessions.reduce((previousIndex, session, i) => {
+            return newComment.commentsessionId === session.id ? i : previousIndex;
+        }, -1);
+        if(sessionIndex === -1) return;
+        
+        // Updating the session to include the new comment
+        const newSessions = [...sessions];
+        const replyId = newComment.replyId ? newComment.replyId : 0;
+
+        // If the array to reply to this comment doesn't exist, add it.
+        if(!newSessions[sessionIndex].comments[newComment.id]) {
+            newSessions[sessionIndex].comments = {...newSessions[sessionIndex].comments,
+                ['' + newComment.id]: []
+            }
+        }
+
+        // Checking to see if we've already added it since useEffect fires twice.
+        if(newSessions[sessionIndex].comments[replyId][newSessions[sessionIndex].comments[replyId].length - 1] && newSessions[sessionIndex].comments[replyId][newSessions[sessionIndex].comments[replyId].length - 1].id === newComment.id) {
+            return;
+        }
+
+        // Setting state for new comment.
+        newSessions[sessionIndex].comments[replyId].push(newComment);
+        setSessions(newSessions);
+    }
+
     return <main id="Map">
-        <div className="Notification" style={notification ? {
-            opacity: 1,
-            pointerEvents: 'all'
-        } : {
-            opacity: 0,
-            pointerEvents: 'none'
-        }}>
+        <div className={`Notification ${notification ? 'Activated' : ' '}`}>
             <p>{notification}</p>
             <button onClick={handleCancelNotificaiton}>
                 <i className="fa-solid fa-x"></i>
             </button>
         </div>
         <Header
-            headerButton={headerButton}
-            setHeaderButton={setHeaderButton}
+            action={action}
+            setAction={setAction}
             map={map}
             setMap={setMap}
             sessions={sessions}
@@ -266,15 +268,18 @@ const Map: FunctionComponent<Props> = (props) => {
         ></Header>
         <div className="MenuSplit">
             <div className="BodyScroll" onMouseDown={handleCloseSideMenu} onTouchStart={handleCloseSideMenu} style={{
-                cursor: headerButton !== '' ? 'copy' : 'auto'
+                cursor: action !== '' ? action === 'MoveNode' ? 'grabbing' : 'copy' : 'auto'
             }}>
                 <div className="Body">
                     <div className="Rows">
                         {map.rows.length > 0 ?
                             map.rows.map((_, i) => {
                                 return <Fragment key={i}>
-                                    <Row map={map}
+                                    <Row 
+                                        map={map}
                                         setMap={setMap}
+                                        action={action}
+                                        setAction={setAction}
                                         rowIndex={i}
                                         setSideMenuData={setSideMenuData}
                                     ></Row>

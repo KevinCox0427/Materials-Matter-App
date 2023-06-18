@@ -78,10 +78,10 @@ const NodeEditor: FunctionComponent<Props> = (props) => {
             })).json();
 
             /**
-             * If the upload failures, just log to console.
+             * If the upload failures, just notify user.
              */
             if(!response.success) {
-                console.log(response.error);
+                props.setNotification(response.message);
                 return;
             }
 

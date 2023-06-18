@@ -26,11 +26,11 @@ export const commentsTable = (table:any) => {
     table.integer('x').unsigned().nullable();
     table.integer('y').unsigned().nullable();
     table.integer('userId').unsigned().nullable();
-    table.foreign('userId').references('id').inTable('user').onDelete('CASCADE').onUpdate('CASCADE');
+    table.foreign('userId').references('id').inTable('users').onDelete('CASCADE').onUpdate('CASCADE');
     table.integer('commentsessionId').unsigned().nullable();
-    table.foreign('commentsessionId').references('id').inTable('commentsession').onDelete('CASCADE').onUpdate('CASCADE');
+    table.foreign('commentsessionId').references('id').inTable('commentsessions').onDelete('CASCADE').onUpdate('CASCADE');
     table.integer('replyId').unsigned().nullable();
-    table.foreign('replyId').references('id').inTable('comment').onDelete('CASCADE').onUpdate('CASCADE');
+    table.foreign('replyId').references('id').inTable('comments').onDelete('CASCADE').onUpdate('CASCADE');
 }
 
 const Comments = {
@@ -80,14 +80,14 @@ const Comments = {
         return result[0] ? result[0] : false;
     },
 
-    update: async (id:number, data: Partial<CommentType>): Promise<number | false> => {
+    update: async (id:number, data: Partial<CommentType>): Promise<boolean> => {
         if(!isDBready) return false;
 
         const result = await knex('comments')
             .where('id', id)
             .update(data);
 
-        return result[0] ? result[0] : false;
+        return result === 1;
     },
 
     delete: async (id:number): Promise<boolean> => {
@@ -97,7 +97,7 @@ const Comments = {
             .where('id', id)
             .del();
 
-        return result === 0 ? false : true;
+        return result !== 0;
     }
 }
 

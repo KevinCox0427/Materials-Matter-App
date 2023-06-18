@@ -23,7 +23,14 @@ body {
         background-color: var(--white);
         z-index: 10;
         box-shadow: 0 0 0 0.1em var(--black), 0 0 0.5em 0 rgba(0,0,0, 0.2);
+        opacity: 0;
+        pointer-events: none;
         transition: opacity 0.25s linear;
+
+        &.Activated {
+            opacity: 1;
+            pointer-events: all;
+        }
 
         p {
             font-size: 1.5em;
@@ -213,7 +220,7 @@ body {
                         flex-wrap: wrap;
                         width: 100%;
                         padding: 0.75em 0;
-                        gap: 0.5em;
+                        gap: 0 0.5em;
     
                         &:first-child {
                             margin-top: auto;
@@ -281,7 +288,7 @@ body {
                             .Nodes {
                                 background-color: var(--white);
                                 height: fit-content;
-                                min-height: 8em;
+                                min-height: 10em;
                                 flex-grow: 1;
                                 flex-direction: row;
                                 gap: 2em;
@@ -291,8 +298,8 @@ body {
                                 overflow-y: hidden;
         
                                 .Node {
-                                    height: 8em;
-                                    width: 8em;
+                                    height: 10em;
+                                    width: 10em;
                                     flex-shrink: 0;
                                     border-radius: 0.75em;
                                     box-shadow: 0 0 0.2em 0 rgba(0,0,0, 0.2) inset, 0 0 0 0em var(--black);
@@ -301,7 +308,8 @@ body {
                                     background-size: cover;
                                     margin: auto;
                                     overflow: hidden;
-                                    transition: box-shadow 0.1s linear, transform 0.1s linear, border-radius 0.15s linear;
+                                    user-select: none;
+                                    transition: box-shadow 0.1s linear, transform 0.1s linear, opacity 0.2s ease-out, border-radius 0.15s linear;
         
                                     &:hover {
                                         box-shadow: 0 0 0.5em 0 rgba(0,0,0, 0) inset, 0 0 0 0.1em var(--black);
@@ -311,6 +319,7 @@ body {
                                     }
 
                                     h3 {
+                                        pointer-events: none;
                                         font-weight: 500;
                                         text-shadow: 0 0 0.25em rgba(255,255,255, 1);
                                         margin: auto;

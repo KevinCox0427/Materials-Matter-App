@@ -21,7 +21,7 @@ export const rowsTable = (table:any) => {
     table.string('name');
     table.integer('index').unsigned();
     table.integer('mapId').unsigned().nullable();
-    table.foreign('mapId').references('id').inTable('map').onDelete('CASCADE').onUpdate('CASCADE');
+    table.foreign('mapId').references('id').inTable('maps').onDelete('CASCADE').onUpdate('CASCADE');
 }
 
 const Rows = {
@@ -45,27 +45,29 @@ const Rows = {
         return result;
     },
 
-    create: async (data: RowType): Promise<RowDoc | false> => {
+    create: async (data: RowType): Promise<number | false> => {
         if(!isDBready) return false;
 
         const result = await knex('rows')
-            .returning('*')
             .insert(data);
 
-        if(result[0]) return result[0];
-        else return false;
+        return result[0] ? result[0] : false;
     },
 
-    update: async (id:number, data: Partial<RowType>): Promise<RowDoc | false> => {
+    update: async (id:number, data: Partial<RowType>): Promise<boolean> => {
         if(!isDBready) return false;
 
-        const result = await knex('rows')
-            .where('id', id)
-            .returning('*')
-            .update(data);
-
-        if(result[0]) return result[0];
-        else return false;
+        try {
+            const result = await knex('rows')
+                .where('rows.id', id)
+                .update(data);
+            
+            return result === 1;
+        }
+        catch (e) {
+            console.log(e);
+            return false;
+        }
     },
 
     delete: async (id:number): Promise<boolean> => {
@@ -75,8 +77,7 @@ const Rows = {
             .where('id', id)
             .del();
 
-        if(result === 0) return false;
-        else return true;
+        return result !== 0;
     }
 }
 

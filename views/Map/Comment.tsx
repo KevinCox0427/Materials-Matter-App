@@ -42,6 +42,10 @@ const Comment: FunctionComponent<Props> = (props) => {
      * Event handler to change the text of a comment.
      */
     function changeMessage(e:React.ChangeEvent<HTMLTextAreaElement>) {
+        if(e.target.value.charAt(e.target.value.length-1) === '\n') {
+            post();
+            return;
+        }
         setCommentMessage(e.target.value);
         /**
          * Making text area wrap content.
@@ -116,6 +120,13 @@ const Comment: FunctionComponent<Props> = (props) => {
             commentsessionId: props.comment!.commentsessionId,
             replyId: props.comment!.replyId
         });
+
+        // Deleting the temp comment that was uploaded.
+        if(props.tempComment) {
+            const newSessions = [...props.sessions];
+            newSessions[props.selectedSession].comments[props.tempComment.replyId].splice(props.tempComment.commentIndex, 1);
+            props.setSessions(newSessions);
+        }
     }
 
     /**
@@ -123,6 +134,9 @@ const Comment: FunctionComponent<Props> = (props) => {
      */
     const commentEl = useRef<HTMLDivElement>(null);
 
+    /**
+     * Callback function to focus the text area when editing.
+     */
     useEffect(() => {
         if(!commentEl.current) return;
         const textarea = commentEl.current.getElementsByTagName('textarea')[0];

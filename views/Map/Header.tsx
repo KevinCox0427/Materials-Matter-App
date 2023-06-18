@@ -1,8 +1,8 @@
 import React, { FunctionComponent, useEffect } from "react";
 
 type Props = {
-    headerButton: 'AddComment' | 'AddNode' | 'AddRow' | '',
-    setHeaderButton: React.Dispatch<React.SetStateAction<Props["headerButton"]>>,
+    action: 'AddComment' | 'AddNode' | 'MoveNode' | 'AddRow' | '',
+    setAction: React.Dispatch<React.SetStateAction<Props["action"]>>,
     map: FullMapDoc,
     setMap: React.Dispatch<React.SetStateAction<FullMapDoc>>,
     sessions: FullSessionDoc[],
@@ -29,7 +29,6 @@ type Props = {
 }
 
 const Header: FunctionComponent<Props> = (props) => {
-
     /**
      * Event handler to change the name of the map
      * @param e The change event from the HTML input.
@@ -47,23 +46,23 @@ const Header: FunctionComponent<Props> = (props) => {
      * @param name The header button to start.
      */
     function handleHeaderButtonStart(name:'AddComment' | 'AddNode' | 'AddRow' | '') {
-        props.setHeaderButton(name);
+        props.setAction(name);
     }
 
     /**
      * Adding event listeners the old fashion way becuase I don't want to move all these functions up the component tree.
      */
     useEffect(() => {
-        if(!props.headerButton) return;
+        if(!props.action) return;
         (document.getElementById('Map') as HTMLDivElement).addEventListener('touchend', handleHeaderButtonEnd);
         (document.getElementById('Map') as HTMLDivElement).addEventListener('mouseup', handleHeaderButtonEnd);
-    }, [props.headerButton]);
+    }, [props.action]);
 
     /**
      * Event handler to add whatever content is specified by the header button.
      */
     function handleHeaderButtonEnd(e:MouseEvent | TouchEvent) {
-        if(!props.headerButton) return;
+        if(!props.action) return;
 
         /**
          * Getting the target element that the cursor was on when mouse up.
@@ -74,7 +73,7 @@ const Header: FunctionComponent<Props> = (props) => {
             /**
              * If the header button is being clicked, ignore.
              */
-            if(target.classList.contains(props.headerButton)) return;
+            if(target.classList.contains(props.action)) return;
             target = target.parentElement as HTMLElement;
         }
 
@@ -87,7 +86,7 @@ const Header: FunctionComponent<Props> = (props) => {
         /**
          * Determining what action to do based on the header button selected.
          */
-        switch(props.headerButton) {
+        switch(props.action) {
             /**
              * If we're adding a node, we'll add one to the row ID found on the target element.
              */
@@ -111,7 +110,7 @@ const Header: FunctionComponent<Props> = (props) => {
         /**
          * Resetting header button and event listeners.
          */
-        props.setHeaderButton('');
+        props.setAction('');
         (document.getElementById('Map') as HTMLDivElement).removeEventListener('touchend', handleHeaderButtonEnd);
         (document.getElementById('Map') as HTMLDivElement).removeEventListener('mouseup', handleHeaderButtonEnd);
     }
@@ -151,6 +150,15 @@ const Header: FunctionComponent<Props> = (props) => {
             index: nodeIndex,
             gallery: [],
             htmlContent: ''  
+        });
+
+        /**
+         * Updating the indeces for all nodes
+         */
+        newMap.rows[parseInt(target.id)].nodes = newMap.rows[parseInt(target.id)].nodes.map((node, i) => {
+            return {...node,
+                index: i
+            }
         });
 
         /**
@@ -200,6 +208,15 @@ const Header: FunctionComponent<Props> = (props) => {
             index: newRowIndex,
             name: 'New Row',
             nodes: []
+        });
+
+        /**
+         * Updating the indeces for all rows
+         */
+        newMap.rows = newMap.rows.map((row, i) => {
+            return {...row,
+                index: i
+            }
         });
 
         /**
@@ -301,9 +318,21 @@ const Header: FunctionComponent<Props> = (props) => {
         });
     }
 
-    function handleSaveMap() {
+    /**
+     * Function to submit the current map data to the server to be saved.
+     */
+    async function handleSaveMap() {
         if(props.userData) {
-
+            const result = await (await fetch(`/map/${props.map.id}`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(props.map)
+            })).json();
+            
+            props.setNotification(result.message);
         }
         else {
             props.setNotification('You must have a registered Binghamton University account to save.')
@@ -316,15 +345,15 @@ const Header: FunctionComponent<Props> = (props) => {
         </a>
         <input value={props.map.name} onChange={handleNameChange}></input>
         <div className="Buttons">
-            <button className={`AddComment ${props.headerButton === 'AddComment' ? 'Activated' : ' '}`} onMouseDown={e => {handleHeaderButtonStart('AddComment')}} onTouchStart={e => {handleHeaderButtonStart('AddComment')}}>
+            <button className={`AddComment ${props.action === 'AddComment' ? 'Activated' : ' '}`} onMouseDown={e => {handleHeaderButtonStart('AddComment')}} onTouchStart={e => {handleHeaderButtonStart('AddComment')}}>
                 <i className="fa-solid fa-comment"></i>
                 <p>Add Comment</p>
             </button>
-            <button className={`AddNode ${props.headerButton === 'AddNode' ? 'Activated' : ' '}`} onMouseDown={e => {handleHeaderButtonStart('AddNode')}} onTouchStart={e => {handleHeaderButtonStart('AddNode')}}>
+            <button className={`AddNode ${props.action === 'AddNode' ? 'Activated' : ' '}`} onMouseDown={e => {handleHeaderButtonStart('AddNode')}} onTouchStart={e => {handleHeaderButtonStart('AddNode')}}>
                 <i className="fa-solid fa-plus"></i>
                 <p>Add Node</p>
             </button>
-            <button className={`AddRow ${props.headerButton === 'AddRow' ? 'Activated' : ' '}`} onMouseDown={e => {handleHeaderButtonStart('AddRow')}} onTouchStart={e => {handleHeaderButtonStart('AddRow')}}>
+            <button className={`AddRow ${props.action === 'AddRow' ? 'Activated' : ' '}`} onMouseDown={e => {handleHeaderButtonStart('AddRow')}} onTouchStart={e => {handleHeaderButtonStart('AddRow')}}>
                 <i className="fa-solid fa-plus"></i>
                 <p>Add Row</p>
             </button>

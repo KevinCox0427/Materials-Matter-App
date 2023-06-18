@@ -21,7 +21,7 @@ export const nodesTable = (table:any) => {
     table.text('htmlContent');
     table.text('gallery');
     table.integer('rowId').unsigned().nullable();
-    table.foreign('rowId').references('id').inTable('row').onDelete('CASCADE').onUpdate('CASCADE');
+    table.foreign('rowId').references('id').inTable('rows').onDelete('CASCADE').onUpdate('CASCADE');
 }
 
 const Nodes = {
@@ -55,7 +55,9 @@ const Nodes = {
         if(!isDBready) return false;
 
         const result = await knex('nodes')
-            .insert(data);
+            .insert({...data,
+                gallery: JSON.stringify(data.gallery)
+            });
 
         return result[0] ? true : false;
     },
@@ -63,12 +65,19 @@ const Nodes = {
     update: async (id:number, data: Partial<NodeType>): Promise<boolean> => {
         if(!isDBready) return false;
 
-        const result = await knex('nodes')
-            .where('id', id)
-            .update(data);
+        try{ 
+            const result = await knex('nodes')
+                .where('id', id)
+                .update({...data,
+                    gallery: JSON.stringify(data.gallery)
+                });
 
-        return result[0] ? true : false;
-    },
+            return result === 1;
+        } catch (e) {
+            console.log(e);
+            return false;
+        }
+    }, 
 
     delete: async (id:number): Promise<boolean> => {
         if(!isDBready) return false;
@@ -77,7 +86,7 @@ const Nodes = {
             .where('id', id)
             .del();
 
-        return result === 0;
+        return result !== 0;
     }
 }
 

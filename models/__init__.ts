@@ -7,7 +7,7 @@ import { rowsTable } from "./rows";
 import { usersTable } from "./users";
 
 /**
- * Initalizing the conneciton to the postgres database.
+ * Initalizing the conneciton to the mysql database.
  */
 export const knex = require('knex')({
     client: 'mysql',
@@ -20,6 +20,9 @@ export const knex = require('knex')({
     }
 });
 
+/** 
+ * Reference to db start since its connection is asynchronous
+ */
 export let isDBready = false;
 
 /**
@@ -36,10 +39,9 @@ const tableSchemas = {
 }
 
 /**
- * An async function that's called on boat to see if any tables are missing from the database.
- * If so, it will create all the tables necessary for the application.
- * 
- * @returns A boolean representing whether the operation of creating / checking the tables are a success.
+ * An asynchronous function that's called on boat to see if any tables are missing from the database.
+ * It will create all tables necessary for the application.
+ * @returns A boolean representing whether the success of the operation.
  */
 const initializeTableSchemas = async () => {
     /**

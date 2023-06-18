@@ -3,6 +3,8 @@ import Node from "./Node";
 
 type Props = {
     rowIndex: number,
+    action: 'AddComment' | 'AddNode' | 'MoveNode' | 'AddRow' | '',
+    setAction: React.Dispatch<React.SetStateAction<Props["action"]>>,
     map: FullMapDoc,
     setMap: React.Dispatch<React.SetStateAction<FullMapDoc>>,
     setSideMenuData: React.Dispatch<React.SetStateAction<null | {
@@ -77,7 +79,7 @@ const Row: FunctionComponent<Props> = (props) => {
         props.setMap({...props.map,
             rows: newRows
         });
-}
+    }
 
     /**
      * An event handler to move the row down an index.
@@ -122,10 +124,14 @@ const Row: FunctionComponent<Props> = (props) => {
                 {rowData.nodes.map((node, i) => {
                     return <Fragment key={i}>
                         <Node
-                            nodeData={node}
+                            node={node}
                             nodeIndex={i}
+                            action={props.action}
+                            setAction={props.setAction}
                             rowIndex={props.rowIndex}
                             setSideMenuData={props.setSideMenuData}
+                            map={props.map}
+                            setMap={props.setMap}
                         ></Node>
                     </Fragment>
                 })}
