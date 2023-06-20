@@ -37,29 +37,13 @@ let packageJson = JSON.parse(fs.readFileSync(resolve('./package.json')).toString
  * Adding a start script.
  */
 packageJson.scripts = {
-    "start": "npm i && node server.js"
+    "start": "node server.js"
 }
-
-/**
- * Looping through each dependecy and removing ones associated with webpack, typescript, and sass.
- */
-let newDevDependencies = {};
-
-Object.keys(packageJson.devDependencies).forEach(dependency => {
-    if(dependency.includes('@types') || ['sass', 'ts-loader', 'webpack', 'webpack-cli', 'babel-loader', 'css-loader', '@babel/preset-env', '@babel/core', 'style-loader'].indexOf(dependency) !== -1) return;
-    newDevDependencies = {...newDevDependencies,
-        [dependency]: packageJson.devDependencies[dependency]
-    };
-});
 
 /**
  * Writing the new package.json.
  */
 delete packageJson.devDependencies;
-packageJson = {...packageJson,
-    dependencies: newDevDependencies
-};
-
 fs.writeFileSync(resolve('./dist/package.json'), JSON.stringify(packageJson));
 
 /**
@@ -107,12 +91,6 @@ function cleanDirectory(dirname) {
         }
     });
 }
-
-/**
- * Adding Resume
- */
-fs.mkdirSync('./dist/public/assets');
-fs.writeFileSync('./dist/public/assets/Resume_Kevin_Cox.pdf', fs.readFileSync('./public/assets/Resume_Kevin_Cox.pdf').toString());
 
 /**
  * Renaming the 'dist' folder to prevent conflicts.
