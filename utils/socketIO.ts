@@ -20,7 +20,7 @@ declare module "http" {
 export const server = http.createServer(app);
 export const io = new Server(server, {
     cors: {
-        origin: "localhost:3000",
+        origin: process.env.socketIOUrl || "localhost:3000",
         methods: ["GET", "POST"]
     }
 });

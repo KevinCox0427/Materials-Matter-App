@@ -94,9 +94,9 @@ module.exports = {
     filename: '[name].js',
     path: resolve('./dist/public/js/'),
   },
-  mode: 'development',
-  // optimization: {
-  //   minimize: true,
-  //   minimizer: [new TerserPlugin()],
-  // }
+  mode: 'production',
+  optimization: {
+    minimize: true,
+    minimizer: [new TerserPlugin()],
+  }
 };

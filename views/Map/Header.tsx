@@ -303,8 +303,8 @@ const Header: FunctionComponent<Props> = (props) => {
             timestamp: (new Date()).toLocaleString().split(', ')[0],
             content: '',
             commentsessionId: props.sessions[props.selectedSession].id,
-            x: (x / mapBody.clientWidth) * 100,
-            y: ((y - mapBody.getBoundingClientRect().top) / mapBody.clientHeight) * 100
+            x: Math.round((x / mapBody.clientWidth) * 100),
+            y: Math.round(((y - mapBody.getBoundingClientRect().top) / mapBody.clientHeight) * 100)
         });
 
         props.setSessions(newSessions)
@@ -334,7 +334,14 @@ const Header: FunctionComponent<Props> = (props) => {
                 body: JSON.stringify(props.map)
             })).json();
             
-            props.setNotification(result.message);
+            // If the message is a number, then its an id and we'll redirect to that page.
+            if(typeof result.message === 'number') {
+                window.location.href = `/map/${result.message}`;
+            }
+            // Otherwise just display the result.
+            else {
+                props.setNotification(result.message);
+            }
         }
         else {
             props.setNotification('You must have a registered Binghamton University account to save.')

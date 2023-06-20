@@ -138,11 +138,11 @@ const Comment: FunctionComponent<Props> = (props) => {
     function post() {
         socket.emit("postComment", {
             content: commentMessage,
-            x: props.comment!.x,
-            y: props.comment!.y,
+            x: props.comment!.x ? props.comment!.x : -1,
+            y: props.comment!.y ? props.comment!.y : -1,
             userId: props.comment!.userId,
             commentsessionId: props.comment!.commentsessionId,
-            replyId: props.comment!.replyId
+            replyId: props.comment!.replyId ? props.comment!.replyId : -1
         });
 
         // Deleting the temp comment that was uploaded.

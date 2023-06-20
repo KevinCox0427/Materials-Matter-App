@@ -16,8 +16,8 @@ export const app = express();
  * Parsing all endpoints to our server in JSON format.
  * Also encoding all URIs.
  */
-app.use(express.json());
-app.use(express.urlencoded({extended:true}));
+app.use(express.json({limit: '10mb'}));
+app.use(express.urlencoded({extended:true, limit: '10mb'}));
 app.set('etag', false);
 
 

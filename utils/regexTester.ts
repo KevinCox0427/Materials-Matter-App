@@ -150,22 +150,17 @@ class RegexTester {
             /**
              * Then we run the test.
              */
-            const result = value.match(regexTestObject![keyName] as RegExp);
+            const result = value.match(regexTestObject![keyName] as RegExp) ? Array.from(value.match(regexTestObject![keyName] as RegExp)!) : null;
 
             /**
              * If Regex rest completly fails, just return a basic error message.
              */
             if(!result) return `Error: Please provide a valid ${keyName}`;
-
-            /**
-             * If Regex test fails but all joined matches are equal to the inputted value, this means it's too long.
-             */
-            if(result.length > 1 && result[result.length-1] !== '' && result.join('') === value) return `Error: ${keyName} exceeds maximum character length.`;
             
             /**
              * If Regex test fails, then search for the illegal character and send back an error message stating so.
              */
-            if(result[0] != value) return `Error: illegal character "${value.split(result[0])[1] == "" ? value.split(result[0])[0].charAt(0) : value.split(result[0])[1].charAt(0)}" in ${keyName}.`;
+            if(result[0] !== value) return `Error: illegal character "${value.split(result[0])[1] == "" ? value.split(result[0])[0].charAt(0) : value.split(result[0])[1].charAt(0)}" in ${keyName}.`;
 
             /**
              * If none of the gaurd clauses apply, then return true.

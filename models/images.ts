@@ -8,11 +8,7 @@ dotenv.config();
  * Declaring the type for an image schema globally.
  */
 declare global {
-    interface ImageType {
-        nodeId: number
-    } 
-
-    interface ImageDoc extends ImageType {
+    interface ImageDoc {
         extension: string,
         id: number
     }
@@ -36,8 +32,6 @@ const s3Client = new S3({
 export const imagesTable = (table:any) => {
     table.increments("id").primary();
     table.string("extension");
-    table.integer('nodeId').unsigned().nullable();
-    table.foreign('nodeId').references('id').inTable('nodes').onDelete('SET NULL').onUpdate('SET NULL');
 }
 
 /**
@@ -111,7 +105,7 @@ const Images = {
      * @param base64 The base64 encoded image data.
      * @returns The url of the new image. Otherwise return false.
      */
-    create: async (newImage: ImageType, base64:string): Promise<string | false> => {
+    create: async (base64:string): Promise<string | false> => {
         if(!isDBready) return false;
 
         const extension = base64.split(';base64,')[0].split('data:image/')[1];
@@ -121,7 +115,7 @@ const Images = {
 
         try{ 
             const createResult = await knex('images')
-                .insert({...newImage,
+                .insert({
                     extension: extension
                 });
 

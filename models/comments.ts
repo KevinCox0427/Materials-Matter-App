@@ -122,7 +122,11 @@ const Comments = {
 
         try {
             const result = await knex('comments')
-                .insert(data);
+                .insert({...data,
+                    x: data.x === -1 ? null : data.x,
+                    y: data.y === -1 ? null : data.y,
+                    replyId: data.replyId === -1 ? null : data.replyId
+                });
 
             return result[0] ? result[0] : false;
         }

@@ -21,7 +21,7 @@ const textRegex = /^[\d\w\s!@#$%^&*()_+-=,.\/;'<>?:"]{1,2000}/;
 const numberRegex = /^[0-9]{1,5}/;
 const idRegex = /^-1|[0-9]{1,5}/;
 const dateRegex = /^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}\ [0-9]{1,2}:[0-9]{1,2}:[0-9]{2}/;
-const htmlRegex = /^(<(li|p|h3|ul|ol|span|strong|em|sub|sup|br|u|s|a)( ?(style|class)=\\?"[\w|\s|\d\-:;]+\\?")*>|[\w\s\d.,!@#$%^&*()\-_+\"\';:,.|\/?=<>]*|<\/(p|h3||li|ul|ol|span|strong|em|sub|sup|br|u|s|a)>)+/g;
+const htmlRegex = /^(<(li|p|h3|ul|ol|span|strong|em|sub|sup|br|u|s|a)( ?(style|class)=\\?"[\w|\s|\d\-:;]+\\?")*>|[\w\s\d.,!@#$%^&*()\-_+\"\';:,.|\\\/?=<>]*|<\/(p|h3||li|ul|ol|span|strong|em|sub|sup|br|u|s|a)>)+/;
 const imageRegex = new RegExp(`${process.env.awsUrl}[0-9]{1,10}.(jpg|jpeg|png|gif|webp|svg)`);
 
 /**
@@ -157,7 +157,10 @@ map.route('/new')
         // Running the regex test to see if we have a valid request body.
         const regexResult = mapRegex.runTest(req.body);
         if(typeof regexResult === 'string') {
-            res.send(400).send(regexResult);
+            res.status(400).send({
+                success: false,
+                message: regexResult
+            });
             return;
         }
 
@@ -198,18 +201,12 @@ map.route('/new')
             }))).every(nodeResult => nodeResult);
         }))).every(rowResult => rowResult);
     
-        // Getting the new map by its ID and returning the result.
+        // Returning the new maps ID so the page can redirect.
         if(mapDataResult) {
-            const newMap = await Maps.getById(newMapId);
-            
-            if(newMap) res.status(200).send({
+            res.status(200).send({
                 success: true,
-                message: nodeListToFullMapDoc(newMap)
+                message: newMapId
             });
-            else res.status(500).send({
-                success: false,
-                message: 'Map failed to be retrieved from the database.'
-            })
         }
         else {
             res.status(500).send({
@@ -298,10 +295,13 @@ map.route('/:id')
         res.status(200).send(serveHTML('Map', serverProps));
     })
     .post(isAuth, async (req, res) => {
-        // Running a regex rest to make sure its a valid request body.
+        // Running the regex test to see if we have a valid request body.
         const regexResult = mapRegex.runTest(req.body);
         if(typeof regexResult === 'string') {
-            res.send(400).send(regexResult);
+            res.status(400).send({
+                success: false,
+                message: regexResult
+            });
             return;
         }
 
@@ -489,11 +489,11 @@ io.on("connect", (socket) => {
  */
 const commentRegex = new RegexTester({
     content: textRegex,
-    x: numberRegex,
-    y: numberRegex,
+    x: idRegex,
+    y: idRegex,
     userId: numberRegex,
     commentsessionId: numberRegex,
-    replyId: numberRegex
+    replyId: idRegex
 });
 
 const sessionRegex = new RegexTester({

@@ -27,6 +27,12 @@ console.log('\nHydrating React files...');
 execSync('webpack');
 
 /**
+ * Copying public files
+ */
+console.log('\nCopying public files...');
+copyPublicFiles('public');
+
+/**
  * Creating a package.json file for the production build.
  * This will add a start script and remove anything that has to do with webpack, typescript, and sass.
  */
@@ -60,6 +66,45 @@ fs.writeFileSync('./dist/Procfile', 'web: node server.js');
 console.log('\nCleaning up the directories...');
 cleanDirectory('./dist');
 
+/**
+ * Renaming the 'dist' folder to prevent conflicts.
+ */
+fs.renameSync('./dist', './app');
+
+console.log('\nDone!\n');
+
+/**
+ * A function that recursively copys a directory into the distributable directory.
+ * @param startingDir The directory that the recursion starts at.
+ */
+function copyPublicFiles(startingDir) {
+    if(!fs.existsSync(`./${startingDir}`)) return;
+
+    /**
+     * Making a directory in the distributable directory to copy + paste into if it doesn't already exist.
+     */
+    if(!fs.existsSync(`./dist/${startingDir}`)) {
+        fs.mkdirSync(`./dist/${startingDir}`);
+    }
+
+    fs.readdirSync(startingDir).forEach(pointer => {
+        if(!fs.existsSync(`./${startingDir}/${pointer}`)) return;
+
+        /**
+         * If it's a folder, then call this function recusively.
+         */
+        if(fs.lstatSync(`${startingDir}/${pointer}`).isDirectory()) {
+            copyPublicFiles(`${startingDir}/${pointer}`);
+        }
+        /**
+         * Otherwise, copy + paste the file into the distrabutable directory.
+         */
+        else {
+            fs.writeFileSync(`./dist/${startingDir}/${pointer}`, fs.readFileSync(`./${startingDir}/${pointer}`));
+        }
+    })
+} 
+
 function cleanDirectory(dirname) {
     fs.readdirSync(resolve(dirname)).forEach(fileName => {
         /**
@@ -91,10 +136,3 @@ function cleanDirectory(dirname) {
         }
     });
 }
-
-/**
- * Renaming the 'dist' folder to prevent conflicts.
- */
-fs.renameSync('./dist', './app');
-
-console.log('\nDone!\n');

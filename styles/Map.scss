@@ -200,8 +200,11 @@ body {
 
             .Body {
                 height: fit-content;
+                min-height: 100%;
                 margin: auto 0;
                 width: 100%;
+                justify-content: center;
+                align-items: center;
         
                 .Rows {
                     width: 100%;
