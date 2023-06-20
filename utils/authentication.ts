@@ -47,7 +47,7 @@ passport.use(new Strategy({
             lastName: profile._json.family_name,
             email: profile._json.email,
             image: profile._json.picture,
-            admin: true
+            admin: false
         }
 
         /**
