@@ -17,6 +17,10 @@ type Props = {
 /**
  * The React component that renders a node inside a row on the map.
  * 
+ * @param action A state variable representing what action the user is currently performing. An empty string means they're not doing anything.
+ * @param setAction A set state function to change what action is being performed.
+ * @param map A state variable containing all the information for the rows and nodes on the map.
+ * @param setMap A set state function to edit any information on the map.
  * @param rowIndex The index of the row this node belongs to.
  * @param nodeIndex The index of the node in the row.
  * @param node The content's data for the node.

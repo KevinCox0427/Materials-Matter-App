@@ -22,6 +22,19 @@ type Props = {
     }
 }
 
+/**
+ * A React component to recursively render a comment on the side menu and all its replies.
+ * 
+ * @param comment The comment's data to start the recursion.
+ * @param sessions A state varialbe of an array of sessions for all the comments.
+ * @param selectedSession A number representing the index of the currently selected session in the sessions array.
+ * @param setSessions A set state function to edit the data of the sessions.
+ * @param tempComment A state variable pointing to what comment is a temporary one when creating a new one.
+ * @param setTempComment The set state function to change what comment its being pointed to.
+ * @param setNotification A set state function to open a pop-up menu to notify the user.
+ * @param marginLeft The amount of margin left this comment need.
+ * @param userData (optional) Data of the logged in user.
+ */
 const Comment: FunctionComponent<Props> = (props) => {
     if(!props.comment) return <></>;
 
@@ -100,11 +113,22 @@ const Comment: FunctionComponent<Props> = (props) => {
             id: -1,
             commentsessionId: newSessions[props.selectedSession].id,
             replyId: props.comment!.id,
-            timestamp: (new Date()).toLocaleString().split(', ')[0],
+            timestamp: (new Date()).toLocaleString(),
             content: '',
             x: null,
             y: null
         })
+        props.setSessions(newSessions);
+    }
+
+    /**
+     * Event handler to remove the temp comment.
+     */
+    function cancel() {
+        if(!props.tempComment) return;
+        const newSessions = [...props.sessions];
+        newSessions[props.selectedSession].comments[props.tempComment.replyId].splice(props.tempComment.commentIndex, 1);
+        props.setTempComment(null);
         props.setSessions(newSessions);
     }
 
@@ -125,6 +149,7 @@ const Comment: FunctionComponent<Props> = (props) => {
         if(props.tempComment) {
             const newSessions = [...props.sessions];
             newSessions[props.selectedSession].comments[props.tempComment.replyId].splice(props.tempComment.commentIndex, 1);
+            props.setTempComment(null);
             props.setSessions(newSessions);
         }
     }
@@ -141,7 +166,17 @@ const Comment: FunctionComponent<Props> = (props) => {
         if(!commentEl.current) return;
         const textarea = commentEl.current.getElementsByTagName('textarea')[0];
         if(textarea) textarea.focus();
-    }, [commentEl])
+    }, [commentEl]);
+
+    /**
+     * A helper function to convert YYYY-MM-DD to MM:DD:YYYY
+     * @param time The inputted date string.
+     */
+    function toLocalDate(date:string) {
+        const dateArray = date.split('-');
+        dateArray.push(dateArray.shift()!);
+        return dateArray.map(value => parseInt(value)).join('/');
+    }
 
     return <>
         <div className="Comment" ref={commentEl} style={{
@@ -154,7 +189,10 @@ const Comment: FunctionComponent<Props> = (props) => {
                 :
                     <button className="Reply" onClick={reply}>reply</button>
                 }
-                <p>{new Date(props.comment.timestamp).toLocaleString().split(', ')[0]}</p>
+                {props.comment.id === -1 ?
+                    <button className="Reply" onClick={cancel}>cancel</button>
+                : <></>}
+                <p>{toLocalDate(props.comment.timestamp.split(' ')[0])}</p>
             </div>
             {props.comment.id === -1 ? 
                 <textarea className="EditContent" placeholder="Enter your comment..." value={commentMessage} onChange={changeMessage}></textarea>

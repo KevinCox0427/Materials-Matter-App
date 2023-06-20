@@ -15,11 +15,36 @@ import { isAuth } from '../utils/authentication';
 const map = express.Router();
 
 /**
+ * Some regex strings so I don't have to repeat them.
+ */
+const textRegex = /^[\d\w\s!@#$%^&*()_+-=,.\/;'<>?:"]{1,2000}/;
+const numberRegex = /^[0-9]{1,5}/;
+const idRegex = /^-1|[0-9]{1,5}/;
+const dateRegex = /^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}\ [0-9]{1,2}:[0-9]{1,2}:[0-9]{2}/;
+const htmlRegex = /^(<(li|p|h3|ul|ol|span|strong|em|sub|sup|br|u|s|a)( ?(style|class)=\\?"[\w|\s|\d\-:;]+\\?")*>|[\w\s\d.,!@#$%^&*()\-_+\"\';:,.|\/?=<>]*|<\/(p|h3||li|ul|ol|span|strong|em|sub|sup|br|u|s|a)>)+/g;
+const imageRegex = new RegExp(`${process.env.awsUrl}[0-9]{1,10}.(jpg|jpeg|png|gif|webp|svg)`);
+
+/**
  * A utility class to test the incoming request objects against an object of regex.
  * See utils/regexTester.ts for more info.
  */
 const mapRegex = new RegexTester({
-    
+    name: textRegex,
+    id: idRegex,
+    rows: {
+        id: idRegex,
+        mapId: idRegex,
+        name: textRegex,
+        index: numberRegex,
+        nodes: {
+            id: idRegex,
+            name: textRegex,
+            index: numberRegex,
+            rowId: idRegex,
+            gallery: imageRegex,
+            htmlContent: htmlRegex
+        }
+    }
 });
 
 function nodeListToFullMapDoc(nodeList: MapNodeList[]) {
@@ -116,7 +141,13 @@ map.route('/new')
         res.status(200).send(serveHTML('Map', serverProps));
     })
     .post(isAuth, async (req, res) => {
-        const mapData = req.body as FullMapDoc;
+        const regexResult = mapRegex.runTest(req.body);
+        if(typeof regexResult === 'string') {
+            res.send(400).send(regexResult);
+            return;
+        }
+
+        const mapData = regexResult as FullMapDoc;
 
         const newMapId = await Maps.create({
             name: mapData.name
@@ -257,7 +288,13 @@ map.route('/:id')
         res.status(200).send(serveHTML('Map', serverProps));
     })
     .post(isAuth, async (req, res) => {
-        const mapData = req.body as FullMapDoc;
+        const regexResult = mapRegex.runTest(req.body);
+        if(typeof regexResult === 'string') {
+            res.send(400).send(regexResult);
+            return;
+        }
+
+        const mapData = regexResult as FullMapDoc;
         const previousMap = await Maps.getById(mapData.id);
 
         if(!previousMap) {
@@ -338,19 +375,33 @@ map.route('/:id')
             message: updateResult && deleteResult ? 'Successfully saved!' : 'Error during save.'
         });
     })
+    .delete(isAuth, async (req, res) => {
+        // Guard clause to make sure the id is a number
+        if(isNaN(parseInt(req.params.id))) {
+            res.status(400).send({
+                success: false,
+                message: 'Invalid id.'
+            });
+            return;
+        }
 
-/**
- * A utility class to test the incoming request objects against an object of regex.
- * See utils/regexTester.ts for more info.
- */
-const commentRegex = new RegexTester({
-    content: /^[\d\w\s!@#$%^&*()_+-=,.\/;'<>?:"]{1,2000}/,
-    x: /^[0-9]{1,5}/,
-    y: /^[0-9]{1,5}/,
-    userId: /^[0-9]{1,5}/,
-    commentsessionId: /^[0-9]{1,5}/,
-    replyId: /^[0-9]{1,5}/
-});
+        // Making the DELETE query on the Maps object.
+        const result = await Maps.delete(parseInt(req.params.id));
+
+        // Returning the result.
+        if(result) {
+            res.status(200).send({
+                success: true,
+                message: true
+            });
+        }
+        else {
+            res.status(400).send({
+                success: false,
+                message: 'Invalid id.'
+            });
+        }
+    })
 
 /**
  * Creating a socket.io connection to post and recieve comments.
@@ -359,9 +410,48 @@ io.on("connect", (socket) => {
     socket.on("postComment", async (requestData) => {
         const newComment = await createComment(requestData);
 
-        if(typeof newComment === 'string') socket.to(socket.id).emit(newComment);
+        if(typeof newComment === 'string') socket.emit("recieveComment", newComment);
         else io.sockets.emit("recieveComment", newComment);
     });
+
+    socket.on("saveSession", async (requestData) => {
+        const newSession = await editSession(requestData);
+
+        if(typeof newSession === 'string') socket.emit("recieveSession", newSession);
+        else io.sockets.emit("recieveSession", newSession);
+    });
+
+    socket.on("deleteSession", async (requestData) => {
+        if(typeof requestData !== 'number') {
+            socket.emit("recieveDeleteSession", 'Invalid comment session id.');
+            return;
+        }
+
+        const deleteResult = await CommentSessions.delete(requestData);
+        if(deleteResult) io.sockets.emit("recieveDeleteSession", requestData);
+        else socket.emit("recieveDeleteSession", 'Invalid comment session id.');
+    })
+});
+
+/**
+ * A utility class to test the incoming request objects against an object of regex.
+ * See utils/regexTester.ts for more info.
+ */
+const commentRegex = new RegexTester({
+    content: textRegex,
+    x: numberRegex,
+    y: numberRegex,
+    userId: numberRegex,
+    commentsessionId: numberRegex,
+    replyId: numberRegex
+});
+
+const sessionRegex = new RegexTester({
+    id: idRegex,
+    mapId: numberRegex,
+    name: textRegex,
+    start: dateRegex,
+    expires: dateRegex,
 });
 
 async function createComment(requestData:any) {
@@ -380,6 +470,39 @@ async function createComment(requestData:any) {
     const newComment = await Comments.getById(createResult);
 
     return newComment ? newComment : 'Comment failed to be retrieved from the database';
+}
+
+async function editSession(requestData: any) {
+    const regexResult = sessionRegex.runTest(requestData);
+
+    if(typeof regexResult === 'string') {
+        return regexResult;
+    }
+
+    if(regexResult.id === -1) {
+        const createResult = await CommentSessions.create({
+            mapId: regexResult.mapId,
+            name: regexResult.name,
+            start: regexResult.start,
+            expires: regexResult.expires,
+        });
+        
+        if(!createResult) return 'Failed to create comment session.';
+        const getResult = await CommentSessions.getById(createResult);
+        return getResult ? getResult : 'Failed to retrieve new comment session.'
+    }
+    else {
+        const updateResult = await CommentSessions.update(regexResult.id, {
+            mapId: regexResult.mapId,
+            name: regexResult.name,
+            start: regexResult.start,
+            expires: regexResult.expires,
+        });
+
+        if(!updateResult) return 'Failed to update comment session.';
+        const getResult = await CommentSessions.getById(regexResult.id);
+        return getResult ? getResult : 'Failed to retrieve updated comment session.'
+    }
 }
 
 export default map;

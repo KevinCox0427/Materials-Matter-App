@@ -28,6 +28,23 @@ type Props = {
     }
 }
 
+/**
+ * A component to render the header and all its actions.
+ * 
+ * @param action A state variable representing what action the user is currently performing. An empty string means they're not doing anything.
+ * @param setAction A set state function to change what action is being performed.
+ * @param map A state variable containing all the information for the rows and nodes on the map.
+ * @param setMap A set state function to edit any information on the map.
+ * @param sessions A state varialbe of an array of sessions for all the comments.
+ * @param selectedSession A number representing the index of the currently selected session in the sessions array.
+ * @param setSessions A set state function to edit the data of the sessions.
+ * @param sideMenuData A state variable pointing to what data is currently being viewed/edited in the side menu.
+ * @param setSideMenuData A set state function to change what data is being pointed to.
+ * @param tempComment A state variable pointing to what comment is a temporary one when creating a new one.
+ * @param setTempComment The set state function to change what comment its being pointed to.
+ * @param setNotification A set state function to open a pop-up menu to notify the user.
+ * @param userData (optional) Data of the logged in user.
+ */
 const Header: FunctionComponent<Props> = (props) => {
     /**
      * Event handler to change the name of the map
@@ -161,18 +178,7 @@ const Header: FunctionComponent<Props> = (props) => {
             }
         });
 
-        /**
-         * Updating state to reflect changes.
-         */
         props.setMap(newMap);
-
-        /**
-         * Opening side menu to enter content.
-         */
-        props.setSideMenuData({
-            type: 'node',
-            dataPointer: [rowIndex, nodeIndex] 
-        });
     }
 
     /**
@@ -189,13 +195,9 @@ const Header: FunctionComponent<Props> = (props) => {
         const targetMiddle = targetRect.top + (targetRect.height / 2);
 
         const newRowIndex = target.id === 'Map' ?
-            /**
-             * If the target is the map, then it's either above or below every row.
-             */
+            // If the target is the map, then it's either above or below every row.
             (y < targetMiddle ? 0 : props.map.rows.length) : 
-            /**
-             * Otherwise if the target it a row, then we can add the empty row directly above or below it based on the mouse position relative to the target's center.
-             */
+            // Otherwise if the target it a row, then we can add the empty row directly above or below it based on the mouse position relative to the target's center.
             (y < targetMiddle ? parseInt(target.id) : parseInt(target.id) + 1);
 
         /**
@@ -323,7 +325,7 @@ const Header: FunctionComponent<Props> = (props) => {
      */
     async function handleSaveMap() {
         if(props.userData) {
-            const result = await (await fetch(`/map/${props.map.id}`, {
+            const result = await (await fetch(`/map/${props.map.id > -1 ? props.map.id : 'new'}`, {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',

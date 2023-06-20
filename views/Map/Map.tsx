@@ -35,10 +35,11 @@ type Props = {
 }
 
 /**
- * A React page that will render the map page.
+ * A React page that will render the contents of the map and its comments.
  * 
  * @param map The configuration of the map to render its content appropriately.
  * @param sessions All available comment sessions to view and their content.
+ * @param userData (optional) Data of the logged in user.
  */
 const Map: FunctionComponent<Props> = (props) => {
     /**
@@ -191,12 +192,26 @@ const Map: FunctionComponent<Props> = (props) => {
             id: -1,
             mapId: map.id,
             name: `New Session - ${(new Date()).toLocaleDateString()}`,
-            start: (new Date()).toISOString(),
-            expires: expirationDate.toISOString(),
+            start: convertDatetime((new Date()).toLocaleString()),
+            expires: convertDatetime(expirationDate.toLocaleString()),
             comments: {}
         });
 
         setSessions(newSessions);
+    }
+    /**
+     * A helper function to convert HH:MM:SS AM/PM to HH:MM:SS
+     * @param time The inputted time string
+     */
+    function convertDatetime(datetime:string) {
+        const dateArray = datetime.split(', ')[0].split('/');
+        dateArray.unshift(dateArray.pop()!);
+        const dateString = dateArray.map(value => value.padStart(2, '0')).join('-');
+    
+        const time = datetime.split(', ')[1];
+        const timeString = time.split(':').map((timeSection, i) => (parseInt(timeSection) + (i == 0 && time.slice(-2) === 'PM' ? 12 : 0)).toString().padStart(2, '0')).join(':');
+    
+        return `${dateString} ${timeString}`;
     }
 
     /**
@@ -243,6 +258,8 @@ const Map: FunctionComponent<Props> = (props) => {
         newSessions[sessionIndex].comments[replyId].push(newComment);
         setSessions(newSessions);
     }
+
+    console.log(sessions[selectedSession]);
 
     return <main id="Map">
         <div className={`Notification ${notification ? 'Activated' : ' '}`}>
@@ -294,7 +311,6 @@ const Map: FunctionComponent<Props> = (props) => {
                             <MapComment
                                 commentData={comment}
                                 setSideMenuData={setSideMenuData}
-                                sessionIndex={selectedSession}
                                 commentIndex={i}
                             ></MapComment>
                         </Fragment>
@@ -343,6 +359,7 @@ const Map: FunctionComponent<Props> = (props) => {
                                         index={i}
                                         sessions={sessions}
                                         setSessions={setSessions}
+                                        selectedSession={selectedSession}
                                         setSelectedSession={setSelectedSession}
                                         isSelected={selectedSession === i}
                                         setNotification={setNotification}

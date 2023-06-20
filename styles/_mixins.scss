@@ -162,7 +162,6 @@
         border-radius: 0 0 0.5em 0.5em;
 
         .ql-editor {
-            font-size: 1.35em;
             padding: 1em;
             color: var(--black);
             height: fit-content;
@@ -172,6 +171,17 @@
                 color: var(--grey);
             }
         }
+    }
+
+    h3 {
+        font-weight: 500;
+        font-size: 2em;
+        margin: 0.25em 0;
+    }
+
+    p, ol, ul {
+        margin: 0.25em 0;
+        font-size: 1.5em;
     }
 }
 
@@ -188,7 +198,7 @@
 
     @for $i from 1 through 8 {
         .ql-indent-#{$i} {
-            padding-left: $i*2em;
+            margin-left: $i*2em;
         }
     }
 
@@ -215,23 +225,22 @@
         display: block !important;
         font-weight: 500;
         font-size: 2em;
-        margin: 0.2em 0;
+        margin: 0.25em 0;
     }
 
     p, ol, ul {
         display: block !important;
-        margin: 0.625em 0;
+        margin: 0.25em 0;
         font-size: 1.5em;
+        line-height: 120%;
     }
 
     blockquote {
         display: block !important;
         margin: 0.625em 0;
-        font-family: var(--cairo);
-        font-weight: 300;
-        font-size: 1.35em;
+        font-size: 1.25em;
         line-height: 130%;
-        border-left: 0.15em solid var(--yellow);
+        border-left: 0.15em solid var(--black);
         padding-left: 1em;
         margin-left: 1.5em !important;
     }
@@ -239,9 +248,11 @@
     ol, ul {
         flex-direction: column;
         gap: 1em;
+        padding-left: 3em;
     }
 
     li {
+        display: list-item;
         margin: 0.625em 0;
     }
 

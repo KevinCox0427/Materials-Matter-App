@@ -5,8 +5,12 @@ type Props = {
     node: NodeDoc
 }
 
+/**
+ * A react component to render the contents of a node in the side menu.
+ * 
+ * @param node The contents of the node being viewed.
+ */
 const NodeViewer: FunctionComponent<Props> = (props) => {
-
     /**
      * State variable and reference to keep track of the gallery slider's position.
      */

@@ -56,9 +56,9 @@ body {
     .Head {
         flex-direction: row;
         flex-wrap: wrap;
-        gap: 1em 2em;
+        gap: 0.25em 2em;
         align-items: center;
-        padding: 0.5em 1em;
+        padding: 0.25em 1em;
         width: calc(100% - 2em);
         background-color: var(--black);
         display: flex;
@@ -68,14 +68,14 @@ body {
         }
 
         .Back {
-            padding: 0.5em 0.75em;
-            border-radius: 0.9em;
+            font-size: 1.5em;
+            padding: 0.3em 0.4em;
+            border-radius: 0.5em;
             background-color: var(--black);
             text-decoration: none;
             transition: background-color 0.1s linear, transform 0.1s linear;
 
             i {
-                font-size: 1.6em;
                 color: var(--white);
                 transition: color 0.1s linear, border 0.1s linear;
             }
@@ -97,7 +97,7 @@ body {
             color: var(--white);
             font-family: var(--rubik);
             font-weight: 400;
-            font-size: 1.5em;
+            font-size: 1.35em;
             border-bottom: 0.075em dashed var(--white);
             flex-basis: 10em;
             flex-grow: 1;
@@ -114,9 +114,10 @@ body {
             flex-wrap: wrap;
             justify-content: center;
             align-items: center;
-            gap: 0.5em 1em;
+            gap: 0em 1em;
 
             button {
+                font-size: 1.1em;
                 flex-direction: row;
                 align-items: center;
                 gap: 0.5em;
@@ -128,13 +129,12 @@ body {
                 transition: background-color 0.1s linear, transform 0.1s linear;
 
                 i {
-                    font-size: 1.75em;
+                    font-size: 1.5em;
                     border-color: inherit !important;
                     transition: color 0.1s linear, border 0.1s linear;
                 }
 
                 p {
-                    font-size: 1.2em;
                     font-weight: 500;
                 }
 
@@ -142,7 +142,7 @@ body {
                     padding: 0.6em;
 
                     i {
-                        font-size: 1.4em;
+                        font-size: 1.15em;
                         border-top: 0.15em solid var(--white);
                         border-bottom: 0.15em solid var(--white);
                         padding: 0.1em 0.25em;
@@ -153,7 +153,7 @@ body {
                     padding: 0.6em;
 
                     i {
-                        font-size: 1.4em;
+                        font-size: 1.1em;
                         border: 0.15em solid var(--white);
                         border-radius: 0.5em;
                         padding: 0.15em 0.25em;
@@ -191,6 +191,7 @@ body {
             flex-basis: 0em;
             flex-grow: 1;
             overflow-y: scroll;
+            overflow-x: hidden;
             display: flex;
 
             * {
@@ -846,7 +847,7 @@ body {
 
                         h3 {
                             margin: 0.4em auto 0.2em auto;
-                            font-size: 1.5em;
+                            font-size: 2em;
                             font-weight: 500;
                             text-align: center;
                         }
@@ -855,7 +856,7 @@ body {
                             flex-basis: 5em;
                             flex-grow: 1;
                             border-bottom: 0.1em dashed var(--black);
-                            font-size: 1.5em;
+                            font-size: 2em;
                             font-family: var(--rubik);
                             font-weight: 500;
                             margin: 0.4em auto;

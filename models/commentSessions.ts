@@ -19,6 +19,21 @@ declare global {
     }
 }
 
+/**
+ * A helper function to convert HH:MM:SS AM/PM to HH:MM:SS
+ * @param time The inputted time string
+ */
+export function convertDatetime(datetime:string) {
+    const dateArray = datetime.split(', ')[0].split('/');
+    dateArray.unshift(dateArray.pop()!);
+    const dateString = dateArray.map(value => value.padStart(2, '0')).join('-');
+
+    const time = datetime.split(', ')[1];
+    const timeString = time.split(':').map((timeSection, i) => (parseInt(timeSection) + (i == 0 && time.slice(-2) === 'PM' ? 12 : 0) - (parseInt(timeSection) === 12 ? 12 : 0)).toString().padStart(2, '0')).join(':');
+
+    return `${dateString} ${timeString}`;
+}
+
 export const commentSessionsTable = (table:any) => {
     table.increments("id").primary();
     table.text('name');
@@ -31,55 +46,87 @@ export const commentSessionsTable = (table:any) => {
 const CommentSessions = {
     getById: async (id: number): Promise<CommentSessionDoc | false> => {
         if(!isDBready) return false;
+        
+        try {
+            const result = await knex('commentsessions')
+                .where('id', id)
+                .first();
 
-        const result = await knex('commentsessions')
-            .where('id', id)
-            .first();
-
-        if(result) return result;
-        else return false;
+            return result ? {...result,
+                start: convertDatetime(result.start.toLocaleString()),
+                expires: convertDatetime(result.expires.toLocaleString()),
+            } : false
+        } catch (e) {
+            console.log(e);
+            return false;
+        }
     },
 
     get: async (query: Partial<CommentSessionDoc> = {}): Promise<CommentSessionDoc[]> => {
         if(!isDBready) return [];
 
-        const result = await knex('commentsessions')
-            .where(query);
+        try {
+            const result = await knex('commentsessions')
+                .where(query);
 
-        return result;
+            return result.map((session:CommentSessionDoc) => {
+                return {...session,
+                    start: convertDatetime(session.start.toLocaleString()),
+                    expires: convertDatetime(session.expires.toLocaleString()),
+                }
+            });
+        }
+        catch (e) {
+            console.log(e);
+            return [];
+        }
     },
 
-    create: async (data: CommentSessionType): Promise<CommentSessionDoc | false> => {
+    create: async (data: CommentSessionType): Promise<number | false> => {
         if(!isDBready) return false;
+        
+        try {
+            const result = await knex('commentsessions')
+                .insert(data);
 
-        const result = await knex('commentsessions')
-            .returning('*')
-            .insert(data);
-
-        if(result[0]) return result[0];
-        else return false;
+            return result[0] ? result[0] : false;
+        }
+        catch(e) {
+            console.log(e);
+            return false;
+        }
     },
 
-    update: async (id:number, data: Partial<CommentSessionType>): Promise<CommentSessionDoc | false> => {
+    update: async (id:number, data: Partial<CommentSessionType>): Promise<boolean> => {
         if(!isDBready) return false;
+        
+        try {
+            const result = await knex('commentsessions')
+                .where('id', id)
+                .update(data);
 
-        const result = await knex('commentsessions')
-            .where('id', id)
-            .returning('*')
-            .update(data);
-
-        if(result[0]) return result[0];
-        else return false;
+            return result === 1;
+        }
+        catch (e) {
+            console.log(e);
+            return false;
+        }
     },
 
     delete: async (id:number): Promise<boolean> => {
         if(!isDBready) return false;
 
-        const result = await knex('commentsessions')
-            .where('id', id)
-            .del();
+        try {
+            const result = await knex('commentsessions')
+                .where('id', id)
+                .del();
 
-        return result !== 0;
+            return result !== 0;
+        }
+        catch (e) {
+            console.log(e);
+            return false;
+        }
     }
 }
 

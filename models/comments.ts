@@ -1,4 +1,5 @@
 import { isDBready, knex } from "./__init__";
+import { convertDatetime } from "./commentSessions";
 
 declare global {
     interface CommentType {
@@ -37,17 +38,24 @@ const Comments = {
     getById: async (id: number): Promise<CommentDoc | false> => {
         if(!isDBready) return false;
 
-        /**
-         * Left joining user information to comment
-         */
-        const result = await knex('comments')
-            .select('comments.*', 'users.firstName', 'users.lastName', 'users.image')
-            .leftJoin('users', 'comments.userId', 'users.id')
-            .where('comments.id', id)
-            .first();
+        try {
+            /**
+             * Left joining user information to comment
+             */
+            const result = await knex('comments')
+                .select('comments.*', 'users.firstName', 'users.lastName', 'users.image')
+                .leftJoin('users', 'comments.userId', 'users.id')
+                .where('comments.id', id)
+                .first();
 
-        if(result) return result;
-        else return false;
+            return result ? {...result,
+                timestamp: convertDatetime(result.timestamp.toLocaleString())
+            } : false;
+        }
+        catch(e) {
+            console.log(e);
+            return false;
+        }
     },
 
     get: async (query: Partial<CommentDoc> = {}, options?: {
@@ -55,49 +63,77 @@ const Comments = {
     }): Promise<CommentDoc[]> => {
         if(!isDBready) return [];
 
-        /**
-         * Left joining user information to comment
-         */
-        const result = await knex('comments')
-            .select('comments.*', 'users.firstName', 'users.lastName', 'users.image')
-            .leftJoin('users', 'comments.userId', 'users.id')
-            .where(query)
-            .modify((queryBuilder:any) => {
-                if(options?.orderBy) {
-                    queryBuilder.orderBy(options.orderBy)
-                }
-            })
+        try {
+            /**
+             * Left joining user information to comment
+             */
+            const result = await knex('comments')
+                .select('comments.*', 'users.firstName', 'users.lastName', 'users.image')
+                .leftJoin('users', 'comments.userId', 'users.id')
+                .where(query)
+                .modify((queryBuilder:any) => {
+                    if(options?.orderBy) {
+                        queryBuilder.orderBy(options.orderBy)
+                    }
+                })
 
-        return result;
+            return result.map((comment:CommentDoc) => {
+                return {...comment,
+                    timestamp: convertDatetime(comment.timestamp.toLocaleString())
+                }
+            });
+        }
+        catch(e) {
+            console.log(e);
+            return [];
+        }
     },
 
     create: async (data: CommentType): Promise<number | false> => {
         if(!isDBready) return false;
 
-        const result = await knex('comments')
-            .insert(data);
+        try {
+            const result = await knex('comments')
+                .insert(data);
 
-        return result[0] ? result[0] : false;
+            return result[0] ? result[0] : false;
+        }
+        catch(e) {
+            console.log(e);
+            return false;
+        }
     },
 
     update: async (id:number, data: Partial<CommentType>): Promise<boolean> => {
         if(!isDBready) return false;
 
-        const result = await knex('comments')
-            .where('id', id)
-            .update(data);
+        try{ 
+            const result = await knex('comments')
+                .where('id', id)
+                .update(data);
 
-        return result === 1;
+            return result === 1;
+        }
+        catch(e) {
+            console.log(e);
+            return false;
+        }
     },
 
     delete: async (id:number): Promise<boolean> => {
         if(!isDBready) return false;
 
-        const result = await knex('comments')
-            .where('id', id)
-            .del();
-
-        return result !== 0;
+        try {
+            const result = await knex('comments')
+                .where('id', id)
+                .del();
+            
+            return result !== 0;
+        }
+        catch(e) {
+            console.log(e);
+            return false;
+        }   
     }
 }
 

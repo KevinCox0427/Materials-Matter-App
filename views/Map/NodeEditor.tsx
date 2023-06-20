@@ -9,16 +9,26 @@ type Props = {
         type: 'node' | 'comment' | 'sessions';
         dataPointer: [number, number];
     },
+    setNotification: React.Dispatch<React.SetStateAction<string>>,
     userData?: {
         userId: number
         firstName: string,
         lastName: string,
         image: string,
         isAdmin: boolean
-    },
-    setNotification: React.Dispatch<React.SetStateAction<string>>
+    }
 }
 
+/**
+ * A component for the side menu to render the inputs to change the contents of a node.
+ * 
+ * @param node A state variable representing the current edits of this node.
+ * @param setNode The set state function to change the edits on this node.
+ * @param setMap A set state function to edit any information on the map.
+ * @param sideMenuData A state variable pointing to what data is currently being viewed/edited in the side menu.
+ * @param setNotification A set state function to open a pop-up menu to notify the user.
+ * @param userData (optional) Data of the logged in user.
+ */
 const NodeEditor: FunctionComponent<Props> = (props) => {
     /**
      * An asynchronous helper function to read a file from an input
@@ -71,9 +81,13 @@ const NodeEditor: FunctionComponent<Props> = (props) => {
              */
             const response = await (await fetch('/image', {
                 method: 'POST',
+                headers: {
+                    "Accept": "application/json",
+                    "Content-Type": "application/json"
+                },
                 body: JSON.stringify({
                     image: image,
-                    nodeId: props.sideMenuData.dataPointer[1]
+                    nodeId: props.node.id
                 })
             })).json();
 
@@ -102,6 +116,23 @@ const NodeEditor: FunctionComponent<Props> = (props) => {
      * @param index The index of the file in the array.
      */
     function deleteImage(index: number) {
+        /**
+         * Making a post call to the server to delete the image on AWS.
+         * Doesn't really matter what the response is.
+         */
+        if(props.userData) {
+            fetch('/image', {
+                method: 'DELETE',
+                headers: {
+                    "Accept": "application/json",
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    urls: [props.node.gallery[index]]
+                })
+            });
+        }
+
         props.setMap(oldMap => {
             const newRows = [...oldMap.rows];
             newRows[props.sideMenuData.dataPointer[0]].nodes[props.sideMenuData.dataPointer[1]].gallery.splice(index, 1);
@@ -111,7 +142,6 @@ const NodeEditor: FunctionComponent<Props> = (props) => {
             };
         });
     }
-
     /**
      * Event handler to move an image in the gallery up one index.
      * @param index Index of the image being moved.
