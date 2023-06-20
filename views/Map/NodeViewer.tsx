@@ -92,11 +92,13 @@ const NodeViewer: FunctionComponent<Props> = (props) => {
                         })}
                     </div>
                 </div>
-                <div className="Pagination">
-                    {props.node.gallery.map((_, i) => {
-                        return <button key={i} className={galleryPosition === i ? 'Activated' : ' '} onClick={() => moveGallery(i)}></button>
-                    })}
-                </div>
+                {props.node.gallery.length > 1 ?
+                    <div className="Pagination">
+                        {props.node.gallery.map((_, i) => {
+                            return <button key={i} className={galleryPosition === i ? 'Activated' : ' '} onClick={() => moveGallery(i)}></button>
+                        })}
+                    </div>
+                :< ></>}
             </div>
         : <></>}
         {props.node.htmlContent ? 

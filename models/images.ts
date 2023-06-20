@@ -46,7 +46,6 @@ export const imagesTable = (table:any) => {
 const Images = {
     /**
      * A get operation using the id as the parameter.
-     * 
      * @param id the id of the datatype.
      * @returns If successful, returns the datatype found. Otherwise returns false.
      */
@@ -68,7 +67,6 @@ const Images = {
     
     /**
      * A get query using any amount of supplied information.
-     * 
      * @param query (optional) Any data to query with.
      * @param options (optional) Can specify any amount of further options for the GET query.
      * Options include:
@@ -109,7 +107,6 @@ const Images = {
     /**
      * A create operation for a user.
      * This will upload the image to the S3 bucket and use its id as the name.
-     * 
      * @param newImage The metadata to create the image with.
      * @param base64 The base64 encoded image data.
      * @returns The url of the new image. Otherwise return false.
@@ -153,7 +150,6 @@ const Images = {
 
     /**
      * A delete operation for image(s) specified by the id.
-     * 
      * @param urls The url(s) of the image(s).
      * @returns a boolean representing the success of the operation.
      */

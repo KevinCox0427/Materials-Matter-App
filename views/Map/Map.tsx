@@ -259,8 +259,6 @@ const Map: FunctionComponent<Props> = (props) => {
         setSessions(newSessions);
     }
 
-    console.log(sessions[selectedSession]);
-
     return <main id="Map">
         <div className={`Notification ${notification ? 'Activated' : ' '}`}>
             <p>{notification}</p>

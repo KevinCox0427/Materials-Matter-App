@@ -1,6 +1,9 @@
 import { isDBready, knex } from "./__init__";
 import { convertDatetime } from "./commentSessions";
 
+/**
+ * Declaring the typing on the data structure for a comment.
+ */
 declare global {
     interface CommentType {
         content: string,
@@ -20,6 +23,10 @@ declare global {
     }
 }
 
+/**
+ * A function to create the SQL schema if not done so.
+ * This will be run in __init__.ts
+ */
 export const commentsTable = (table:any) => {
     table.increments("id").primary();
     table.timestamp('timestamp').defaultTo(knex.fn.now(0));
@@ -34,7 +41,15 @@ export const commentsTable = (table:any) => {
     table.foreign('replyId').references('id').inTable('comments').onDelete('CASCADE').onUpdate('CASCADE');
 }
 
+/**
+ * A comments model to implement CRUD operations.
+ */
 const Comments = {
+    /**
+     * A get operation using the id as the parameter.
+     * @param id the id of the comment.
+     * @returns If successful, returns the comment joined with its user. Otherwise returns false.
+     */
     getById: async (id: number): Promise<CommentDoc | false> => {
         if(!isDBready) return false;
 
@@ -58,6 +73,14 @@ const Comments = {
         }
     },
 
+    /**
+     * A get query using any amount of supplied information.
+     * @param query (optional) Any data to query with.
+     * @param options (optional) Can specify any amount of further options for the GET query.
+     * Options include:
+     *      orderBy: string  -  The way the commments are order. Default is by id.
+     * @returns An array of found comments. Returns empty array if none found.
+     */
     get: async (query: Partial<CommentDoc> = {}, options?: {
         orderBy: string
     }): Promise<CommentDoc[]> => {
@@ -89,6 +112,11 @@ const Comments = {
         }
     },
 
+    /**
+     * A create operation for a comment.
+     * @param data The data to create the comment with.
+     * @returns The id of the newly created comment, or false upon failure
+     */
     create: async (data: CommentType): Promise<number | false> => {
         if(!isDBready) return false;
 
@@ -104,6 +132,12 @@ const Comments = {
         }
     },
 
+    /**
+     * An update operation for a comment that overwrites any data at the given id.
+     * @param id The id of the comment being overwritten
+     * @param data The data to overwrite with.
+     * @returns A boolean representing the success of the operation
+     */
     update: async (id:number, data: Partial<CommentType>): Promise<boolean> => {
         if(!isDBready) return false;
 
@@ -120,7 +154,12 @@ const Comments = {
         }
     },
 
-    delete: async (id:number): Promise<boolean> => {
+    /**
+     * A delete operation for comment(s) specified by the id.
+     * @param id The id of the comment(s).
+     * @returns a boolean representing the success of the operation.
+     */
+    delete: async (id:number | number[]): Promise<boolean> => {
         if(!isDBready) return false;
 
         try {

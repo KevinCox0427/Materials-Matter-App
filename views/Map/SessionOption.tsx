@@ -143,7 +143,7 @@ const SessionOption: FunctionComponent<Props> = (props) => {
     useEffect(() => {
         socket.on('recieveSession', addSession);
         socket.on('recieveDeleteSession', confirmDeleteSession);
-    }, [socket]);
+    }, [socket, addSession, confirmDeleteSession]);
 
     /**
      * Helper function to add or edit the session recieved from Socket.io
@@ -161,7 +161,6 @@ const SessionOption: FunctionComponent<Props> = (props) => {
         const sessionIndex = newSessions.reduce((previousIndex, session, currentIndex) => {
             return session.id === (newSession as FullSessionDoc).id ? currentIndex : previousIndex;
         }, -1);
-        
 
         // If not found, push the new session
         if(sessionIndex === -1) {
@@ -184,8 +183,6 @@ const SessionOption: FunctionComponent<Props> = (props) => {
         if(tempSessionIndex > -1) {
             newSessions.splice(tempSessionIndex, 1);
         }
-
-        console.log(newSession)
         
         props.setSessions(newSessions);
     }

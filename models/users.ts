@@ -19,7 +19,8 @@ declare global {
 }
 
 /**
- * The function for creating the table schema based on the typings above.
+ * A function to create the SQL schema if not done so.
+ * This will be run in __init__.ts
  */
 export const usersTable = (table:any) => {
     table.increments("id").primary();
@@ -43,12 +44,17 @@ const Users = {
     getByID: async (id:number): Promise<UserDoc | false> => {
         if(!isDBready) return false;
 
-        const result = await knex('users')
-            .where('id', id)
-            .first();
+        try {
+            const result = await knex('users')
+                .where('id', id)
+                .first();
 
-        if(result) return result
-        else return false;
+            return result ? result : false;
+        }
+        catch (e) {
+            console.log(e);
+            return false;
+        }
     },
 
     /**
@@ -60,67 +66,80 @@ const Users = {
     get: async (query: Partial<UserDoc> = {}): Promise<UserDoc[]> => {
         if(!isDBready) return [];
         
-        const result = await knex('users')
-            .where(query);
+        try {
+            const result = await knex('users')
+                .where(query);
 
-        return result;
-    },
+            return result;
+        }
+        catch (e) {
+            console.log(e);
+            return [];
+        }
+    }, 
 
 
     /**
      * A create operation for a user.
-     * 
      * @param newUser The datatype to be created. Must be a full data structure (no Id need, created by SQL).
-     * 
-     * @returns If successful, return the Id(primary key). Otherwise return false.
+     * @returns If successful, return the Id. Otherwise return false.
      */
-    create: async (newUser:UserType): Promise<UserDoc | false> => {
+    create: async (newUser:UserType): Promise<number | false> => {
         if(!isDBready) return false;
 
-        const createResult = await knex('users')
-            .returning('*')
-            .insert(newUser);
+        try { 
+            const createResult = await knex('users')
+                .insert(newUser);
 
-        if(createResult[0]) return createResult[0];
-        else return false;
+            return createResult[0] ? createResult[0] : false;
+        }
+        catch (e) {
+            console.log(e);
+            return false;
+        }
     },
 
     /**
-     * An update operation for the data type.
-     * Overwrites the data type with the supplied Id with any amount of supplied information.
-     * 
-     * @param id The id of the data type being overwritten
-     * @param userData The pieces of data to overwrite with.
-     * @returns If sucessful, returns the new data type that's been edited. Otherwise return false.
+     * An update operation for a user that overwrites any data at the given id.
+     * @param id The id of the user being overwritten
+     * @param data The data to overwrite with.
+     * @returns A boolean representing the success of the operation
      */
-
-    update: async(id:number, userData:Partial<UserType>): Promise<UserDoc | false> => {
+    update: async(id:number, userData:Partial<UserType>): Promise<boolean> => {
         if(!isDBready) return false;
 
-        const updateResult = await knex('users')
-            .where('id', id)
-            .returning('*')
-            .update(userData);
+        try{
+            const updateResult = await knex('users')
+                .where('id', id)
+                .update(userData);
 
-        if(updateResult[0]) return updateResult[0];
-        else return false;
+            return updateResult === 1;
+        }
+        catch (e) {
+            console.log(e);
+            return false;
+        }
     },
 
     /**
      * A delete operation for the data type specified by the Id.
-     * 
      * @param id The id of the user.
      * @returns Boolean representing if it was successful.
      */
-    delete: async(id: number[]): Promise<boolean> => {
+    delete: async(id:number | number[]): Promise<boolean> => {
         if(!isDBready) return false;
 
-        const deletedUser = await knex('users')
-            .where('id', id)
-            .del();
-        
-        if(deletedUser === 0) return false;
-        else return true;
+        try { 
+            const deletedUser = await knex('users')
+                .where('id', id)
+                .del();
+            
+            return deletedUser !== 0;
+        }
+        catch (e) {
+            console.log(e);
+            return false;
+        }
     }
 }
 

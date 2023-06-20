@@ -60,7 +60,12 @@ passport.use(new Strategy({
          */
         if(userDoc.length === 0) {
             const createResult = await User.create(googleAccount);
-            if(createResult) userDoc = createResult;
+            if(createResult) {
+                // Getting the user doc from the newly created id.
+                const getResult = await User.getByID(createResult);
+                if(getResult) userDoc = getResult;
+                else return done(null, false);
+            }
             else return done(null, false);
         }
         /**

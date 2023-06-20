@@ -2,6 +2,7 @@ import { isDBready, knex } from "./__init__";
 
 /**
  * Declaring the types for a map schema globally.
+ * Also declaring the type for a join SQL table with its nodes and rows, along with a nested object version.
  */
 declare global {
     interface MapType {
@@ -45,9 +46,8 @@ export const mapsTable = (table:any) => {
 const Maps = {
     /**
      * A get operation using the id as the parameter.
-     * 
      * @param id the id of the map.
-     * @returns If successful, returns the map found. Otherwise returns false.
+     * @returns If successful, returns the joined SQL map table with its nodes and rows. Otherwise returns false.
      */
     getById: async (id: number): Promise<MapNodeList[] | false> => {
         if(!isDBready) return false;
@@ -82,7 +82,6 @@ const Maps = {
 
     /**
      * A get query using any amount of supplied information.
-     * 
      * @param query (optional) Any data to query with.
      * @param options (optional) Can specify any amount of further options for the GET query.
      * Options include:
@@ -122,9 +121,8 @@ const Maps = {
 
     /**
      * A create operation for a map.
-     * 
      * @param data The data to create the map with.
-     * @returns A boolean representing the success of the operation.
+     * @returns The id of the newly created map, or false upon failure
      */
     create: async (data: MapType): Promise<number | false> => {
         if(!isDBready) return false;
@@ -142,12 +140,10 @@ const Maps = {
     },
 
     /**
-     * An update operation for a map.
-     * Overwrites the data at the supplied id.
-     * 
+     * An update operation for a map that overwrites any data at the given id.
      * @param id The id of the map being overwritten
-     * @param data The pieces of data to overwrite with.
-     * @returns Boolean representing the success of the operation
+     * @param data The data to overwrite with.
+     * @returns A boolean representing the success of the operation
      */
     update: async (id:number, data: Partial<MapType>): Promise<boolean> => {
         if(!isDBready) return false;
@@ -167,11 +163,10 @@ const Maps = {
 
     /**
      * A delete operation for map(s) specified by the id.
-     * 
      * @param id The id of the map(s).
      * @returns a boolean representing the success of the operation.
      */
-    delete: async (id:number): Promise<boolean> => {
+    delete: async (id:number | number[]): Promise<boolean> => {
         if(!isDBready) return false;
 
         try {
