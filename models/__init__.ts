@@ -34,8 +34,8 @@ const tableSchemas = {
     rows: rowsTable,
     nodes: nodesTable,
     images: imagesTable,
-    comments: commentsTable,
-    commentsessions: commentSessionsTable
+    commentsessions: commentSessionsTable,
+    comments: commentsTable
 }
 
 /**
