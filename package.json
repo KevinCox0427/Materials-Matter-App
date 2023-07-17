@@ -4,8 +4,8 @@
   "description": "Re-done application",
   "main": "dist/server.js",
   "scripts": {
-    "build": "tsc && sass styles:dist/public/css && webpack && node dist/server.js",
-    "start": "tsc utils/watch.ts --outDir dist/utils && node dist/utils/watch.js",
+    "build": "npm i && tsc && sass styles:dist/public/css && webpack",
+    "start": "node dist/utils/watch.js",
     "deploy": "node utils/deploy.js"
   },
   "repository": {
