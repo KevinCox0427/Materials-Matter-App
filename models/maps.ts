@@ -119,6 +119,67 @@ const Maps = {
         }
     },
 
+    getFullMapDoc: async (id: number): Promise<FullMapDoc | false> => {
+        if(!isDBready) return false;
+
+        try {
+            const result = await knex('maps')
+                .select([
+                    'maps.id',
+                    knex.raw(`CONCAT(
+                        '[', 
+                        (
+                            SELECT GROUP_CONCAT(
+                                SUBSTRING(
+                                    JSON_OBJECT(
+                                        'id', r.id,
+                                        'name', r.name,
+                                        'index', r.index,
+                                        'mapId', r.mapId
+                                    ),
+                                    1,
+                                    LENGTH(JSON_OBJECT(
+                                        'id', r.id,
+                                        'name', r.name,
+                                        'index', r.index,
+                                        'mapId', r.mapId
+                                    )) - 1
+                                ),
+                                ',"nodes": [',
+                                (
+                                    SELECT GROUP_CONCAT(JSON_OBJECT(
+                                        'id', n.id,
+                                        'name', n.name,
+                                        'index', n.index,
+                                        'rowId', r.id,
+                                        'gallery', n.gallery,
+                                        'htmlContent', n.htmlContent
+                                    )) as 'nodes'
+                                    FROM \`nodes\` n
+                                    WHERE n.rowId = r.id
+                                    GROUP BY n.rowId
+                                ),
+                                ']}'
+                            )
+                            FROM \`rows\` r
+                            WHERE r.mapId = ?
+                            GROUP BY r.mapId
+                        ), 
+                        ']'
+                    ) as 'rows'`, id, id)
+                ])
+            .where({id: id})
+            .first();
+
+            return {...result,
+                rows: JSON.parse(result.rows)
+            };
+        } catch(e) {
+            console.log(e);
+            return false;
+        }
+    },
+
     /**
      * A create operation for a map.
      * @param data The data to create the map with.

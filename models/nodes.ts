@@ -127,7 +127,7 @@ const Nodes = {
             console.log(e);
             return false;
         }
-    }, 
+    },
 
     /**
      * A delete operation for node(s) specified by the id.

@@ -1,26 +1,3 @@
-@mixin RoundButton($primary, $secondary) {
-    box-shadow: 0 0 0 0.1em $primary;
-    padding: 0.25em 1em;
-    border-radius: 10em;
-    text-decoration: none;
-    background-color: $secondary;
-    color: $primary;
-    height: fit-content;
-    transition: background-color 0.1s linear, color 0.1s linear, transform 0.1s linear;
-
-    &:hover {
-        background-color: $primary;
-        color: $secondary;
-        transform: scale(1.05);
-        cursor: pointer;
-    }
-
-    &.Activated {
-        background-color: $primary;
-        color: $secondary;
-    }
-}
-
 @mixin QuillStyleAdjustments() {
     .ql-toolbar, .ql-container {
         width: 100%;
@@ -48,7 +25,7 @@
                 transition: transform 0.1s linear;
             }
 
-            button:hover {
+            button:hover, button:focus {
                 transform: scale(1.2);
                 
                 .ql-stroke {
@@ -59,7 +36,7 @@
                 }
             }
 
-            .ql-picker-label:hover {
+            .ql-picker-label:hover, .ql-picker-label:focus {
                 transform: scale(1.1);
                 
                 .ql-stroke {
@@ -99,7 +76,7 @@
             .ql-picker-options {
                 background-color: var(--grey);
 
-                .ql-selected, .ql-picker-item:hover {
+                .ql-selected, .ql-picker-item:hover, .ql-picker-item:focus {
                     color: var(--yellow);
                 }
             }

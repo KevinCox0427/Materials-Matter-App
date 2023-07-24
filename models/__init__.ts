@@ -1,7 +1,8 @@
+import { nodeListToFullMapDoc } from "../controllers/map";
 import { commentsTable } from "./comments";
 import { commentSessionsTable } from "./commentSessions";
 import { imagesTable } from "./images";
-import { mapsTable } from "./maps";
+import Maps, { mapsTable } from "./maps";
 import { nodesTable } from "./nodes";
 import { rowsTable } from "./rows";
 import { usersTable } from "./users";

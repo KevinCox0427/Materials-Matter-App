@@ -107,37 +107,35 @@ const Row: FunctionComponent<Props> = (props) => {
     }
     
     return <div className="Row" id={'' + props.rowIndex}>
+        <div className="Nodes">
+            {rowData.nodes.map((node, i) => {
+                return <Fragment key={i}>
+                    <Node
+                        node={node}
+                        nodeIndex={i}
+                        action={props.action}
+                        setAction={props.setAction}
+                        rowIndex={props.rowIndex}
+                        setSideMenuData={props.setSideMenuData}
+                        map={props.map}
+                        setMap={props.setMap}
+                    ></Node>
+                </Fragment>
+            })}
+        </div>
         <div className="Name">
             <input value={rowData.name} onChange={handleNameChange}></input>
         </div>
-        <div className="Bottom">
-            <div className="LeftButtons">
-                <button onClick={handleMoveUp}>
-                    <i className="fa-solid fa-arrow-up"></i>
-                </button>
-                <button onClick={handleDelete}>
-                    <i className="fa-solid fa-trash-can"></i>
-                </button>
-                <button onClick={handleMoveDown}>
-                    <i className="fa-solid fa-arrow-down"></i>
-                </button>
-            </div>
-            <div className="Nodes">
-                {rowData.nodes.map((node, i) => {
-                    return <Fragment key={i}>
-                        <Node
-                            node={node}
-                            nodeIndex={i}
-                            action={props.action}
-                            setAction={props.setAction}
-                            rowIndex={props.rowIndex}
-                            setSideMenuData={props.setSideMenuData}
-                            map={props.map}
-                            setMap={props.setMap}
-                        ></Node>
-                    </Fragment>
-                })}
-            </div>
+        <div className="LeftButtons">
+            <button onClick={handleMoveUp}>
+                <i className="fa-solid fa-arrow-up"></i>
+            </button>
+            <button onClick={handleDelete}>
+                <i className="fa-solid fa-trash-can"></i>
+            </button>
+            <button onClick={handleMoveDown}>
+                <i className="fa-solid fa-arrow-down"></i>
+            </button>
         </div>
     </div>
 }

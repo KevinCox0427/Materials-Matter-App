@@ -52,7 +52,7 @@ const mapRegex = new RegexTester({
  * @param nodeList The SQL response of all the nodes in a map
  * @returns A map object.
  */
-function nodeListToFullMapDoc(nodeList: MapNodeList[]) {
+export function nodeListToFullMapDoc(nodeList: MapNodeList[]) {
     if(nodeList.length === 0) {
         return {
             id: -1,

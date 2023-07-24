@@ -351,8 +351,8 @@ const Header: FunctionComponent<Props> = (props) => {
     return <header className="Head">
         <a href="/" className="Back">
             <i className="fa-solid fa-backward-step"></i>
+            <p>Back</p>
         </a>
-        <input value={props.map.name} onChange={handleNameChange}></input>
         <div className="Buttons">
             <button className={`AddComment ${props.action === 'AddComment' ? 'Activated' : ' '}`} onMouseDown={e => {handleHeaderButtonStart('AddComment')}} onTouchStart={e => {handleHeaderButtonStart('AddComment')}}>
                 <i className="fa-solid fa-comment"></i>
@@ -375,6 +375,7 @@ const Header: FunctionComponent<Props> = (props) => {
                 <p>Sessions</p>
             </button>
         </div>
+        <input value={props.map.name} onChange={handleNameChange}></input>
     </header>
 }
 

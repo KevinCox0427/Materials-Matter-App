@@ -11,7 +11,7 @@ import NodeSideMenu from "./NodeSideMenu";
  * Setting up the socket.io server.
  */
 import io from "socket.io-client";
-export const socket = io("https://teachingappdemo.herokuapp.com");
+export const socket = io("localhost:3000");
 
 /**
  * Declaring globally what properties this page should inherited from the server under "MapPageProps".

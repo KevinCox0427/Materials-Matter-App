@@ -2,6 +2,7 @@
 
 body {
     overflow: hidden;
+    font-family: var(--workSans);
 }
 
 #Map {
@@ -42,11 +43,10 @@ body {
             background-color: var(--white);
             border-radius: 10em;
             padding: 0.5em 0.6em;
-            transition: background-color 0.1s linear, color 0.1s linear, transform 0.1s linear;
+            transition: background-color 0.1s linear, transform 0.1s linear;
 
-            &:hover {
-                background-color: var(--black);
-                color: var(--white);
+            &:hover, &:focus {
+                background-color: var(--yellow);
                 transform: scale(1.05);
                 cursor: pointer;
             }
@@ -60,52 +60,54 @@ body {
         align-items: center;
         padding: 0.25em 1em;
         width: calc(100% - 2em);
-        background-color: var(--black);
         display: flex;
+        color: var(--black);
 
         * {
             display: flex;
         }
 
         .Back {
-            font-size: 1.5em;
-            padding: 0.3em 0.4em;
+            flex-direction: row;
+            align-items: center;
+            gap: 0.5em;
+            font-size: 1.2em;
+            padding: 0.3em 0.5em;
             border-radius: 0.5em;
-            background-color: var(--black);
+            background-color: rgba(0,0,0,0);
             text-decoration: none;
+            color: inherit;
             transition: background-color 0.1s linear, transform 0.1s linear;
 
             i {
-                color: var(--white);
+                font-size: 1.4em;
                 transition: color 0.1s linear, border 0.1s linear;
             }
 
-            &:hover {
-                background-color: var(--white);
+            p {
+                font-weight: 500;
+            }
+
+            &:hover, &:focus {
+                background-color: var(--yellow);
                 transform: scale(1.05);
                 cursor: pointer;
-
-                i {
-                    color: var(--black);
-                    border-color: var(--black);
-                }
             }
         }
 
         input {
             background: none;
-            color: var(--white);
             font-family: var(--rubik);
             font-weight: 400;
-            font-size: 1.35em;
-            border-bottom: 0.075em dashed var(--white);
+            font-size: 1.5em;
+            border-bottom: 0.125em dashed;
             flex-basis: 10em;
             flex-grow: 1;
             max-width: 20em;
-            margin-right: auto;
+            margin-left: auto;
 
             &:hover, &:focus {
-                border-bottom: 0.07em solid var(--white);
+                border-bottom: 0.125em solid;
             }
         }
 
@@ -117,19 +119,17 @@ body {
             gap: 0em 1em;
 
             button {
-                font-size: 1.1em;
+                font-size: 1.2em;
                 flex-direction: row;
                 align-items: center;
                 gap: 0.5em;
                 padding: 0.5em;
                 border-radius: 0.5em;
-                background-color: var(--black);
-                color: var(--white);
-                border-color: var(--white);
+                background-color: rgba(0,0,0,0);
                 transition: background-color 0.1s linear, transform 0.1s linear;
 
                 i {
-                    font-size: 1.5em;
+                    font-size: 1.4em;
                     border-color: inherit !important;
                     transition: color 0.1s linear, border 0.1s linear;
                 }
@@ -142,9 +142,9 @@ body {
                     padding: 0.6em;
 
                     i {
-                        font-size: 1.15em;
-                        border-top: 0.15em solid var(--white);
-                        border-bottom: 0.15em solid var(--white);
+                        font-size: 1.05em;
+                        border-top: 0.15em solid;
+                        border-bottom: 0.15em solid;
                         padding: 0.1em 0.25em;
                     }
                 }
@@ -153,17 +153,15 @@ body {
                     padding: 0.6em;
 
                     i {
-                        font-size: 1.1em;
-                        border: 0.15em solid var(--white);
+                        font-size: 1em;
+                        border: 0.15em solid;
                         border-radius: 0.5em;
                         padding: 0.15em 0.25em;
                     }
                 }
 
-                &:hover, &.Activated {
-                    color: var(--black);
-                    border-color: var(--black);
-                    background-color: var(--white);
+                &:hover, &:focus, &.Activated {
+                    background-color: var(--yellow);
                     transform: scale(1.05);
                     cursor: pointer;
                 }
@@ -200,14 +198,13 @@ body {
 
             .Body {
                 height: fit-content;
-                min-height: 100%;
                 margin: auto 0;
                 width: 100%;
                 justify-content: center;
                 align-items: center;
         
                 .Rows {
-                    width: 100%;
+                    width: calc(100% - 6em);
                     height: fit-content;
                     padding: 2em 0;
                     
@@ -223,8 +220,8 @@ body {
                         flex-direction: row;
                         flex-wrap: wrap;
                         width: 100%;
-                        padding: 0.75em 0;
                         gap: 0 0.5em;
+                        padding: 0.5em 0;
     
                         &:first-child {
                             margin-top: auto;
@@ -235,12 +232,14 @@ body {
                         }
         
                         .Name {
-                            padding-left: 3em;
-                            flex-basis: 100%;
+                            position: absolute;
+                            left: 1em;
+                            top: 1em;
         
                             input {
-                                font-size: 1.25em;
+                                font-size: 1.4em;
                                 font-weight: 600;
+                                text-shadow: -2px -2px 0 var(--yellow), 2px -2px 0 var(--yellow), -2px 2px 0 var(--yellow), 2px 2px 0 var(--yellow);
                                 width: fit-content;
                                 background: none;
                                 border-bottom: 0.1em dashed var(--black);
@@ -251,85 +250,76 @@ body {
                             }
                         }
         
-                        .Bottom {
-                            width: 100%;
-                            flex-direction: row;
-        
-                            .LeftButtons {
-                                flex-basis: 3em;
-                                flex-shrink: 0;
+                        .LeftButtons {
+                            position: absolute;
+                            left: -2.5em;
+                            top: 50%;
+                            transform: translateY(-50%);
+                            flex-basis: 3em;
+                            flex-shrink: 0;
+                            align-items: center;
+                            justify-content: space-around;
+                            gap: 1.25em;
+    
+                            button {
+                                background-color: var(--grey);
+                                height: 2.5em;
+                                width: 2.5em;
+                                border-radius: 10em;
+                                justify-content: center;
                                 align-items: center;
-                                justify-content: space-around;
-                                gap: 0.5em;
-                                padding-bottom: 1em;
-        
-                                button {
-                                    background-color: var(--grey);
-                                    height: 2.5em;
-                                    width: 2.5em;
-                                    border-radius: 10em;
-                                    justify-content: center;
-                                    align-items: center;
-                                    transition: 0.1s linear background-color, 0.1s linear transform;
-        
-                                    i {
-                                        font-size: 1.5em;
-                                        transition: 0.1s linear color;
-                                    }
-        
-                                    &:hover {
-                                        background-color: var(--black);
-                                        transform: scale(1.05);
-                                        cursor: pointer;
-                                        
-                                        i {
-                                            color: var(--grey);
-                                        }
-                                    }
+                                transition: 0.1s linear background-color, 0.1s linear transform;
+    
+                                i {
+                                    font-size: 1.5em;
+                                }
+    
+                                &:hover, &:focus {
+                                    background-color: var(--yellow);
+                                    transform: scale(1.05);
+                                    cursor: pointer;
                                 }
                             }
-        
-                            .Nodes {
+                        }
+    
+                        .Nodes {
+                            background-color: var(--yellow);
+                            height: fit-content;
+                            min-height: 11em;
+                            flex-grow: 1;
+                            flex-direction: row;
+                            gap: 2em;
+                            align-items: center;
+                            padding: 0.5em 1em;
+                            overflow-x: scroll;
+                            overflow-y: hidden;
+    
+                            .Node {
+                                height: 12em;
+                                width: 12em;
+                                flex-shrink: 0;
+                                border-radius: 1000em;
                                 background-color: var(--white);
-                                height: fit-content;
-                                min-height: 10em;
-                                flex-grow: 1;
-                                flex-direction: row;
-                                gap: 2em;
-                                align-items: center;
-                                padding: 0.5em 1em;
-                                overflow-x: scroll;
-                                overflow-y: hidden;
-        
-                                .Node {
-                                    height: 10em;
-                                    width: 10em;
-                                    flex-shrink: 0;
-                                    border-radius: 0.75em;
-                                    box-shadow: 0 0 0.2em 0 rgba(0,0,0, 0.2) inset, 0 0 0 0em var(--black);
-                                    background-color: var(--grey);
-                                    background-position: center;
-                                    background-size: cover;
-                                    margin: auto;
-                                    overflow: hidden;
-                                    user-select: none;
-                                    transition: box-shadow 0.1s linear, transform 0.1s linear, opacity 0.2s ease-out, border-radius 0.15s linear;
-        
-                                    &:hover {
-                                        box-shadow: 0 0 0.5em 0 rgba(0,0,0, 0) inset, 0 0 0 0.1em var(--black);
-                                        cursor: pointer;
-                                        transform: scale(1.03);
-                                        border-radius: 0.25em;
-                                    }
+                                box-shadow: 0 0 0 0.15em var(--black);
+                                background-position: center;
+                                background-size: cover;
+                                margin: auto;
+                                overflow: hidden;
+                                user-select: none;
+                                transition: box-shadow 0.1s linear, transform 0.1s linear, opacity 0.2s ease-out, border-radius 0.15s linear;
+    
+                                &:hover, &:focus {
+                                    cursor: pointer;
+                                    transform: scale(1.03);
+                                }
 
-                                    h3 {
-                                        pointer-events: none;
-                                        font-weight: 500;
-                                        text-shadow: 0 0 0.25em rgba(255,255,255, 1);
-                                        margin: auto;
-                                        text-align: center;
-                                        pointer-events: none;
-                                    }
+                                h3 {
+                                    pointer-events: none;
+                                    font-size: 1.4em;
+                                    font-weight: 500;
+                                    text-shadow: -2px -2px 0 var(--yellow), 2px -2px 0 var(--yellow), -2px 2px 0 var(--yellow), 2px 2px 0 var(--yellow);
+                                    margin: auto;
+                                    text-align: center;
                                 }
                             }
                         }
@@ -353,7 +343,7 @@ body {
                     transform: translate(-50%, -50%);
                     transition: transform 0.1s linear, opacity 0.1s linear;
     
-                    &:hover {
+                    &:hover, &:focus {
                         transform: translate(-50%, -50%) scale(1.05);
                         opacity: 0.5;
                         cursor: pointer;
@@ -408,23 +398,21 @@ body {
                         justify-content: center;
                         align-items: center;
                         color: var(--black);
-                        transition: 0.1s linear transform, 0.1s background-color linear, color 0.1s linear;
+                        transition: 0.1s linear transform, 0.1s background-color linear;
     
                         i {
                             font-size: 1.25em;
                             color: inherit;
                         }
     
-                        &:hover {
-                            color: var(--white);
-                            background-color: var(--black);
+                        &:hover, &:focus {
+                            background-color: var(--yellow);
                             transform: scale(1.05);
                             cursor: pointer;
                         }
 
                         &.Activated {
-                            color: var(--white);
-                            background-color: var(--black);
+                            background-color: var(--yellow);
                         }
                     }
                 }
@@ -493,7 +481,7 @@ body {
                             width: 100%;
                             cursor: pointer;
     
-                            &:hover ~ label {
+                            &:hover ~ label, &:focus ~ label {
                                 border: 0.1em solid var(--black);
                                 border-radius: 0.25em;
                             }
@@ -546,19 +534,10 @@ body {
                                     top: calc(50% + 2.15em);
                                 }
     
-                                i {
-                                    color: var(--black);
-                                    transition: color 0.1s linear;
-                                }
-    
-                                &:hover {
-                                    background-color: var(--black);
+                                &:hover, &:focus {
+                                    background-color: var(--yellow);
                                     transform: translate(-50%, -50%) scale(1.1);
                                     cursor: pointer;
-    
-                                    i {
-                                        color: var(--white)
-                                    }
                                 }
                             }
                         }
@@ -580,6 +559,7 @@ body {
                     .GalleryWrapper {
                         flex-direction: row;
                         overflow-x: scroll;
+                        overflow-y: hidden;
                         scroll-behavior: smooth;
                         flex-basis: 100%;
 
@@ -620,14 +600,14 @@ body {
                             box-shadow: 0 0 0 0.05em rgba(0,0,0, 0.2) inset;
                             transition: background-color 0.1s linear, transform 0.1s linear;
 
-                            &:hover {
-                                background-color: var(--black);
+                            &:hover, &:focus {
+                                background-color: var(--yellow);
                                 transform: scale(1.1);
                                 cursor: pointer;
                             }
 
                             &.Activated {
-                                background-color: var(--black);
+                                background-color: var(--yellow);
                             }
                         }
                     }
@@ -689,11 +669,10 @@ body {
                             transform: translateY(-0.1em);
                             border-radius: 5em;
                             font-weight: 500;
-                            transition: background-color 0.1s linear, color 0.1s linear, transform 0.1s linear;
+                            transition: background-color 0.1s linear, transform 0.1s linear;
     
-                            &:hover {
-                                background-color: var(--black);
-                                color: var(--white);
+                            &:hover, &:focus {
+                                background-color: var(--yellow);
                                 transform: scale(1.05) translateY(-0.1em);
                                 cursor: pointer;
                             }
@@ -742,12 +721,12 @@ body {
                         &.Activated {
                             transform: translateY(-50%) rotate(-90deg);
     
-                            &:hover {
+                            &:hover, &:focus {
                                 transform: translateY(-50%) rotate(-75deg);
                             }
                         }
     
-                        &:hover {
+                        &:hover, &:focus {
                             transform: translateY(-50%) rotate(-15deg);
                             cursor: pointer;
     
@@ -804,22 +783,20 @@ body {
                     align-items: center;
                     padding: 0.25em 0.6em;
                     border-radius: 0.5em;
-                    transition: background-color 0.1s linear, color 0.1s linear, transform 0.1s linear;
+                    transition: background-color 0.1s linear, transform 0.1s linear;
 
                     i {
                         font-size: 1.2em;
                     }
 
-                    &:hover {
-                        background-color: var(--black);
-                        color: var(--white);
+                    &:hover, &:focus {
+                        background-color: var(--yellow);
                         transform: scale(1.05);
                         cursor: pointer;
                     }
 
                     &.Activated {
-                        background-color: var(--black);
-                        color: var(--white);
+                        background-color: var(--yellow);
                     }
                 }
 
@@ -865,7 +842,7 @@ body {
                             margin: 0.4em auto;
                             text-align: center;
 
-                            &:hover {
+                            &:hover, &:focus {
                                 cursor: text;
                                 border-bottom: 0.1em solid var(--black);
                             }
@@ -905,7 +882,7 @@ body {
                                 font-size: 1.15em;
                                 margin: 0.1em 0;
 
-                                &:hover {
+                                &:hover, &:focus {
                                     cursor: text;
                                     border-bottom: 0.125em solid var(--black);
                                 }

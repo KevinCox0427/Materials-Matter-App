@@ -158,12 +158,23 @@ const Node: FunctionComponent<Props> = (props) => {
         setIsMoving(false);
     }
     
-    return <div className="Node" id={`${props.rowIndex}.${props.nodeIndex}`} onMouseDown={e => startMoveNode(e)} onTouchStart={e => startMoveNode(e)} style={{
+    /**
+     * An event function to open the node in the side menu.
+     */ 
+    function openNode(e:React.KeyboardEvent<HTMLButtonElement>) {
+        if(e.key !== 'Enter') return;
+        props.setSideMenuData({
+            type: 'node',
+            dataPointer: [props.rowIndex, props.nodeIndex]
+        });
+    }
+    
+    return <button className="Node" id={`${props.rowIndex}.${props.nodeIndex}`} onKeyDown={openNode} onMouseDown={e => startMoveNode(e)} onTouchStart={e => startMoveNode(e)} style={{
         opacity: isMoving ? 0.5 : 1,
         backgroundImage: props.node.gallery[0] ? `url("${props.node.gallery[0]}")` : 'none'
     }}>
         <h3>{props.node.name}</h3>
-    </div>
+    </button>
 }
 
 export default Node;
