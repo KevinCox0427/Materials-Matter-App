@@ -16,19 +16,6 @@ declare global {
     interface FullMapDoc extends MapDoc {
         rows: FullRowDoc[]
     }
-
-    interface MapNodeList {
-        id: number,
-        name: string,
-        rowId: number | null,
-        rowName: string | null,
-        rowIndex: number | null,
-        nodeId: number | null,
-        nodeIndex: number | null,
-        nodeName: string | null,
-        nodeHtmlContent: string | null,
-        nodeGallery: string | null
-    }
 }
 
 /**
@@ -49,32 +36,61 @@ const Maps = {
      * @param id the id of the map.
      * @returns If successful, returns the joined SQL map table with its nodes and rows. Otherwise returns false.
      */
-    getById: async (id: number): Promise<MapNodeList[] | false> => {
+    getById: async (id: number): Promise<FullMapDoc | false> => {
         if(!isDBready) return false;
 
         try {
-            /**
-             * Left joining all the rows and nodes to this map.
-             */
-            const getResult = await knex('maps')
-                .select('maps.*',
-                    'rows.id as rowId',
-                    'rows.name as rowName',
-                    'rows.index as rowIndex',
-                    'nodes.id as nodeId',
-                    'nodes.index as nodeIndex',
-                    'nodes.name as nodeName',
-                    'nodes.htmlContent as nodeHtmlContent',
-                    'nodes.gallery as nodeGallery'
-                )
-                .where('maps.id', id)
-                .leftJoin('rows', 'rows.mapId', 'maps.id')
-                .leftJoin('nodes', 'nodes.rowId', 'rows.id')
-                .orderBy(['rowIndex', 'nodeIndex'])
+            const result = await knex('maps')
+                .select([
+                    'maps.id',
+                    'maps.name',
+                    knex.raw(`(
+                        SELECT JSON_ARRAYAGG(
+                            JSON_INSERT(
+                                JSON_OBJECT(
+                                    'id', r.id,
+                                    'name', r.name,
+                                    'index', r.index,
+                                    'mapId', r.mapId
+                                ),
+                                '$.nodes',
+                                (
+                                    SELECT JSON_ARRAYAGG(JSON_OBJECT(
+                                        'id', n.id,
+                                        'name', n.name,
+                                        'index', n.index,
+                                        'rowId', r.id,
+                                        'gallery', n.gallery,
+                                        'htmlContent', n.htmlContent,
+                                        'tags', n.tags,
+                                        'action', n.action
+                                    ))
+                                    FROM \`nodes\` n
+                                    WHERE n.rowId = r.id
+                                    GROUP BY n.rowId
+                                )
+                            )
+                        ) 
+                        FROM \`rows\` r
+                        WHERE r.mapId = ?
+                        GROUP BY r.mapId
+                    ) as 'rows'`, id)
+                ])
+            .where({id: id})
+            .first();
 
-            return getResult && getResult.length > 0 ? getResult : false;
-        }
-        catch(e) {
+            const parseResult = {...result,
+                rows: JSON.parse(result.rows)
+            };
+
+            // Since SQL returns null values instead of empty arrays, we need to check for that on the rows and nodes.
+            if(!parseResult.rows) parseResult.rows = [];
+            for(let i = 0; i < parseResult.rows.length; i++) {
+                if(!parseResult.rows[i].nodes) parseResult.rows[i].nodes = [];
+            }
+
+            return parseResult;
+        } catch(e) {
             console.log(e);
             return false;
         }
@@ -116,67 +132,6 @@ const Maps = {
         catch(e) {
             console.log(e);
             return [];
-        }
-    },
-
-    getFullMapDoc: async (id: number): Promise<FullMapDoc | false> => {
-        if(!isDBready) return false;
-
-        try {
-            const result = await knex('maps')
-                .select([
-                    'maps.id',
-                    knex.raw(`CONCAT(
-                        '[', 
-                        (
-                            SELECT GROUP_CONCAT(
-                                SUBSTRING(
-                                    JSON_OBJECT(
-                                        'id', r.id,
-                                        'name', r.name,
-                                        'index', r.index,
-                                        'mapId', r.mapId
-                                    ),
-                                    1,
-                                    LENGTH(JSON_OBJECT(
-                                        'id', r.id,
-                                        'name', r.name,
-                                        'index', r.index,
-                                        'mapId', r.mapId
-                                    )) - 1
-                                ),
-                                ',"nodes": [',
-                                (
-                                    SELECT GROUP_CONCAT(JSON_OBJECT(
-                                        'id', n.id,
-                                        'name', n.name,
-                                        'index', n.index,
-                                        'rowId', r.id,
-                                        'gallery', n.gallery,
-                                        'htmlContent', n.htmlContent
-                                    )) as 'nodes'
-                                    FROM \`nodes\` n
-                                    WHERE n.rowId = r.id
-                                    GROUP BY n.rowId
-                                ),
-                                ']}'
-                            )
-                            FROM \`rows\` r
-                            WHERE r.mapId = ?
-                            GROUP BY r.mapId
-                        ), 
-                        ']'
-                    ) as 'rows'`, id, id)
-                ])
-            .where({id: id})
-            .first();
-
-            return {...result,
-                rows: JSON.parse(result.rows)
-            };
-        } catch(e) {
-            console.log(e);
-            return false;
         }
     },
 

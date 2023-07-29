@@ -36,51 +36,11 @@ export const rowsTable = (table:any) => {
  */
 const Rows = {
     /**
-     * A get operation using the id as the parameter.
-     * @param id the id of the comment.
-     * @returns If successful, returns the comment. Otherwise returns false.
-     */
-    getById: async (id: number): Promise<RowDoc | false> => {
-        if(!isDBready) return false;
-        
-        try {
-            const result = await knex('rows')
-                .where('id', id)
-                .first();
-
-            return result ? result : false;
-        } catch (e) {
-            console.log(e);
-            return false;
-        }
-    },
-    
-    /**
-     * A get query using any amount of supplied information.
-     * @param query (optional) Any data to query with.
-     * @returns An array of found rows. Returns empty array if none found.
-     */
-    get: async (query: Partial<RowDoc> = {}): Promise<RowDoc[]> => {
-        if(!isDBready) return [];
-
-        try {
-            const result = await knex('rows')
-                .where(query);
-
-            return result;
-        }
-        catch (e) {
-            console.log(e);
-            return [];
-        }
-    },
-
-    /**
      * A create operation for a row.
      * @param data The data to create the row with.
-     * @returns The id of the newly created row, or false upon failure
+     * @returns The id of the first node (because MySQL is so awesome), or false upon failure
      */
-    create: async (data: RowType): Promise<number | false> => {
+    create: async (data: RowType[]): Promise<number | false> => {
         if(!isDBready) return false;
 
         try {
@@ -122,12 +82,12 @@ const Rows = {
      * @param id The id of the row(s).
      * @returns a boolean representing the success of the operation.
      */
-    delete: async (id:number | number[]): Promise<boolean> => {
+    delete: async (id:number[]): Promise<boolean> => {
         if(!isDBready) return false;
 
         try{ 
             const result = await knex('rows')
-                .where('id', id)
+                .whereIn('id', id)
                 .del();
 
             return result !== 0;

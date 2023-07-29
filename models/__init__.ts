@@ -1,10 +1,11 @@
-import { nodeListToFullMapDoc } from "../controllers/map";
 import { commentsTable } from "./comments";
 import { commentSessionsTable } from "./commentSessions";
 import { imagesTable } from "./images";
-import Maps, { mapsTable } from "./maps";
+import { mapsTable } from "./maps";
 import { nodesTable } from "./nodes";
-import { rowsTable } from "./rows";
+import { nodesToTagsTable } from "./nodesToTags";
+import Rows, { rowsTable } from "./rows";
+import { tagsTable } from "./tag";
 import { usersTable } from "./users";
 
 /**
@@ -34,6 +35,8 @@ const tableSchemas = {
     maps: mapsTable,
     rows: rowsTable,
     nodes: nodesTable,
+    tags: tagsTable,
+    nodeToTags: nodesToTagsTable,
     images: imagesTable,
     commentsessions: commentSessionsTable,
     comments: commentsTable

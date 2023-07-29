@@ -98,5 +98,5 @@ app.use('/public', express.static('dist/public'));
  * Importing the server from the socket.io configuration.
  * Listening server to declared port.
  */
-import { server } from './utils/socketIO';
+import { server } from './controllers/socketIO';
 server.listen(process.env.PORT || 3000);

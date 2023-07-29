@@ -45,7 +45,7 @@ body {
             padding: 0.5em 0.6em;
             transition: background-color 0.1s linear, transform 0.1s linear;
 
-            &:hover, &:focus {
+            &:hover, &:focus-visible {
                 background-color: var(--yellow);
                 transform: scale(1.05);
                 cursor: pointer;
@@ -88,7 +88,7 @@ body {
                 font-weight: 500;
             }
 
-            &:hover, &:focus {
+            &:hover, &:focus-visible {
                 background-color: var(--yellow);
                 transform: scale(1.05);
                 cursor: pointer;
@@ -106,7 +106,7 @@ body {
             max-width: 20em;
             margin-left: auto;
 
-            &:hover, &:focus {
+            &:hover, &:focus-visible {
                 border-bottom: 0.125em solid;
             }
         }
@@ -160,7 +160,7 @@ body {
                     }
                 }
 
-                &:hover, &:focus, &.Activated {
+                &:hover, &:focus-visible, &.Activated {
                     background-color: var(--yellow);
                     transform: scale(1.05);
                     cursor: pointer;
@@ -244,7 +244,7 @@ body {
                                 background: none;
                                 border-bottom: 0.1em dashed var(--black);
         
-                                &:hover, &:focus {
+                                &:hover, &:focus-visible {
                                     border-bottom: 0.1em solid var(--black)
                                 }
                             }
@@ -274,7 +274,7 @@ body {
                                     font-size: 1.5em;
                                 }
     
-                                &:hover, &:focus {
+                                &:hover, &:focus-visible {
                                     background-color: var(--yellow);
                                     transform: scale(1.05);
                                     cursor: pointer;
@@ -308,7 +308,7 @@ body {
                                 user-select: none;
                                 transition: box-shadow 0.1s linear, transform 0.1s linear, opacity 0.2s ease-out, border-radius 0.15s linear;
     
-                                &:hover, &:focus {
+                                &:hover, &:focus-visible {
                                     cursor: pointer;
                                     transform: scale(1.03);
                                 }
@@ -343,7 +343,7 @@ body {
                     transform: translate(-50%, -50%);
                     transition: transform 0.1s linear, opacity 0.1s linear;
     
-                    &:hover, &:focus {
+                    &:hover, &:focus-visible {
                         transform: translate(-50%, -50%) scale(1.05);
                         opacity: 0.5;
                         cursor: pointer;
@@ -405,7 +405,7 @@ body {
                             color: inherit;
                         }
     
-                        &:hover, &:focus {
+                        &:hover, &:focus-visible {
                             background-color: var(--yellow);
                             transform: scale(1.05);
                             cursor: pointer;
@@ -431,7 +431,7 @@ body {
                     background: none;
                     border-bottom: 0.08em dashed var(--black);
 
-                    &:hover, &:focus {
+                    &:hover, &:focus-visible {
                         border-bottom: 0.08em solid var(--black);
                     }
                 }
@@ -481,7 +481,7 @@ body {
                             width: 100%;
                             cursor: pointer;
     
-                            &:hover ~ label, &:focus ~ label {
+                            &:hover ~ label, &:focus-visible ~ label {
                                 border: 0.1em solid var(--black);
                                 border-radius: 0.25em;
                             }
@@ -534,7 +534,7 @@ body {
                                     top: calc(50% + 2.15em);
                                 }
     
-                                &:hover, &:focus {
+                                &:hover, &:focus-visible {
                                     background-color: var(--yellow);
                                     transform: translate(-50%, -50%) scale(1.1);
                                     cursor: pointer;
@@ -600,7 +600,7 @@ body {
                             box-shadow: 0 0 0 0.05em rgba(0,0,0, 0.2) inset;
                             transition: background-color 0.1s linear, transform 0.1s linear;
 
-                            &:hover, &:focus {
+                            &:hover, &:focus-visible {
                                 background-color: var(--yellow);
                                 transform: scale(1.1);
                                 cursor: pointer;
@@ -671,7 +671,7 @@ body {
                             font-weight: 500;
                             transition: background-color 0.1s linear, transform 0.1s linear;
     
-                            &:hover, &:focus {
+                            &:hover, &:focus-visible {
                                 background-color: var(--yellow);
                                 transform: scale(1.05) translateY(-0.1em);
                                 cursor: pointer;
@@ -702,7 +702,7 @@ body {
                         resize: none;
                         border-bottom: 0.1em dashed var(--black);
 
-                        &:hover, &:focus {
+                        &:hover, &:focus-visible {
                             border-bottom: 0.1em solid var(--black);
                         }
                     }
@@ -721,12 +721,12 @@ body {
                         &.Activated {
                             transform: translateY(-50%) rotate(-90deg);
     
-                            &:hover, &:focus {
+                            &:hover, &:focus-visible {
                                 transform: translateY(-50%) rotate(-75deg);
                             }
                         }
     
-                        &:hover, &:focus {
+                        &:hover, &:focus-visible {
                             transform: translateY(-50%) rotate(-15deg);
                             cursor: pointer;
     
@@ -789,7 +789,7 @@ body {
                         font-size: 1.2em;
                     }
 
-                    &:hover, &:focus {
+                    &:hover, &:focus-visible {
                         background-color: var(--yellow);
                         transform: scale(1.05);
                         cursor: pointer;
@@ -842,7 +842,7 @@ body {
                             margin: 0.4em auto;
                             text-align: center;
 
-                            &:hover, &:focus {
+                            &:hover, &:focus-visible {
                                 cursor: text;
                                 border-bottom: 0.1em solid var(--black);
                             }
@@ -882,7 +882,7 @@ body {
                                 font-size: 1.15em;
                                 margin: 0.1em 0;
 
-                                &:hover, &:focus {
+                                &:hover, &:focus-visible {
                                     cursor: text;
                                     border-bottom: 0.125em solid var(--black);
                                 }

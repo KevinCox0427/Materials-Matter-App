@@ -3,7 +3,6 @@ import serveHTML from '../utils/serveHTML';
 import Maps from '../models/maps';
 import CommentSessions from '../models/commentSessions';
 import Comments from '../models/comments';
-import { io } from '../utils/socketIO';
 import RegexTester from '../utils/regexTester';
 import Rows from '../models/rows';
 import Nodes from '../models/nodes';
@@ -17,119 +16,46 @@ const map = express.Router();
 /**
  * Some regex strings so I don't have to repeat them.
  */
-const textRegex = /^[\d\w\s!@#$%^&*()_+-=,.\/;'<>?:"]{1,2000}/;
-const numberRegex = /^[0-9]{1,5}/;
-const idRegex = /^-1|[0-9]{1,5}/;
-const dateRegex = /^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}\ [0-9]{1,2}:[0-9]{1,2}:[0-9]{2}/;
-const htmlRegex = /^(<(li|p|h3|ul|ol|span|strong|em|sub|sup|br|u|s|a)( ?(style|class)=\\?"[\w|\s|\d\-:;]+\\?")*>|[\w\s\d.,!@#$%^&*()\-_+\"\';:,.|\\\/?=<>]*|<\/(p|h3||li|ul|ol|span|strong|em|sub|sup|br|u|s|a)>)+/;
-const imageRegex = new RegExp(`${process.env.awsUrl}[0-9]{1,10}.(jpg|jpeg|png|gif|webp|svg)`);
+export const regexStrings = {
+    text: /^[\d\w\s!@#$%^&*()_+-=,.\/;'<>?:"]{1,2000}/,
+    number: /^[0-9]{1,5}/,
+    id: /^-1|[0-9]{1,5}/,
+    date: /^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}\ [0-9]{1,2}:[0-9]{1,2}:[0-9]{2}/,
+    html:/^(<(li|p|h3|ul|ol|span|strong|em|sub|sup|br|u|s|a)( ?(style|class)=\\?"[\w|\s|\d\-:;]+\\?")*>|[\w\s\d.,!@#$%^&*()\-_+\"\';:,.|\\\/?=<>]*|<\/(p|h3||li|ul|ol|span|strong|em|sub|sup|br|u|s|a)>)+/,
+    image: new RegExp(`${process.env.awsUrl}[0-9]{1,10}.(jpg|jpeg|png|gif|webp|svg)`)
+};
 
 /**
  * A utility class to test the incoming request objects against an object of regex.
  * See utils/regexTester.ts for more info.
  */
 const mapRegex = new RegexTester({
-    name: textRegex,
-    id: idRegex,
+    name: regexStrings.text,
+    id: regexStrings.id,
     rows: {
-        id: idRegex,
-        mapId: idRegex,
-        name: textRegex,
-        index: numberRegex,
+        id: regexStrings.id,
+        mapId: regexStrings.id,
+        name: regexStrings.text,
+        index: regexStrings.number,
         nodes: {
-            id: idRegex,
-            name: textRegex,
-            index: numberRegex,
-            rowId: idRegex,
-            gallery: imageRegex,
-            htmlContent: htmlRegex
+            id: regexStrings.id,
+            name: regexStrings.text,
+            index: regexStrings.number,
+            rowId: regexStrings.id,
+            gallery: regexStrings.image,
+            htmlContent: regexStrings.html,
+            action: /^(filter|content)$/,
+            tags: /^\[[\d\w\s!@#$%^&*()_+-=,.\/;'<>?:"]{1,2000}\]/
         }
     }
 });
-
-/**
- * Helper function to convert the SQL response into a map object.
- * @param nodeList The SQL response of all the nodes in a map
- * @returns A map object.
- */
-export function nodeListToFullMapDoc(nodeList: MapNodeList[]) {
-    if(nodeList.length === 0) {
-        return {
-            id: -1,
-            name: '',
-            rows: []
-        };
-    }
-
-    /**
-     * Now we'll structure all these SQL rows into a JSON object.
-     */
-    let map:FullMapDoc = {
-        id: nodeList[0].id,
-        name: nodeList[0].name,
-        rows: []
-    }
-
-    /**
-     * Looping through each node in the list and adding it to the correct row.
-     */
-    nodeList.forEach(node => {
-        /**
-         * If the row id is null, that means there are no rows, and we can just return the empty map.
-         */
-        if(!node.rowId) {
-            return;
-        }
-        /**
-         * If the node id is null, that means it's an empty row
-         */
-        if(!node.nodeId) {
-            map.rows.push({
-                id: node.rowId!,
-                mapId: node.id!,
-                index: node.rowIndex!,
-                name: node.rowName!,
-                nodes: []
-            });
-        }
-        /**
-         * Otherwise the row exists. If it isn't made yet then push a row.
-         */
-        else {
-            if(!map.rows[node.rowIndex!]) {
-                map.rows.push({
-                    id: node.rowId!,
-                    mapId: node.id!,
-                    index: node.rowIndex!,
-                    name: node.rowName!,
-                    nodes: []
-                });
-            }
-            /**
-             * And push the node.
-             */
-            map.rows[node.rowIndex!].nodes.push({
-                id: node.nodeId!,
-                rowId: node.rowId!,
-                index: node.nodeIndex!,
-                name: node.nodeName!,
-                htmlContent: node.nodeHtmlContent!,
-                gallery: JSON.parse(node.nodeGallery!)
-            })
-        }
-    });
-
-    return map;
-}
 
 /**
  * Setting up a GET endpoint to serve the map page React file.
  */
 map.route('/new')
     .get(async (req, res) => {
-        /**
-         * Loading the server properties to pass to the client.
-         */
+        // Loading the server properties to pass to the client.
         const serverProps:ServerPropsType = {
             mapPageProps: {
                 map: {
@@ -148,9 +74,7 @@ map.route('/new')
             }
         }
 
-        /**
-         * Serving the react page.
-         */
+        // Serving the react page.
         res.status(200).send(serveHTML('Map', serverProps));
     })
     .post(isAuth, async (req, res) => {
@@ -179,41 +103,39 @@ map.route('/new')
             return;
         }
     
-        // Looping through each row to insert in the data base.
-        const mapDataResult = (await Promise.all(mapData.rows.map(async (row, i) => {
-            const rowResult = await Rows.create({
-                name: row.name,
-                index: i,
-                mapId: newMapId
-            });
-    
-            if(!rowResult) return false;
-    
-            // Looping through each node to enter in the database.
-            return (await Promise.all(row.nodes.map(async (node, j) => {
-                return await Nodes.create({
-                    name: node.name,
-                    index: j,
-                    rowId: rowResult,
-                    gallery: node.gallery,
-                    htmlContent: node.htmlContent
-                })
-            }))).every(nodeResult => nodeResult);
-        }))).every(rowResult => rowResult);
+        // Inserting the rows into the database.
+        if(mapData.rows.length > 0) {   
+            if(!(await Rows.create(mapData.rows))) {
+                res.status(500).send({
+                    success: false,
+                    message: 'Rows failed to save in the database.'
+                });
+                return;
+            };
+        }
+
+        // Getting the nodes from each row.
+        const newNodes:NodeDoc[] = [];
+        mapData.rows.forEach(row => {
+            newNodes.push.apply(newNodes, row.nodes);
+        });
+
+        // Inserting the nodes into the database.
+        if(newNodes.length > 0) {
+            if(!(await Nodes.create(newNodes))) {
+                res.status(500).send({
+                    success: false,
+                    message: 'Nodes failed to save in the database.'
+                });
+                return;
+            };
+        }
     
         // Returning the new maps ID so the page can redirect.
-        if(mapDataResult) {
-            res.status(200).send({
-                success: true,
-                message: newMapId
-            });
-        }
-        else {
-            res.status(500).send({
-                success: false,
-                message: 'Map\'s data failed to save in the database.'
-            });
-        }
+        res.status(200).send({
+            success: true,
+            message: newMapId
+        });
     })
 
 /**
@@ -238,7 +160,7 @@ map.route('/:id')
 
         // Getting the comment sessions from the database.
         const sessions = await CommentSessions.get({
-            mapId: map[0].id
+            mapId: map.id
         });
 
         // And filling the sessions with their comments from the database.
@@ -272,12 +194,10 @@ map.route('/:id')
             })
         );
 
-        /**
-         * Loading the server properties to pass to the client.
-         */
+        // Loading the server properties to pass to the client.
         const serverProps:ServerPropsType = {
             mapPageProps: {
-                map: nodeListToFullMapDoc(map),
+                map: map,
                 sessions: fullSessions,
                 userData: req.user ? {
                     userId: req.user.id,
@@ -289,9 +209,7 @@ map.route('/:id')
             }
         }
 
-        /**
-         * Serving the react page.
-         */
+        // Serving the react page.
         res.status(200).send(serveHTML('Map', serverProps));
     })
     .post(isAuth, async (req, res) => {
@@ -319,101 +237,126 @@ map.route('/:id')
             return;
         }
 
+        // Finding out what rows need to be added, deleted, and updated
+        const rowEdits = compareRows(previousMap, mapData);
+
+        // First creating the new rows so their ids will fill and the nodes in the new rows can reference them properly.
+        // The id that's returned will only be the first one that was inserted because MySQL is so cool.
+        if(rowEdits.add.length > 0) {
+            const firstInsertedRowId = await Rows.create(rowEdits.add.map(row => {
+                return {
+                    index: row.index,
+                    mapId: row.mapId,
+                    name: row.name
+                }
+            }));
+
+            if(!firstInsertedRowId) {
+                res.status(500).send({
+                    success: false,
+                    message: 'Rows failed to be created in the database.'
+                });
+                return;
+            }
+
+            // Now we'll update the row data so that the nodes can have proper foreign keys.
+            let j = 0;
+            for(let i = 0; i < mapData.rows.length; i++) {
+                if(mapData.rows[i].id === -1) {
+                    mapData.rows[i].id = firstInsertedRowId + j;
+                    j++;
+                }
+            }
+        }
+
+        // Finding out what nodes need to be added, deleted, and updated
+        const nodeEdits = compareNodes(previousMap, mapData);
+
+        // Then adding the new nodes.
+        if(nodeEdits.add.length > 0) {   
+            if(!(await Nodes.create(nodeEdits.add.map((node, i) => {
+                return {
+                    name: node.name,
+                    index: node.index,
+                    rowId: node.rowId,
+                    gallery: node.gallery,
+                    htmlContent: node.htmlContent,
+                    action: node.action,
+                    tags: node.tags
+                }
+            })))) {
+                res.status(500).send({
+                    success: false,
+                    message: 'Nodes failed to be created in the database.'
+                });
+                return;
+            }
+        }
+
+        // Updating previous rows
+        if(rowEdits.update.length > 0) {
+            if(!(await Promise.all(rowEdits.update.map(async (row) => {
+                // @ts-ignore
+                delete row.nodes;
+                return await Rows.update(row.id, row);
+            }))).every(rowSuccess => rowSuccess)) {
+                res.status(500).send({
+                    success: false,
+                    message: 'Rows failed to be updated in the database.'
+                });
+                return;
+            }
+        }
+
+        // Updating previous nodes
+        if(nodeEdits.update.length > 0) {
+            if(!(await Promise.all(nodeEdits.update.map(async (node) => {
+                return await Nodes.update(node.id, node);
+            }))).every(nodeSuccess => nodeSuccess)) {
+                res.status(500).send({
+                    success: false,
+                    message: 'Nodes failed to be updated in the database.'
+                });
+                return;
+            }
+        }
+
+        // Deleteing previous rows
+        if(rowEdits.delete.length > 0) {
+            if(!(await Rows.delete(rowEdits.delete.map(row => row.id)))) {
+                res.status(500).send({
+                    success: false,
+                    message: 'Rows failed to be deleted in the database.'
+                });
+                return;
+            }
+        }
+
+        // Deleteing previous nodes
+        if(nodeEdits.delete.length > 0) {
+            if(!(await Nodes.delete(nodeEdits.delete.map(node => node.id)))) {
+                res.status(500).send({
+                    success: false,
+                    message: 'Nodes failed to be deleted in the database.'
+                });
+                return;
+            }
+        }
+
         // Updating map metadata.
-        Maps.update(mapData.id, {
+        if(! (await Maps.update(mapData.id, {
             name: mapData.name
-        });
+        }))) {
+            res.status(500).send({
+                success: false,
+                message: 'Map failed to be updated in the database.'
+            });
+            return;
+        }
 
-        /**
-         * WARNING: this save function is ugly and inefficient. Hoping to come back to this with a fresher mind.
-         * Comparing a joined SQL table to a nested object to find which SQL rows to add, update and delete was brutal.
-         * This really should have just been done with noSQL.
-         */
-
-        // Looping through each node and row to see what query needs to be performed.
-        const updateResult = (await Promise.all(mapData.rows.map(async (row) => {
-            let rowId = row.id;
-
-            // If it has an id of -1, that means it's new and needs to be inserted.
-            if(rowId === -1) {
-                const newRowId = await Rows.create({
-                    name: row.name,
-                    index: row.index,
-                    mapId: mapData.id
-                });
-
-                if(newRowId) rowId = newRowId;
-                else return false;
-            }
-            // Otherwise if it does have an id, it needs to be updated.
-            else {
-                const result = await Rows.update(rowId, {
-                    name: row.name,
-                    index: row.index,
-                    mapId: mapData.id
-                });
-
-                if(!result) return false;
-
-                // Then if the previous row was empty, it needs to be removed from the previousMap object, as its nodes won't do so.
-                const previousRowIndex = previousMap.findIndex(mapItem => mapItem.rowId === rowId);
-                if(previousRowIndex !== -1 && previousMap[previousRowIndex].nodeId === null) {
-                    previousMap.splice(previousRowIndex, 1);
-                }
-            }        
-
-            // Now looping through the nodes.
-            return (await Promise.all(row.nodes.map(async (node) => {
-                // If its id is -1, it's a new node and needs to be inserted.
-                if(node.id === -1) {
-                    return (await Nodes.create({
-                        name: node.name,
-                        index: node.index,
-                        rowId: rowId,
-                        gallery: node.gallery,
-                        htmlContent: node.htmlContent
-                    }));
-                }
-                // Otherwise if it has an id, then it needs to be updated.
-                else {
-                    // Removing it from the previous map so it isn't deleted.
-                    previousMap.splice(previousMap.findIndex(mapItem => mapItem.nodeId === node.id), 1);
-                    return (await Nodes.update(node.id, {
-                        name: node.name,
-                        index: node.index,
-                        rowId: rowId,
-                        gallery: node.gallery,
-                        htmlContent: node.htmlContent
-                    }));
-                }
-            }))).every(result => result);
-        }))).every(result => result);
-
-        // Now going through each remaining node on the previous map and removing it.
-        const deleteResult = (await Promise.all(previousMap.map(async (mapItem) => {
-            // If it has a node id, we can remove the node.
-            if(mapItem.nodeId) {
-                // If we can't find the row, that means the whole row has been delete, and we must delete both the node and row from the db.
-                if(mapItem.rowId && mapData.rows.findIndex(row => row.id === mapItem.rowId) === -1) {
-                    return (await Nodes.delete(mapItem.nodeId)) && (await Rows.delete(mapItem.rowId));
-                }
-                // Otherwise just delete the node.
-                else {
-                    return (await Nodes.delete(mapItem.nodeId));
-                }
-            }
-            // Otherwise that means it's an empty row, and just delete the row.
-            else {
-                if(mapItem.rowId) {
-                    return (await Rows.delete(mapItem.rowId));
-                }
-            }
-        }))).every(result => result);
-
-        // Sending the result.
         res.status(200).send({
-            success: updateResult && deleteResult,
-            message: updateResult && deleteResult ? 'Successfully saved!' : 'Error during save.'
+            success: true,
+            message: 'Successfully saved!'
         });
     })
     .delete(isAuth, async (req, res) => {
@@ -442,133 +385,93 @@ map.route('/:id')
                 message: 'Invalid id.'
             });
         }
-    })
-
-/**
- * Creating a socket.io connection to post and recieve comments.
- */
-io.on("connect", (socket) => {
-    /**
-     * Socket for posting a new comment
-     */
-    socket.on("postComment", async (requestData) => {
-        const newComment = await createComment(requestData);
-
-        if(typeof newComment === 'string') socket.emit("recieveComment", newComment);
-        else io.emit("recieveComment", newComment);
     });
-
-    /**
-     * Socket for saving a new session
-     */
-    socket.on("saveSession", async (requestData) => {
-        const newSession = await editSession(requestData);
-
-        if(typeof newSession === 'string') socket.emit("recieveSession", newSession);
-        else io.emit("recieveSession", newSession);
-    });
-
-    /**
-     * Socket for deleting sesions.
-     */
-    socket.on("deleteSession", async (requestData) => {
-        if(typeof requestData !== 'number') {
-            socket.emit("recieveDeleteSession", 'Comment session id must be a number.');
-            return;
-        }
-
-        const deleteResult = await CommentSessions.delete(requestData);
-        if(deleteResult) io.emit("recieveDeleteSession", requestData);
-        else socket.emit("recieveDeleteSession", 'Invalid comment session id.');
-    })
-});
-
-/**
- * A utility class to test the incoming request objects against an object of regex.
- * See utils/regexTester.ts for more info.
- */
-const commentRegex = new RegexTester({
-    content: textRegex,
-    x: idRegex,
-    y: idRegex,
-    userId: numberRegex,
-    commentsessionId: numberRegex,
-    replyId: idRegex
-});
-
-const sessionRegex = new RegexTester({
-    id: idRegex,
-    mapId: numberRegex,
-    name: textRegex,
-    start: dateRegex,
-    expires: dateRegex,
-});
-
-/**
- * Function to create a comment from a Socket.io request.
- * @param requestData The request recieved in socket.io
- * @returns The new comment object that was just created
- */
-async function createComment(requestData:any) {
-    // Running the regex test to make sure its valid data.
-    const regexResult = commentRegex.runTest(requestData);
-    if(typeof regexResult === 'string') {
-        return regexResult;
-    }
-    // Creating the comment in the db.
-    const createResult = await Comments.create(requestData as CommentType);
-
-    // Returning the results.
-    if(!createResult) {
-        return 'Comment failed to be inserted into the database';
-    }
-
-    const newComment = await Comments.getById(createResult);
-    return newComment ? newComment : 'Comment failed to be retrieved from the database';
-}
-
-/**
- * A function to edit a session from a socket.io request.
- * @param requestData The request from socket.io.
- * @returns The new session object just editted.
- */
-async function editSession(requestData: any) {
-    // Running a regex test to make sure the data is valid.
-    const regexResult = sessionRegex.runTest(requestData);
-    if(typeof regexResult === 'string') {
-        return regexResult;
-    }
-
-    // If the session's id is -1, that means it's a new session and must be created in the db.
-    if(regexResult.id === -1) {
-        // Creating in db.
-        const createResult = await CommentSessions.create({
-            mapId: regexResult.mapId,
-            name: regexResult.name,
-            start: regexResult.start,
-            expires: regexResult.expires,
-        });
-        
-        // Returning the result.
-        if(!createResult) return 'Failed to create comment session.';
-        const getResult = await CommentSessions.getById(createResult);
-        return getResult ? getResult : 'Failed to retrieve new comment session.'
-    }
-    // Otherwise if it has an id, that means it must be updated.
-    else {
-        // Updating in db.
-        const updateResult = await CommentSessions.update(regexResult.id, {
-            mapId: regexResult.mapId,
-            name: regexResult.name,
-            start: regexResult.start,
-            expires: regexResult.expires,
-        });
-
-        // Returning the result.
-        if(!updateResult) return 'Failed to update comment session.';
-        const getResult = await CommentSessions.getById(regexResult.id);
-        return getResult ? getResult : 'Failed to retrieve updated comment session.'
-    }
-}
 
 export default map;
+
+/**
+ * A function that compares the data of two maps to declare what SQL statements need to be made to reflect the update in the database.
+ * @param previousMap The map that is saved in the database.
+ * @param currentMap The map that is being updated to the databased.
+ * @returns An object containing the row data that needs to be added, updated, and deleted from the database.
+ */
+function compareRows(previousMap:FullMapDoc, currentMap:FullMapDoc): {add: FullRowDoc[], update: FullRowDoc[], delete: FullRowDoc[]} {
+    const returnObject: {add: FullRowDoc[], update: FullRowDoc[], delete: FullRowDoc[]} = {
+        add: [],
+        update: [],
+        delete: []
+    }
+
+    // Creating clone of the previous rows since we'll be removing any rows that need to be updated.
+    const previousRows = [...previousMap.rows];
+
+    // Looping through each new row to see if it needs to be added or updated.
+    for(let i = 0; i < currentMap.rows.length; i++) {
+        // If it has an id of -1, that means it's not in the database.
+        if(currentMap.rows[i].id === -1) {
+            returnObject.add.push(currentMap.rows[i]);
+            continue;
+        }
+
+        // If the new row was found in the previous ones, then it needs an update.
+        for(let j = 0; j < previousRows.length; j++) {
+            if(currentMap.rows[i].id === previousRows[j].id) {
+                returnObject.update.push(currentMap.rows[i]);
+                previousRows.splice(j, 1);
+                break;
+            }
+        }
+    }
+
+    // Any remaing rows that were not included in the new ones need to be deleted.
+    returnObject.delete = previousRows;
+    return returnObject;
+}
+
+/**
+ * A function that compares the data of two rows to declare what SQL statements need to be made to reflect the update in the database.
+ * @param previousRow The row that is saved in the database.
+ * @param currentRow The row that is being updated to the databased.
+ * @returns An object containing the node data that needs to be added, updated, and deleted from the database.
+ */
+function compareNodes(previousMap:FullMapDoc, currentMap:FullMapDoc): {add: NodeDoc[], update: NodeDoc[], delete: NodeDoc[]} {
+    const returnObject: {add: NodeDoc[], update: NodeDoc[], delete: NodeDoc[]} = {
+        add: [],
+        update: [],
+        delete: []
+    }
+
+    // Creating clone of the previous rows since we'll be removing any rows that need to be updated.
+    const previousNodes: NodeDoc[] = [];
+    for(let i = 0; i < previousMap.rows.length; i++) {
+        previousNodes.push.apply(previousNodes, previousMap.rows[i].nodes);
+    }
+
+    // Looping through each new node to see if it needs to be added or updated.
+    for(let i = 0; i < currentMap.rows.length; i++) {
+        for(let j = 0; j < currentMap.rows[i].nodes.length; j++) {
+            // Making sure the node has the correct foreign key.
+            // This is becuase some rows will start out without an id when they're sent from the client.
+            currentMap.rows[i].nodes[j].rowId = currentMap.rows[i].id;
+
+            // If it has an id of -1, that means it's not in the database.
+            if(currentMap.rows[i].nodes[j].id === -1) {
+                returnObject.add.push(currentMap.rows[i].nodes[j]);
+                continue;
+            }
+
+            // If the new row was found in the previous ones, then it needs an update.
+            for(let k = 0; k < previousNodes.length; k++) {
+                if(currentMap.rows[i].nodes[j].id === previousNodes[k].id) {
+                    returnObject.update.push(currentMap.rows[i].nodes[j]);
+                    previousNodes.splice(k, 1);
+                    break;
+                }
+            }
+        }
+    }
+
+    // Any remaing rows that were not included in the new ones need to be deleted.
+    returnObject.delete = previousNodes;
+    return returnObject;
+}

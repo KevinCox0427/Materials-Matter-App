@@ -129,6 +129,10 @@ class RegexTester {
                  * Otherwise it's a basic value, and we can just call the match test function.
                  */
                 else {
+                    if(typeof value === 'undefined' || value === null) {
+                        return `Error: Please provide a valid ${keyName}`;
+                    }
+                    
                     const result = matchTest(value.toString(), keyName);
 
                     /**

@@ -166,7 +166,9 @@ const Header: FunctionComponent<Props> = (props) => {
             name: 'New Node',
             index: nodeIndex,
             gallery: [],
-            htmlContent: ''  
+            htmlContent: '',
+            tags: [],
+            action: 'content'
         });
 
         /**

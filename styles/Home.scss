@@ -56,7 +56,7 @@ header {
                 color: inherit;
             }
 
-            &:hover, &:focus {
+            &:hover, &:focus-visible {
                 background-color: var(--white);
                 transform: scale(1.05);
                 cursor: pointer;
@@ -98,7 +98,7 @@ main {
             height: fit-content;
             transition: background-color 0.1s linear, transform 0.1s linear;
 
-            &:hover, &:focus {
+            &:hover, &:focus-visible {
                 background-color: var(--yellow);
                 transform: scale(1.05);
                 cursor: pointer;
@@ -136,7 +136,7 @@ main {
                 border-radius: 10em;
                 transition: 0.1s linear background-color, 0.1s linear transform;
 
-                &:hover, &:focus {
+                &:hover, &:focus-visible {
                     background-color: var(--white);
                     transform: scale(1.1);
 
