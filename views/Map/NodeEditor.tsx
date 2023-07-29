@@ -2,11 +2,10 @@ import React, { FunctionComponent } from "react";
 import TextEditor from "../components/TextEditor";
 
 type Props = {
-    node: NodeDoc,
-    setNode: React.Dispatch<React.SetStateAction<NodeDoc>>,
+    map: FullMapDoc
     setMap: React.Dispatch<React.SetStateAction<FullMapDoc>>,
     sideMenuData: {
-        type: 'node' | 'comment' | 'sessions';
+        type: 'node' | 'comment' | 'sessions' | 'tags';
         dataPointer: [number, number];
     },
     setNotification: React.Dispatch<React.SetStateAction<string>>,
@@ -30,6 +29,7 @@ type Props = {
  * @param userData (optional) Data of the logged in user.
  */
 const NodeEditor: FunctionComponent<Props> = (props) => {
+    const node = props.map.rows[props.sideMenuData.dataPointer[0]].nodes[props.sideMenuData.dataPointer[1]];
     /**
      * An asynchronous helper function to read a file from an input
      * @param file The File object created by the input
@@ -44,11 +44,9 @@ const NodeEditor: FunctionComponent<Props> = (props) => {
     }
 
     /**
-     * Event handler to parse an uploaded file into a base64 string and add it to the props.node's gallery array.
+     * Event handler to parse an uploaded file into a base64 string and add it to the node's gallery array.
      */
     async function uploadFile(e: React.ChangeEvent<HTMLInputElement>) {
-        const newGallery = [...props.node.gallery];
-
         /**
         * If it's file size is greater than 1MB, do nothing.
         */
@@ -87,7 +85,7 @@ const NodeEditor: FunctionComponent<Props> = (props) => {
                 },
                 body: JSON.stringify({
                     image: image,
-                    nodeId: props.node.id
+                    nodeId: node.id
                 })
             })).json();
 
@@ -105,14 +103,13 @@ const NodeEditor: FunctionComponent<Props> = (props) => {
             image = response.url;
         }
         
-        newGallery.push(image);
-        props.setNode({...props.node,
-            gallery: newGallery
-        })
+        const newMap = {...props.map};
+        newMap.rows[props.sideMenuData.dataPointer[0]].nodes[props.sideMenuData.dataPointer[1]].gallery.push(image);
+        props.setMap(newMap);
     }
 
     /**
-     * Event handler to remove a file from the props.node's gallery array.
+     * Event handler to remove a file from the node's gallery array.
      * @param index The index of the file in the array.
      */
     function deleteImage(index: number) {
@@ -128,19 +125,14 @@ const NodeEditor: FunctionComponent<Props> = (props) => {
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    urls: [props.node.gallery[index]]
+                    urls: [node.gallery[index]]
                 })
             });
         }
 
-        props.setMap(oldMap => {
-            const newRows = [...oldMap.rows];
-            newRows[props.sideMenuData.dataPointer[0]].nodes[props.sideMenuData.dataPointer[1]].gallery.splice(index, 1);
-
-            return {...oldMap,
-                rows: newRows
-            };
-        });
+        const newMap = {...props.map};
+        newMap.rows[props.sideMenuData.dataPointer[0]].nodes[props.sideMenuData.dataPointer[1]].gallery.splice(index, 1);
+        props.setMap(newMap);
     }
     /**
      * Event handler to move an image in the gallery up one index.
@@ -148,14 +140,13 @@ const NodeEditor: FunctionComponent<Props> = (props) => {
      */
     function moveImageUp(index: number) {
         if(index === 0) return;
-        const targetImage = props.node.gallery[index]
-        const newGallery = [...props.node.gallery];
+        const newMap = {...props.map};
+        const newNode = newMap.rows[props.sideMenuData.dataPointer[0]].nodes[props.sideMenuData.dataPointer[1]];
+        
+        newNode.gallery.splice(index, 1);
+        newNode.gallery.splice(index - 1, 0, newNode.gallery[index]);
 
-        newGallery.splice(index, 1);
-        newGallery.splice(index - 1, 0, targetImage);
-        props.setNode({...props.node,
-            gallery: newGallery
-        });
+        props.setMap(newMap);
     }
 
     /**
@@ -163,38 +154,37 @@ const NodeEditor: FunctionComponent<Props> = (props) => {
      * @param index Index of the image being moved.
      */
     function moveImageDown(index: number) {
-        if(index === props.node.gallery.length - 1) return;
-        const targetImage = props.node.gallery[index]
-        const newGallery = [...props.node.gallery];
+        if(index === node.gallery.length - 1) return;
+        const newMap = {...props.map};
+        const newNode = newMap.rows[props.sideMenuData.dataPointer[0]].nodes[props.sideMenuData.dataPointer[1]];
 
-        newGallery.splice(index, 1);
-        newGallery.splice(index + 1, 0, targetImage);
-        props.setNode({...props.node,
-            gallery: newGallery
-        });
+        newNode.gallery.splice(index, 1);
+        newNode.gallery.splice(index + 1, 0, newNode.gallery[index]);
+
+        props.setMap(newMap);
     }
 
     /**
-     * Event handler to change the name of the props.node.
+     * Event handler to change the name of the node.
      */
     function changeName(e: React.ChangeEvent<HTMLInputElement>) {
-        props.setNode({...props.node,
-            name: e.target.value
-        });
+        const newMap = {...props.map}
+        newMap.rows[props.sideMenuData.dataPointer[0]].nodes[props.sideMenuData.dataPointer[1]].name = e.target.value;
+        props.setMap(newMap);
     }
 
     /**
-     * Event handler to change the text a props.node.
+     * Event handler to change the text a node.
      * @param newContent The new html string to set.
      */
     function changeText(newContent: string) {
-        props.setNode({...props.node,
-            htmlContent: newContent
-        });
+        const newMap = {...props.map}
+        newMap.rows[props.sideMenuData.dataPointer[0]].nodes[props.sideMenuData.dataPointer[1]].htmlContent = newContent;
+        props.setMap(newMap);
     }
 
     return <>
-        <input className="Title" value={props.node.name} onChange={changeName}></input>
+        <input className="Title" value={node.name} onChange={changeName}></input>
         <div className="GalleryUpload">
             <h3>Gallery:</h3>
             <div className="FileUpload">
@@ -203,9 +193,9 @@ const NodeEditor: FunctionComponent<Props> = (props) => {
                 <label>Click or drag to upload +</label>
             </div>
             <div className="GalleryEdit">
-                {props.node.gallery.map((image, i) => {
+                {node.gallery.map((image, i) => {
                     return <div key={i} className="ImageWrapper">
-                        <img src={image} alt={`${props.node.name} Gallery Image ${i+1}`}></img>
+                        <img src={image} alt={`${node.name} Gallery Image ${i+1}`}></img>
                         <button onClick={() => moveImageUp(i)}>
                             <i className="fa-solid fa-arrow-up"></i>
                         </button>
@@ -221,7 +211,7 @@ const NodeEditor: FunctionComponent<Props> = (props) => {
         </div>
         <div className="TextEditorWrapper">
             <h3>Content:</h3>
-            <TextEditor content={props.node.htmlContent ? props.node.htmlContent : ''} setContent={changeText}></TextEditor>
+            <TextEditor content={node.htmlContent ? node.htmlContent : ''} setContent={changeText}></TextEditor>
         </div>
     </>
 }

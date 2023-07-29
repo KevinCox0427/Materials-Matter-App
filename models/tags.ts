@@ -5,7 +5,7 @@ import { isDBready, knex } from "./__init__";
  */
 declare global {
     interface Tag {
-        name: '',
+        name: string,
         mapId: number
     }
 
@@ -72,7 +72,7 @@ const Tags = {
      * @param data The data to create the tag with.
      * @returns The id of the newly created tag, or false upon failure
      */
-    create: async (data: Tag): Promise<number | false> => {
+    create: async (data: Tag[]): Promise<number | false> => {
         if(!isDBready) return false;
 
         try {
@@ -130,3 +130,5 @@ const Tags = {
         }   
     }
 }
+
+export default Tags;

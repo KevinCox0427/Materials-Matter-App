@@ -9,7 +9,7 @@ type Props = {
     nodeIndex: number,
     node: NodeDoc,
     setSideMenuData: React.Dispatch<React.SetStateAction<null | {
-        type: 'node' | 'comment' | 'sessions';
+        type: 'node' | 'comment' | 'sessions' | 'tags';
         dataPointer: [number, number];
     }>>
 }

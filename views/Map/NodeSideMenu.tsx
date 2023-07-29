@@ -3,9 +3,8 @@ import NodeEditor from "./NodeEditor";
 import NodeViewer from "./NodeViewer";
 
 type Props = {
-    node: NodeDoc | undefined,
     sideMenuData: {
-        type: 'node' | 'comment' | 'sessions';
+        type: 'node' | 'comment' | 'sessions' | 'tags';
         dataPointer: [number, number];
     },
     setSideMenuData: React.Dispatch<React.SetStateAction<Props["sideMenuData"] | null>>,
@@ -27,8 +26,7 @@ type Props = {
 /**
  * The React component for the side menu to be able to edit and view nodes.
  * 
- * @param node The contents of the node being viewed.
- * @param sideMenuData A pointer to the contents data that's being editted.
+ * @param sideMenuData The data that stores the reference to the node that's being edited.
  * @param setSideMenuData The set state function to change what data is being pointed to.
  * @param map The state variable representing all the map's data.
  * @param setMap The set state function for the map to change the data that's being editted in the side menu.
@@ -39,17 +37,8 @@ type Props = {
  * @param userData (optional) Data of the logged in user.
  */
 const NodeSideMenu: FunctionComponent<Props> = (props) => {
-    if(!props.node) return <></>;
-
-    /**
-     * Setting state for the node's content to be editted.
-     */
-    const [node, setNode] = useState(props.node);
-    useEffect(() => {
-        setNode(props.node!);
-        if(isEditing) toggleIsEditing();
-    }, [props.node]);
-
+    const node = props.map.rows[props.sideMenuData.dataPointer[0]].nodes[props.sideMenuData.dataPointer[1]];
+    if(!node) return <></>;
     /**
      * State variable to keep track of when the node is being edited
      */
@@ -60,7 +49,6 @@ const NodeSideMenu: FunctionComponent<Props> = (props) => {
      */
     function toggleIsEditing() {
         setIsEditing(!isEditing);
-        setNode(props.node!);
         
         // Removing any toolbars the Quill created.
         const qlToolbars = Array.from(document.getElementsByClassName('ql-toolbar')) as HTMLDivElement[];
@@ -85,7 +73,7 @@ const NodeSideMenu: FunctionComponent<Props> = (props) => {
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    urls: props.node!.gallery
+                    urls: node.gallery
                 })
             });
         }
@@ -101,22 +89,12 @@ const NodeSideMenu: FunctionComponent<Props> = (props) => {
         props.setSideMenuData(null);
     }
 
-    /**
-     * Event handler to save this this component's state data to the map's state data.
-     */
-    function handleSave() {
-        const newMap = {...props.map};
-        newMap.rows[props.sideMenuData.dataPointer[0]].nodes[props.sideMenuData.dataPointer[1]] = {...node};
-        props.setMap(newMap);
-        toggleIsEditing();
-    }
-
     return <div className="node">
         <div className="Buttons">
             {isEditing ? 
                 <button className="Activated" onClick={toggleIsEditing}>
-                    <i className="fa-solid fa-x"></i>
-                    Cancel
+                    <i className="fa-solid fa-check"></i>
+                    Done
                 </button>
             :
                 <button onClick={toggleIsEditing}>
@@ -124,12 +102,6 @@ const NodeSideMenu: FunctionComponent<Props> = (props) => {
                     Edit
                 </button>
             }
-            {isEditing ? 
-                <button onClick={handleSave}>
-                    <i className="fa-solid fa-floppy-disk"></i>
-                    Save
-                </button>
-            : <></>}
             <button onClick={deleteNode}>
                 <i className="fa-solid fa-trash-can"></i>
                 Delete
@@ -137,8 +109,7 @@ const NodeSideMenu: FunctionComponent<Props> = (props) => {
         </div>
         {isEditing ? 
             <NodeEditor
-                node={node}
-                setNode={setNode}
+                map={props.map}
                 setMap={props.setMap}
                 sideMenuData={props.sideMenuData}
                 userData={props.userData}
@@ -146,7 +117,7 @@ const NodeSideMenu: FunctionComponent<Props> = (props) => {
             ></NodeEditor>
         :
             <NodeViewer
-                node={props.node}
+                node={node}
             ></NodeViewer>
         }
     </div>

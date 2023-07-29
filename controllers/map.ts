@@ -7,6 +7,7 @@ import RegexTester from '../utils/regexTester';
 import Rows from '../models/rows';
 import Nodes from '../models/nodes';
 import { isAuth } from '../utils/authentication';
+import Tags from '../models/tags';
 
 /**
  * Setting up a router for our index route.
@@ -32,6 +33,7 @@ export const regexStrings = {
 const mapRegex = new RegexTester({
     name: regexStrings.text,
     id: regexStrings.id,
+    tags: regexStrings.text,
     rows: {
         id: regexStrings.id,
         mapId: regexStrings.id,
@@ -45,7 +47,7 @@ const mapRegex = new RegexTester({
             gallery: regexStrings.image,
             htmlContent: regexStrings.html,
             action: /^(filter|content)$/,
-            tags: /^\[[\d\w\s!@#$%^&*()_+-=,.\/;'<>?:"]{1,2000}\]/
+            tags: regexStrings.text
         }
     }
 });
@@ -61,6 +63,7 @@ map.route('/new')
                 map: {
                     id: -1,
                     name: 'New Map',
+                    tags: [],
                     rows: []
                 },
                 sessions: [],
@@ -88,7 +91,7 @@ map.route('/new')
             return;
         }
 
-        // Creating the map in teh database.
+        // Creating the map in the database.
         const mapData = regexResult as FullMapDoc;
         const newMapId = await Maps.create({
             name: mapData.name
@@ -99,6 +102,20 @@ map.route('/new')
             res.status(500).send({
                 success: false,
                 message: 'Map failed to be created in the database.'
+            });
+            return;
+        }
+
+        // Creating the tags in the database
+        if(! (await Tags.create(mapData.tags.map(tag => {
+            return {
+                name: tag.name,
+                mapId: newMapId
+            }
+        })))) {
+            res.status(500).send({
+                success: false,
+                message: 'Tags failed to be created in the database.'
             });
             return;
         }
@@ -282,7 +299,8 @@ map.route('/:id')
                     gallery: node.gallery,
                     htmlContent: node.htmlContent,
                     action: node.action,
-                    tags: node.tags
+                    tags: node.tags,
+                    filter: null
                 }
             })))) {
                 res.status(500).send({

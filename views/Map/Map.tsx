@@ -11,6 +11,7 @@ import NodeSideMenu from "./NodeSideMenu";
  * Setting up the socket.io server.
  */
 import io from "socket.io-client";
+import TagsEditor from "./TagsEditor";
 export const socket = io("localhost:3000");
 
 /**
@@ -68,7 +69,7 @@ const Map: FunctionComponent<Props> = (props) => {
      * State variable pointing to the data that's being edited in the side menu.
      */
     const [sideMenuData, setSideMenuData] = useState<{
-        type: 'node' | 'comment' | 'sessions',
+        type: 'node' | 'comment' | 'sessions' | 'tags',
         dataPointer: [number, number]
     } | null>(null);
 
@@ -319,7 +320,6 @@ const Map: FunctionComponent<Props> = (props) => {
                 {sideMenuData ? <>
                     {sideMenuData.type === 'node' ? 
                         <NodeSideMenu
-                            node={map.rows[sideMenuData.dataPointer[0]] ? map.rows[sideMenuData.dataPointer[0]].nodes[sideMenuData.dataPointer[1]] : undefined}
                             map={map}
                             setMap={setMap}
                             sideMenuData={sideMenuData}
@@ -366,6 +366,11 @@ const Map: FunctionComponent<Props> = (props) => {
                                 </Fragment>
                             })}
                         </div>
+                    : <></>}
+                    {sideMenuData.type === 'tags' ? 
+                        <TagsEditor 
+                            tags={map.tags}
+                        />
                     : <></>}
                 </> : <></>}
             </div>

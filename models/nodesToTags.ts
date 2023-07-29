@@ -19,6 +19,8 @@ declare global {
  */
 export const nodesToTagsTable = (table:any) => {
     table.increments("id").primary();
+    table.integer('tagId').unsigned().nullable();
+    table.foreign('tagId').references('id').inTable('tags').onDelete('CASCADE').onUpdate('CASCADE');
     table.integer('nodeId').unsigned().nullable();
     table.foreign('nodeId').references('id').inTable('nodes').onDelete('CASCADE').onUpdate('CASCADE');
 }

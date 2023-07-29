@@ -11,11 +11,12 @@ declare global {
         gallery: string[],
         htmlContent: string,
         action: 'filter' | 'content',
-        tags: string[]
+        filter: string | null
     } 
 
     interface NodeDoc extends NodeType {
-        id: number
+        id: number,
+        tags: TagDoc[],
     }
 }
 
@@ -31,8 +32,9 @@ export const nodesTable = (table:any) => {
     table.json('gallery');
     table.integer('rowId').unsigned().nullable();
     table.foreign('rowId').references('id').inTable('rows').onDelete('CASCADE').onUpdate('CASCADE');
-    table.json('tags');
     table.string('action').defaultTo('content');
+    table.integer('filter').unsigned().nullable();
+    table.foreign('filter').references('id').inTable('tags').onDelete('SET_NULL').onUpdate('SET_NULL');
 }
 
 /**
@@ -65,7 +67,7 @@ const Nodes = {
      * @param data The data to overwrite with.
      * @returns A boolean representing the success of the operation
      */
-    update: async (id:number, data: Partial<NodeType>): Promise<boolean> => {
+    update: async (id:number, data: Partial<NodeDoc>): Promise<boolean> => {
         if(!isDBready) return false;
 
         try{ 

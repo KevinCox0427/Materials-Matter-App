@@ -10,7 +10,8 @@ declare global {
     } 
 
     interface MapDoc extends MapType {
-        id: number
+        id: number,
+        tags: TagDoc[]
     }
 
     interface FullMapDoc extends MapDoc {
@@ -40,11 +41,20 @@ const Maps = {
         if(!isDBready) return false;
 
         try {
-            const result = await knex('maps')
-                .select([
-                    'maps.id',
-                    'maps.name',
-                    knex.raw(`(
+            const result = await knex.raw(`
+                SELECT
+                    m.id,
+                    m.name,
+                    IF(COUNT(*) = 0, JSON_ARRAY(), JSON_ARRAYAGG(JSON_OBJECT('id', t.id, 'name', t.name, 'mapId', t.mapId))) AS 'tags',
+                    IFNULL((
+                        WITH
+                            rowData as (
+                                SELECT
+                                    r.id, r.name, r.index, r.mapId,
+                                    ROW_NUMBER() OVER(PARTITION BY r.index ORDER BY r.index) AS array_index
+                                FROM \`rows\` r
+                                WHERE r.mapId = ?
+                            )
                         SELECT JSON_ARRAYAGG(
                             JSON_INSERT(
                                 JSON_OBJECT(
@@ -54,40 +64,66 @@ const Maps = {
                                     'mapId', r.mapId
                                 ),
                                 '$.nodes',
-                                (
-                                    SELECT JSON_ARRAYAGG(JSON_OBJECT(
-                                        'id', n.id,
-                                        'name', n.name,
-                                        'index', n.index,
-                                        'rowId', r.id,
-                                        'gallery', n.gallery,
-                                        'htmlContent', n.htmlContent,
-                                        'tags', n.tags,
-                                        'action', n.action
-                                    ))
-                                    FROM \`nodes\` n
+                                IFNULL ((
+                                    WITH
+                                        nodeData as (
+                                            SELECT
+                                                n.id,
+                                                n.name,
+                                                n.index,
+                                                n.rowId,
+                                                n.gallery,
+                                                n.htmlContent,
+                                                n.action,
+                                                n.filter,
+                                                IF(COUNT(t2.id) = 0, JSON_ARRAY(),  JSON_ARRAYAGG(JSON_OBJECT('id', t2.id, 'name', t2.name, 'mapId', t2.mapId))) as 'tags',
+                                                ROW_NUMBER() OVER(PARTITION BY n.index ORDER BY n.index) AS array_index
+                                            FROM \`nodes\` n
+                                            LEFT JOIN \`tags\` t1 on n.filter = t1.id
+                                            LEFT JOIN \`nodestotags\` ntt ON n.id = ntt.nodeId
+                                            LEFT JOIN \`tags\` t2 on ntt.tagId = t2.id
+                                            WHERE n.rowId = r.id
+                                            GROUP BY n.id
+                                        )
+                                    SELECT 
+                                        JSON_ARRAYAGG(JSON_OBJECT(
+                                            'id', n.id,
+                                            'name', n.name,
+                                            'index', n.index,
+                                            'rowId', r.id,
+                                            'gallery', n.gallery,
+                                            'htmlContent', n.htmlContent,
+                                            'tags', n.tags,
+                                            'action', n.action,
+                                            'filter', n.filter
+                                        )) as 'nodes'
+                                    FROM \`nodeData\` n
                                     WHERE n.rowId = r.id
                                     GROUP BY n.rowId
-                                )
+                                    ORDER BY n.array_index
+                                ), JSON_ARRAY())
                             )
-                        ) 
-                        FROM \`rows\` r
+                        ) as 'rows'
+                        FROM \`rowData\` r
                         WHERE r.mapId = ?
                         GROUP BY r.mapId
-                    ) as 'rows'`, id)
-                ])
-            .where({id: id})
-            .first();
-
-            const parseResult = {...result,
-                rows: JSON.parse(result.rows)
-            };
-
-            // Since SQL returns null values instead of empty arrays, we need to check for that on the rows and nodes.
-            if(!parseResult.rows) parseResult.rows = [];
-            for(let i = 0; i < parseResult.rows.length; i++) {
-                if(!parseResult.rows[i].nodes) parseResult.rows[i].nodes = [];
+                        ORDER BY r.array_index
+                    ), JSON_ARRAY()) as 'rows'
+                FROM \`maps\` m
+                LEFT JOIN \`tags\` t ON t.mapId = m.id
+                WHERE m.id = ?
+                GROUP BY m.id
+                Limit 1
+            `, [id, id, id]);
+            
+            if(result[0].length === 0) {
+                return false;
             }
+
+            const parseResult = {...result[0][0],
+                rows: JSON.parse(result[0][0].rows),
+                tags: JSON.parse(result[0][0].tags)
+            };
 
             return parseResult;
         } catch(e) {

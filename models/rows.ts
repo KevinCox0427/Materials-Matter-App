@@ -61,7 +61,7 @@ const Rows = {
      * @param data The data to overwrite with.
      * @returns A boolean representing the success of the operation
      */
-    update: async (id:number, data: Partial<RowType>): Promise<boolean> => {
+    update: async (id:number, data: Partial<RowDoc>): Promise<boolean> => {
         if(!isDBready) return false;
 
         try {

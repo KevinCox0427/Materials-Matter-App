@@ -3,7 +3,7 @@ import React, { FunctionComponent } from "react";
 type Props = {
     commentData: CommentDoc,
     setSideMenuData: React.Dispatch<React.SetStateAction<{
-        type: 'node' | 'comment' | 'sessions';
+        type: 'node' | 'comment' | 'sessions' | 'tags';
         dataPointer: [number, number];
     } | null>>,
     commentIndex: number

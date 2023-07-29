@@ -9,7 +9,7 @@ type Props = {
     selectedSession: number,
     setSessions: React.Dispatch<React.SetStateAction<FullSessionDoc[]>>,
     sideMenuData: {
-        type: 'node' | 'comment' | 'sessions',
+        type: 'node' | 'comment' | 'sessions' | 'tags',
         dataPointer: [number, number]
     } | null,
     setSideMenuData: React.Dispatch<React.SetStateAction<Props["sideMenuData"]>>,
@@ -168,7 +168,8 @@ const Header: FunctionComponent<Props> = (props) => {
             gallery: [],
             htmlContent: '',
             tags: [],
-            action: 'content'
+            action: 'content',
+            filter: null
         });
 
         /**
@@ -323,6 +324,16 @@ const Header: FunctionComponent<Props> = (props) => {
     }
 
     /**
+     * Event handler to toggle opening the tags on the side menu.
+     */
+    function toggleTags() {
+        props.setSideMenuData(props.sideMenuData && props.sideMenuData.type === 'sessions' ? null : {
+            type: 'tags',
+            dataPointer: [0, 0]     // doesn't really matter
+        });
+    }
+
+    /**
      * Function to submit the current map data to the server to be saved.
      */
     async function handleSaveMap() {
@@ -351,11 +362,19 @@ const Header: FunctionComponent<Props> = (props) => {
     }
     
     return <header className="Head">
-        <a href="/" className="Back">
-            <i className="fa-solid fa-backward-step"></i>
-            <p>Back</p>
-        </a>
-        <div className="Buttons">
+        <div className="Group">
+            <a href="/" className="Back">
+                <i className="fa-solid fa-backward-step"></i>
+                <p>Back</p>
+            </a>
+            <input value={props.map.name} onChange={handleNameChange}></input>
+        </div>
+        <div className="Group">
+            <button className="Preview">
+                <i className="fa-solid fa-eye"></i>
+                {/* {props.action === 'Preview' ? <i className="fa-solid fa-eye"></i> : <i className="fa-solid fa-eye-slash"></i>} */}
+                <p>Preview</p>
+            </button>
             <button className={`AddComment ${props.action === 'AddComment' ? 'Activated' : ' '}`} onMouseDown={e => {handleHeaderButtonStart('AddComment')}} onTouchStart={e => {handleHeaderButtonStart('AddComment')}}>
                 <i className="fa-solid fa-comment"></i>
                 <p>Add Comment</p>
@@ -368,16 +387,19 @@ const Header: FunctionComponent<Props> = (props) => {
                 <i className="fa-solid fa-plus"></i>
                 <p>Add Row</p>
             </button>
+            <button className={`Tags ${props.sideMenuData?.type === 'tags' ? 'Activated' : ''}`} onClick={toggleTags}>
+                <i className="fa-solid fa-tag"></i>
+                <p>Edit Tags</p>
+            </button>
+            <button className={`Sessions ${props.sideMenuData?.type === 'sessions' ? 'Activated' : ''}`} onClick={toggleSessions}>
+                <i className="fa-solid fa-bars"></i>
+                <p>Sessions</p>
+            </button>
             <button className="Save" onClick={handleSaveMap}>
                 <i className="fa-solid fa-floppy-disk"></i>
                 <p>Save</p>
             </button>
-            <button className="Sessions" onClick={toggleSessions}>
-                <i className="fa-solid fa-bars"></i>
-                <p>Sessions</p>
-            </button>
         </div>
-        <input value={props.map.name} onChange={handleNameChange}></input>
     </header>
 }
 

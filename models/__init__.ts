@@ -4,8 +4,8 @@ import { imagesTable } from "./images";
 import { mapsTable } from "./maps";
 import { nodesTable } from "./nodes";
 import { nodesToTagsTable } from "./nodesToTags";
-import Rows, { rowsTable } from "./rows";
-import { tagsTable } from "./tag";
+import { rowsTable } from "./rows";
+import { tagsTable } from "./tags";
 import { usersTable } from "./users";
 
 /**
@@ -36,7 +36,7 @@ const tableSchemas = {
     rows: rowsTable,
     nodes: nodesTable,
     tags: tagsTable,
-    nodeToTags: nodesToTagsTable,
+    nodesToTags: nodesToTagsTable,
     images: imagesTable,
     commentsessions: commentSessionsTable,
     comments: commentsTable

@@ -8,7 +8,7 @@ type Props = {
     map: FullMapDoc,
     setMap: React.Dispatch<React.SetStateAction<FullMapDoc>>,
     setSideMenuData: React.Dispatch<React.SetStateAction<null | {
-        type: 'node' | 'comment' | 'sessions';
+        type: 'node' | 'comment' | 'sessions' | 'tags';
         dataPointer: [number, number];
     }>>
 }
