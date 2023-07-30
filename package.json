@@ -4,9 +4,10 @@
   "description": "Re-done application",
   "main": "dist/server.js",
   "scripts": {
-    "build": "npm i && tsc && sass styles:dist/public/css && webpack",
-    "start": "node dist/utils/watch.js",
-    "deploy": "node utils/deploy.js"
+    "build": "npm i && tsc && sass styles:dist/public/css && vite build",
+    "dev": "node utils/watch.js",
+    "start": "node dist/server.js",
+    "nodemon": "nodemon server.ts --exec 'tsc && node dist/server.js' -e ts,tsx --ignore node_modules/ --ignore dist/"
   },
   "repository": {
     "type": "git",
@@ -38,11 +39,11 @@
     "@types/quill": "^2.0.10",
     "@types/react": "^18.0.28",
     "@types/react-dom": "^18.2.4",
+    "@vitejs/plugin-react": "^4.0.3",
+    "nodemon": "^3.0.1",
     "sass": "^1.60.0",
-    "ts-loader": "^9.4.2",
     "typescript": "^5.0.2",
-    "webpack": "^5.76.3",
-    "webpack-cli": "^5.0.1"
+    "vite": "^4.4.7"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.350.0",

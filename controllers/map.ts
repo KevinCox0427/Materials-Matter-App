@@ -156,6 +156,78 @@ map.route('/new')
     })
 
 /**
+ * A POST route to get map data for debugging
+ */
+map.post('/props/:id', async (req, res) => {
+    // Guard clause to make sure the id is a number.
+    if(!req.params.id || isNaN(parseInt(req.params.id))) {
+        res.status(400).send('Invalid Id.');
+        return;
+    }
+
+    // Getting the map from the database.
+    const map = await Maps.getById(parseInt(req.params.id));
+
+    // If the map wasn't found, return error.
+    if(!map) {
+        res.status(400).send('Invalid Id.');
+        return;
+    }
+
+    // Getting the comment sessions from the database.
+    const sessions = await CommentSessions.get({
+        mapId: map.id
+    });
+
+    // And filling the sessions with their comments from the database.
+    const fullSessions:FullSessionDoc[] = await Promise.all(
+        sessions.map(async (session) => {
+            let comments = await Comments.get({
+                commentsessionId: session.id
+            });
+        
+            // Using a table of ids to store the replies
+            let commentMap:{
+                [replyId: string]: CommentDoc[]
+            } = {}
+
+            // Adding each comment to the table based on its reply id.
+            comments.forEach(comment => {
+                const key = '' + (comment.replyId ? comment.replyId : 0);
+
+                if(!Object.keys(commentMap).includes(key)) {
+                    commentMap = {...commentMap,
+                        [key]: []
+                    }
+                }
+
+                commentMap[key].push(comment);
+            })
+
+            return {...session,
+                comments: commentMap
+            }
+        })
+    );
+
+    // Sending the server properties to pass to the client.
+    res.status(200).send({
+        mapPageProps: {
+            map: map,
+            sessions: fullSessions,
+            userData: req.user ? {
+                userId: req.user.id,
+                firstName: req.user.firstName,
+                lastName: req.user.lastName,
+                image: req.user.image,
+                isAdmin: req.user.admin
+            } : undefined
+        }
+    });
+});
+
+
+/**
  * Setting up a GET endpoint to serve the map page React file.
  */
 map.route('/:id')

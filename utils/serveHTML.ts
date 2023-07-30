@@ -14,7 +14,6 @@ declare global {
  * Finally, using webpack, we hydrate the "root" div by sending the client a bundled JS file via the document head.
  * This is the exact process that Create-React-App does, but instead we're doing it on our own Node server.
  * 
- * @param reactComponent The JSX component to be rendered.
  * @param fileName The name of the CSS and JS files to be sent to the client (should be the same).
  * @param ServerProps (Optional) Allows us to pass any properties from the server to the client. This is done by parsing it into a JSON string and attaching it to the client's window. This is a technique used by full-stack frameworks like Next.js or Remix.js.
  * @param seoOptions (Optional) Decides how to render the meta tags in the header for SEO purposes.
@@ -51,13 +50,14 @@ function serveHTML(fileName:string, inputServerProps:ServerPropsType = {}, seoOp
             <link rel="stylesheet" type="text/css" href="/public/css/${fileName}.css">
             <link rel="stylesheet" type="text/css" href="/public/css/globals.css">
             <link rel="stylesheet" href="/public/css/fontawesome.css" />
+            <script type="module" src="/public/js/client.js"></script>
             <script src="/public/js/quill.js"></script>
-            <link href="/public/css/quill.css" rel="stylesheet"></link>
+            <link href="/public/css/quill.css" rel="stylesheet" />
             <script>window.ServerProps=${JSON.stringify(inputServerProps)}</script>
         </head>
         <body>
             <div id="root"></div>
-            <script src="/public/js/${fileName}.js"></script>
+            <script type="module" src="/public/js/${fileName}.js"></script>
             <noscript>JavaScript must be enabled for this app to run.</noscript>
         </body>
         </html>

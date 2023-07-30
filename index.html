@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Materials Matter App</title>
+    <link rel="stylesheet" type="text/css" href="/styles/Home.scss">
+    <link rel="stylesheet" type="text/css" href="/styles/globals.scss">
+    <link rel="stylesheet" href="/public/css/fontawesome.css" />
+    <script src="/public/js/quill.js"></script>
+    <link href="/public/css/quill.css" rel="stylesheet" />
+    <script async>
+        const props = fetch('http://localhost:3000/map/props/3', { method: 'POST', headers: { "Content-Type": 'application/json', "Accept": 'application/json' }});
+        props.then(async (result) => {
+            window.ServerProps = await result.json();
+        });
+    </script>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="module" src="/views/Map/Map.tsx"></script>
+</body>
+</html>

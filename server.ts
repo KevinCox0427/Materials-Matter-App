@@ -60,7 +60,6 @@ import './models/__init__';
  * Importing the authentication and socket.io configuration
  */
 import './utils/authentication';
-import './utils/socketIO';
 
 
 /**
