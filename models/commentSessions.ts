@@ -89,7 +89,8 @@ const CommentSessions = {
 
         try {
             const result = await knex('commentsessions')
-                .where(query);
+                .where(query)
+                .orderBy('start');
 
             // Converting the timestamps so they're usuable on the front-end.
             return result.map((session:CommentSessionDoc) => {

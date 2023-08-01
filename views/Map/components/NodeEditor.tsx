@@ -1,5 +1,5 @@
 import React, { FunctionComponent } from "react";
-import TextEditor from "../components/TextEditor";
+import TextEditor from "./TextEditor";
 
 type Props = {
     map: FullMapDoc

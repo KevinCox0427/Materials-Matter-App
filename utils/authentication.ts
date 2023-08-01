@@ -29,7 +29,7 @@ declare global {
 passport.use(new Strategy({
         clientID: process.env.googleClientId || '',
         clientSecret: process.env.googleClientSecret || '',
-        callbackURL: process.env.googleCallbackURI || '',
+        callbackURL: `${process.env.originURL}/users/callback` || '',
         passReqToCallback: true
     },
     async (request:any, accessToken:any, refreshToken:any, profile:any, done:any) => {

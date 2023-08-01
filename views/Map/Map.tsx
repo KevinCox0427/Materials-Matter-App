@@ -1,17 +1,19 @@
 import React, { Fragment, FunctionComponent, useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
-import Row from "./Row";
-import MapComment from "./MapComment";
-import Header from "./Header";
-import Comment from "./Comment";
-import SessionOption from "./SessionOption";
-import NodeSideMenu from "./NodeSideMenu";
+import { Provider } from 'react-redux';
+import store from './store/store';
 
-/**
- * Setting up the socket.io server.
- */
+// Importing Components.
+import Row from "./components/Row";
+import MapComment from "./components/MapComment";
+import Header from "./components/Header";
+import Comment from "./components/Comment";
+import SessionOption from "./components/SessionOption";
+import NodeSideMenu from "./components/NodeSideMenu";
+import TagsEditor from "./components/TagsEditor";
+
+// Setting up the socket.io server.
 import io from "socket.io-client";
-import TagsEditor from "./TagsEditor";
 export const socket = io("localhost:3000");
 
 /**
@@ -43,54 +45,16 @@ type Props = {
  * @param userData (optional) Data of the logged in user.
  */
 const Map: FunctionComponent<Props> = (props) => {
-    /**
-     * Making sure we inherit the properties from the server.
-     */
+    // Making sure we inherit the properties from the server.
     const pageProps = props.ServerProps.mapPageProps;
     if(!pageProps) return <></>;
 
-    /**
-     * The state variable representing the contents of the map.
-     */
-    const [map, setMap] = useState(pageProps.map);
-
-    /**
-     * State varialbes representing each comment session and the comments' content.
-     */
-    const [sessions, setSessions] = useState(pageProps.sessions);
-    /**
-     * State variable representing the index of the currently selected comment session.
-     */
-    const [selectedSession, setSelectedSession] = useState(pageProps.sessions.reduce((selectedSession, session, i) => {
-        return (new Date()) > new Date(session.start) && (new Date()) < new Date(session.expires) ? i : selectedSession
-    }, -1));
-
-    /**
-     * State variable pointing to the data that's being edited in the side menu.
-     */
-    const [sideMenuData, setSideMenuData] = useState<{
-        type: 'node' | 'comment' | 'sessions' | 'tags',
-        dataPointer: [number, number]
-    } | null>(null);
-
-    /**
-     * Storing a reference to the temp comment currently being editted.
-     */
-    const [tempComment, setTempComment] = useState<{
-        replyId: number,
-        commentIndex: number
-    } | null>(null);
-
-    /**
-     * Callback function to remove the temp comment if it wasn't posted when the side menu or comment session changes.
-     * Also will remove temp session if it wasn't finished being saved.
-     */
+    // Callback function to remove the temp comment if it wasn't posted when the side menu or comment session changes.
+    // Also will remove temp session if it wasn't finished being saved.
     useEffect(() => {
         const newSessions = [...sessions];
 
-        /**
-         * Removing temp session if it exists.
-         */
+        // Removing temp session if it exists.
         if(
             newSessions[newSessions.length-1] &&
             newSessions[newSessions.length-1].id === -1 && (
@@ -103,9 +67,7 @@ const Map: FunctionComponent<Props> = (props) => {
             newSessions.splice(newSessions.length-1, 1);
         }
 
-        /**
-         * If we're not editting the temp comment, remove it.
-         */
+        // If we're not editting the temp comment, remove it.
         if(
             newSessions[selectedSession] &&
             tempComment && (
@@ -125,20 +87,8 @@ const Map: FunctionComponent<Props> = (props) => {
         setSessions(newSessions);
     }, [sideMenuData, selectedSession]);
 
-    /**
-     * State variable representing what button on the header is currently selected.
-     */
-    const [action, setAction] = useState<'AddComment' | 'AddNode' | 'MoveNode' | 'AddRow' | ''>('');
-
-    /**
-     * Setting state for a notification pop-up and a reference to close it.
-     */
-    const [notification, setNotification] = useState('');
-    const notificationTimeout = useRef<NodeJS.Timeout | null>(null)
-
-    /**
-     * Automatically closing the notification after 10s.
-     */
+    // Automatically closing the notification after 10s.
+    const notificationTimeout = useRef<NodeJS.Timeout | null>(null);
     useEffect(() => {
         if(notificationTimeout.current) clearTimeout(notificationTimeout.current);
         notificationTimeout.current = setTimeout(() => setNotification(''), 10000);
@@ -150,15 +100,6 @@ const Map: FunctionComponent<Props> = (props) => {
     function handleCancelNotificaiton() {
         if(notificationTimeout.current) clearTimeout(notificationTimeout.current);
         setNotification('');
-    }
-    
-    /**
-     * An event handler to close the side menu when a node isn't clicked.
-     * @param e The click event.
-     */
-    function handleCloseSideMenu(e:React.MouseEvent | React.TouchEvent) {
-        if((e.target as HTMLElement).classList.contains('Node') || (e.target as HTMLElement).classList.contains('Comment')) return;
-        setSideMenuData(null);
     }
 
     /**
@@ -200,6 +141,7 @@ const Map: FunctionComponent<Props> = (props) => {
 
         setSessions(newSessions);
     }
+
     /**
      * A helper function to convert HH:MM:SS AM/PM to HH:MM:SS
      * @param time The inputted time string
@@ -215,9 +157,7 @@ const Map: FunctionComponent<Props> = (props) => {
         return `${dateString} ${timeString}`;
     }
 
-    /**
-     * Callback function for when the client recieves a new comment from the server.
-     */
+    // Callback function for when the client recieves a new comment from the server.
     useEffect(() => {
         socket.on('recieveComment', addServerComment);
     }, [socket]);
@@ -384,7 +324,9 @@ const Map: FunctionComponent<Props> = (props) => {
 const root = createRoot(document.getElementById('root') as HTMLDivElement);
 root.render(
     <React.StrictMode>
-        <Map ServerProps={window.ServerProps}></Map>
+        <Provider store={store}>
+            <Map ServerProps={window.ServerProps} />
+        </Provider>
     </React.StrictMode>
 );
 

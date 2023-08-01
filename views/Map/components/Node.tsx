@@ -61,28 +61,20 @@ const Node: FunctionComponent<Props> = (props) => {
      * @param x The x coordinate of the mouse position.
      */
     function endMoveNode(e:MouseEvent | TouchEvent) {
-        /**
-         * Getting the target element that the cursor was on when mouse up.
-         * This could be the map or a row.
-         */
+        // Getting the target element that the cursor was on when mouse up.
+        // This could be the map or a row.
         let target = e.target as HTMLElement;
         while(target.id !== 'Map' && !target.classList.contains('Row')) {
-            /**
-             * If the header button is being clicked, ignore.
-             */
+            // If the header button is being clicked, ignore.
             if(target.classList.contains('MoveButton')) return;
             target = target.parentElement as HTMLElement;
         }
 
-        /**
-         * Getting the mouse position.
-         */
+        // Getting the mouse position.
         const x = e instanceof MouseEvent ? e.clientX : e.touches[0].clientX;
         const y = e instanceof MouseEvent ? e.clientY : e.touches[0].clientY;
 
-        /**
-         * If the cursor hasn't traveled more than 10 pixels, then just end here and open the side menu.
-         */
+        // If the cursor hasn't traveled more than 10 pixels, then just end here and open the side menu.
         if(Math.abs(mousePosition.current[0]) - x < 10 && Math.abs(mousePosition.current[1] - y) < 10) {
             const mapEl = document.getElementById('Map') as HTMLDivElement;
             mapEl.removeEventListener('touchend', endMoveNode);
@@ -98,15 +90,11 @@ const Node: FunctionComponent<Props> = (props) => {
             return;
         }
         
-        /**
-         * If the target doesn't have a number id, that means it's not a row, and we can just return.
-         */
+        // If the target doesn't have a number id, that means it's not a row, and we can just return.
         if(isNaN(parseInt(target.id))) return;
 
-        /**
-         * Finding the index position of the new node based on the X position of the cursor.
-         * Since the wrapper has "space-around" for its justify-content, the space inbetween the nodes are not even.
-         */
+        // Finding the index position of the new node based on the X position of the cursor.
+        // Since the wrapper has "space-around" for its justify-content, the space inbetween the nodes are not even.
         const newMap = {...props.map}
 
         // Gettitng reference to the element responsible for wrapping the nodes and having a horiozontal scroll.
@@ -125,15 +113,11 @@ const Node: FunctionComponent<Props> = (props) => {
             newNodeIndex--;
         }
 
-        /**
-         * Deleting the node at its current spot and adding it to its new spot.
-         */
+        // Deleting the node at its current spot and adding it to its new spot.
         newMap.rows[props.rowIndex].nodes.splice(props.nodeIndex, 1);
         newMap.rows[newRowIndex].nodes.splice(newNodeIndex, 0, {...props.node});
 
-        /**
-         * Updating the indeces for all nodes
-         */
+        // Updating the indeces for all nodes
         newMap.rows[props.rowIndex].nodes = newMap.rows[props.rowIndex].nodes.map((node, i) => {
             return {...node,
                 index: i

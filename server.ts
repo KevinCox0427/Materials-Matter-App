@@ -14,11 +14,17 @@ export const app = express();
 
 /**
  * Parsing all endpoints to our server in JSON format.
- * Also encoding all URIs.
+ * Encoding all URIs.
+ * Adding CORS policies
  */
+import cors from 'cors';
+
 app.use(express.json({limit: '10mb'}));
 app.use(express.urlencoded({extended:true, limit: '10mb'}));
 app.set('etag', false);
+app.use(cors({
+    origin: '*'
+}));
 
 
 /**

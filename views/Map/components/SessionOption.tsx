@@ -1,5 +1,5 @@
 import React, { FunctionComponent, useEffect, useState } from "react";
-import { socket } from "./Map";
+import { socket } from "../Map";
 
 type Props = {
     isSelected: boolean,
