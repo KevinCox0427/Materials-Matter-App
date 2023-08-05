@@ -1,24 +1,6 @@
 import React, { FunctionComponent, useEffect } from "react";
 
 type Props = {
-    action: 'AddComment' | 'AddNode' | 'MoveNode' | 'AddRow' | '',
-    setAction: React.Dispatch<React.SetStateAction<Props["action"]>>,
-    map: FullMapDoc,
-    setMap: React.Dispatch<React.SetStateAction<FullMapDoc>>,
-    sessions: FullSessionDoc[],
-    selectedSession: number,
-    setSessions: React.Dispatch<React.SetStateAction<FullSessionDoc[]>>,
-    sideMenuData: {
-        type: 'node' | 'comment' | 'sessions' | 'tags',
-        dataPointer: [number, number]
-    } | null,
-    setSideMenuData: React.Dispatch<React.SetStateAction<Props["sideMenuData"]>>,
-    tempComment: {
-        replyId: number;
-        commentIndex: number;
-    } | null
-    setTempComment: React.Dispatch<React.SetStateAction<Props['tempComment']>>,
-    setNotification: React.Dispatch<React.SetStateAction<string>>
     userData?: {
         userId: number,
         firstName: string,
@@ -30,19 +12,6 @@ type Props = {
 
 /**
  * A component to render the header and all its actions.
- * 
- * @param action A state variable representing what action the user is currently performing. An empty string means they're not doing anything.
- * @param setAction A set state function to change what action is being performed.
- * @param map A state variable containing all the information for the rows and nodes on the map.
- * @param setMap A set state function to edit any information on the map.
- * @param sessions A state varialbe of an array of sessions for all the comments.
- * @param selectedSession A number representing the index of the currently selected session in the sessions array.
- * @param setSessions A set state function to edit the data of the sessions.
- * @param sideMenuData A state variable pointing to what data is currently being viewed/edited in the side menu.
- * @param setSideMenuData A set state function to change what data is being pointed to.
- * @param tempComment A state variable pointing to what comment is a temporary one when creating a new one.
- * @param setTempComment The set state function to change what comment its being pointed to.
- * @param setNotification A set state function to open a pop-up menu to notify the user.
  * @param userData (optional) Data of the logged in user.
  */
 const Header: FunctionComponent<Props> = (props) => {

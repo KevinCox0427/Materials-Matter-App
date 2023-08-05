@@ -2,13 +2,7 @@ import React, { FunctionComponent, useEffect, useState } from "react";
 import { socket } from "../Map";
 
 type Props = {
-    isSelected: boolean,
     index: number
-    sessions: FullSessionDoc[],
-    setSessions: React.Dispatch<React.SetStateAction<FullSessionDoc[]>>,
-    selectedSession: number,
-    setSelectedSession: React.Dispatch<React.SetStateAction<number>>,
-    setNotification: React.Dispatch<React.SetStateAction<string>>,
     userData?: {
         userId: number
         firstName: string,
@@ -21,13 +15,7 @@ type Props = {
 /**
  * A react component to render a comment session in the side menu to be able to edit its conents.
  * 
- * @param isSelected A boolean representing whether it's been selected by the user.
  * @param index. The index of this session in the sessions array.
- * @param sessions A state varialbe of an array of sessions for all the comments.
- * @param setSessions A set state function to edit the data of the sessions.
- * @param selectedSession A number representing the index of the currently selected session in the sessions array.
- * @param setSelectedSession A set state function to change which session is selected.
- * @param setNotification A set state function to open a pop-up menu to notify the user.
  * @param userData (optional) Data of the logged in user.
  */
 const SessionOption: FunctionComponent<Props> = (props) => {

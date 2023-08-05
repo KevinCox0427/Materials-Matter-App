@@ -3,25 +3,12 @@ import Node from "./Node";
 
 type Props = {
     rowIndex: number,
-    action: 'AddComment' | 'AddNode' | 'MoveNode' | 'AddRow' | '',
-    setAction: React.Dispatch<React.SetStateAction<Props["action"]>>,
-    map: FullMapDoc,
-    setMap: React.Dispatch<React.SetStateAction<FullMapDoc>>,
-    setSideMenuData: React.Dispatch<React.SetStateAction<null | {
-        type: 'node' | 'comment' | 'sessions' | 'tags';
-        dataPointer: [number, number];
-    }>>
 }
 
 /**
  * The React component that renders a row on the map.
  * 
  * @param rowIndex The index of the row this node belongs to.
- * @param action A state variable representing what action the user is currently performing. An empty string means they're not doing anything.
- * @param setAction A set state function to change what action is being performed.
- * @param map The state variable representing all the map's data.
- * @param setMap The set state function for the map to change the row's data.
- * @param setSideMenuData The set state function for the side menu's data to point it to this node's data upon a user's click.
  */
 const Row: FunctionComponent<Props> = (props) => {
     const rowData = props.map.rows[props.rowIndex];

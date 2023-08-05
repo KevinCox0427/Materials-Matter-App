@@ -3,15 +3,6 @@ import { socket } from '../Map';
 
 type Props = {
     comment: CommentDoc | undefined,
-    sessions: FullSessionDoc[],
-    selectedSession: number,
-    setSessions: React.Dispatch<React.SetStateAction<FullSessionDoc[]>>,
-    tempComment: {
-        replyId: number;
-        commentIndex: number;
-    } | null
-    setTempComment:  React.Dispatch<React.SetStateAction<Props['tempComment']>>,
-    setNotification: React.Dispatch<React.SetStateAction<string>>,
     marginLeft: number,
     userData?: {
         userId: number,
@@ -24,23 +15,14 @@ type Props = {
 
 /**
  * A React component to recursively render a comment on the side menu and all its replies.
- * 
  * @param comment The comment's data to start the recursion.
- * @param sessions A state varialbe of an array of sessions for all the comments.
- * @param selectedSession A number representing the index of the currently selected session in the sessions array.
- * @param setSessions A set state function to edit the data of the sessions.
- * @param tempComment A state variable pointing to what comment is a temporary one when creating a new one.
- * @param setTempComment The set state function to change what comment its being pointed to.
- * @param setNotification A set state function to open a pop-up menu to notify the user.
  * @param marginLeft The amount of margin left this comment need.
  * @param userData (optional) Data of the logged in user.
  */
 const Comment: FunctionComponent<Props> = (props) => {
     if(!props.comment) return <></>;
 
-    /**
-     * State variables to keep track of a comment's content and whether its replies are visible.
-     */
+    // State variables to keep track of a comment's content and whether its replies are visible.
     const [showReplies, setShowReplies] = useState(true);
     const [commentMessage, setCommentMessage] = useState('');
 
@@ -71,9 +53,7 @@ const Comment: FunctionComponent<Props> = (props) => {
      * Event handler to create an empty reply comment.
      */
     function reply() {
-        /**
-         * A user must be logged in to reply
-         */
+        // A user must be logged in to reply.
         if(!props.userData) {
             props.setNotification('You must be logged in to comment.');
             return;

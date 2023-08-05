@@ -1,15 +1,13 @@
 import React, { FunctionComponent } from "react";
+import { useSelector } from "../store/store";
 
-type Props = {
-    tags: TagDoc[]
-}
-
-const TagsEditor: FunctionComponent<Props> = (props) => {
+const TagsEditor: FunctionComponent = () => {
+    const tags = useSelector(state => state.map.tags);
     
     return <div className="tags">
         <h2>Tags</h2>
         <button>+ Add Tag</button>
-        {props.tags.map((tag, i) => <div key={i}>
+        {tags.map((tag, i) => <div key={i}>
             <input value={tag.name}></input>
             <button>
                 <i className="fa-solid fa-trash-can"></i>

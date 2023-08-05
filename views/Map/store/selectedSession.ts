@@ -9,5 +9,3 @@ export const selectedSessionSlice = createSlice({
         
     }
 });
-
-export default selectedSessionSlice.reducer;

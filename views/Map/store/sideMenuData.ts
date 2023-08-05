@@ -1,4 +1,4 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction, Reducer } from '@reduxjs/toolkit';
 import { PageLimit } from 'aws-sdk/clients/directoryservice';
 
 type SideMenuData = null | {
@@ -6,32 +6,34 @@ type SideMenuData = null | {
     dataPointer: [number, number]
 }
 
+const initialState: SideMenuData = null;
+
 export const sideMenuDataSlice = createSlice({
     name: 'sideMenuData',
-    initialState: null,
+    initialState: initialState as SideMenuData,
     reducers: {
-        setNode: (state:SideMenuData, action:PayloadAction<[number, number]>) => {
+        setNode: (state, action:PayloadAction<[number, number]>) => {
             state = {
                 type: 'node',
                 dataPointer: action.payload
             }
         },
 
-        setComment: (state:SideMenuData, action:PayloadAction<[number, number]>) => {
+        setComment: (state, action:PayloadAction<[number, number]>) => {
             state = {
                 type: 'comment',
                 dataPointer: action.payload
             }
         },
 
-        setSessions: (state:SideMenuData) => {
+        setSessions: (state) => {
             state = {
                 type: 'sessions',
                 dataPointer: [0, 0]
             }
         },
 
-        setTags: (state:SideMenuData) => {
+        setTags: (state) => {
             state = {
                 type: 'tags',
                 dataPointer: [0, 0]
@@ -49,5 +51,4 @@ export const sideMenuDataSlice = createSlice({
     }
 });
 
-export default sideMenuDataSlice.reducer;
-export const { setNode, setSessions, setComment, setTags } = sideMenuDataSlice.actions;
+export const { setNode, setSessions, setComment, setTags, closeSideMenu } = sideMenuDataSlice.actions;

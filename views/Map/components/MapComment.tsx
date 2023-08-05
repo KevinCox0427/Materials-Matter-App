@@ -2,10 +2,6 @@ import React, { FunctionComponent } from "react";
 
 type Props = {
     commentData: CommentDoc,
-    setSideMenuData: React.Dispatch<React.SetStateAction<{
-        type: 'node' | 'comment' | 'sessions' | 'tags';
-        dataPointer: [number, number];
-    } | null>>,
     commentIndex: number
 }
 
@@ -13,7 +9,6 @@ type Props = {
  * A component that renders a pin for any comment placed on the map.
  * 
  * @param commentData The contents of this comment.
- * @param setSideMenuData A set state function to change what data is being pointed to.
  * @param commentIndex The index of the comment in the session data.
  */
 const MapComment: FunctionComponent<Props> = (props) => {

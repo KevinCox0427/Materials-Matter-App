@@ -1,7 +1,7 @@
 import React, { Fragment, FunctionComponent, useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { Provider } from 'react-redux';
-import store from './store/store';
+import { store, useSelector} from './store/store';
 
 // Importing Components.
 import Row from "./components/Row";
@@ -14,6 +14,10 @@ import TagsEditor from "./components/TagsEditor";
 
 // Setting up the socket.io server.
 import io from "socket.io-client";
+import { setNotification } from "./store/notification";
+import { addComment } from "./store/sessions";
+import { closeSideMenu } from "./store/sideMenuData";
+import SideMenu from "./components/SideMenu";
 export const socket = io("localhost:3000");
 
 /**
@@ -23,14 +27,16 @@ declare global {
     type MapPageProps = {
         map: FullMapDoc,
         sessions: FullSessionDoc[],
-        userData: {
-            userId: number
-            firstName: string,
-            lastName: string,
-            image: string,
-            isAdmin: boolean
-        } | undefined
+        userData: UserData
     }
+
+    type UserData = {
+        userId: number
+        firstName: string,
+        lastName: string,
+        image: string,
+        isAdmin: boolean
+    } | undefined
 }
 
 type Props = {
@@ -49,43 +55,50 @@ const Map: FunctionComponent<Props> = (props) => {
     const pageProps = props.ServerProps.mapPageProps;
     if(!pageProps) return <></>;
 
+    const map = useSelector(state => state.map);
+    const selectedSession = useSelector(state => state.selectedSession);
+    const sessions = useSelector(state => state.sessions);
+
+    const action = useSelector(state => state.action);
+    const notification = useSelector(state => state.notification);
+
     // Callback function to remove the temp comment if it wasn't posted when the side menu or comment session changes.
     // Also will remove temp session if it wasn't finished being saved.
-    useEffect(() => {
-        const newSessions = [...sessions];
+    // useEffect(() => {
+    //     const newSessions = [...sessions];
 
-        // Removing temp session if it exists.
-        if(
-            newSessions[newSessions.length-1] &&
-            newSessions[newSessions.length-1].id === -1 && (
-                !sideMenuData || (
-                    sideMenuData &&
-                    sideMenuData.type !== 'sessions'
-                )
-            )
-        ) {
-            newSessions.splice(newSessions.length-1, 1);
-        }
+    //     // Removing temp session if it exists.
+    //     if(
+    //         newSessions[newSessions.length-1] &&
+    //         newSessions[newSessions.length-1].id === -1 && (
+    //             !sideMenuData || (
+    //                 sideMenuData &&
+    //                 sideMenuData.type !== 'sessions'
+    //             )
+    //         )
+    //     ) {
+    //         newSessions.splice(newSessions.length-1, 1);
+    //     }
 
-        // If we're not editting the temp comment, remove it.
-        if(
-            newSessions[selectedSession] &&
-            tempComment && (
-                !sideMenuData || (
-                    sideMenuData && (
-                        sideMenuData.type !== 'comment' ||
-                        sideMenuData.dataPointer[0] !== tempComment.replyId ||
-                        sideMenuData.dataPointer[1] !== tempComment.commentIndex
-                    )
-                )
-            )
-        ) {
-            newSessions[selectedSession].comments[tempComment.replyId].splice(tempComment.commentIndex, 1);
-            setTempComment(null);
-        }
+    //     // If we're not editting the temp comment, remove it.
+    //     if(
+    //         newSessions[selectedSession] &&
+    //         tempComment && (
+    //             !sideMenuData || (
+    //                 sideMenuData && (
+    //                     sideMenuData.type !== 'comment' ||
+    //                     sideMenuData.dataPointer[0] !== tempComment.replyId ||
+    //                     sideMenuData.dataPointer[1] !== tempComment.commentIndex
+    //                 )
+    //             )
+    //         )
+    //     ) {
+    //         newSessions[selectedSession].comments[tempComment.replyId].splice(tempComment.commentIndex, 1);
+    //         setTempComment(null);
+    //     }
 
-        setSessions(newSessions);
-    }, [sideMenuData, selectedSession]);
+    //     setSessions(newSessions);
+    // }, [sideMenuData, selectedSession]);
 
     // Automatically closing the notification after 10s.
     const notificationTimeout = useRef<NodeJS.Timeout | null>(null);
@@ -100,61 +113,6 @@ const Map: FunctionComponent<Props> = (props) => {
     function handleCancelNotificaiton() {
         if(notificationTimeout.current) clearTimeout(notificationTimeout.current);
         setNotification('');
-    }
-
-    /**
-     * Event handler to create a new temporary session in the side menu
-     */
-    function handleNewSession() {
-        // Only admins can edit, add, or delete sessions
-        if(!pageProps!.userData || (pageProps!.userData && !pageProps!.userData.isAdmin)) {
-            setNotification('You must be an administrator to add comment sessions.');
-            return;
-        }
-
-        const newSessions = [...sessions];
-
-        /**
-         * If there's already a temporary session, then delete it.
-         */
-        if(newSessions[newSessions.length - 1] && newSessions[newSessions.length - 1].id === -1) {
-            newSessions.splice(newSessions.length - 1, 1);
-        }
-
-        /**
-         * Adding an extra day to the expiration date by default.
-         */
-        const expirationDate = new Date();
-        expirationDate.setDate(expirationDate.getDate() + 1);
-
-        /**
-         * Pushing an empty session and setting state.
-         */
-        newSessions.push({
-            id: -1,
-            mapId: map.id,
-            name: `New Session - ${(new Date()).toLocaleDateString()}`,
-            start: convertDatetime((new Date()).toLocaleString()),
-            expires: convertDatetime(expirationDate.toLocaleString()),
-            comments: {}
-        });
-
-        setSessions(newSessions);
-    }
-
-    /**
-     * A helper function to convert HH:MM:SS AM/PM to HH:MM:SS
-     * @param time The inputted time string
-     */
-    function convertDatetime(datetime:string) {
-        const dateArray = datetime.split(', ')[0].split('/');
-        dateArray.unshift(dateArray.pop()!);
-        const dateString = dateArray.map(value => value.padStart(2, '0')).join('-');
-    
-        const time = datetime.split(', ')[1];
-        const timeString = time.split(':').map((timeSection, i) => (parseInt(timeSection) + (i == 0 && time.slice(-2) === 'PM' ? 12 : 0)).toString().padStart(2, '0')).join(':');
-    
-        return `${dateString} ${timeString}`;
     }
 
     // Callback function for when the client recieves a new comment from the server.
@@ -173,31 +131,8 @@ const Map: FunctionComponent<Props> = (props) => {
             return;
         }
 
-        // Finding the session for the new comment.
-        const sessionIndex = sessions.reduce((previousIndex, session, i) => {
-            return newComment.commentsessionId === session.id ? i : previousIndex;
-        }, -1);
-        if(sessionIndex === -1) return;
-        
-        // Updating the session to include the new comment
-        const newSessions = [...sessions];
-        const replyId = newComment.replyId ? newComment.replyId : 0;
-
-        // If the array to reply to this comment doesn't exist, add it.
-        if(!newSessions[sessionIndex].comments[newComment.id]) {
-            newSessions[sessionIndex].comments = {...newSessions[sessionIndex].comments,
-                ['' + newComment.id]: []
-            }
-        }
-
-        // Checking to see if we've already added it since useEffect fires twice.
-        if(newSessions[sessionIndex].comments[replyId][newSessions[sessionIndex].comments[replyId].length - 1] && newSessions[sessionIndex].comments[replyId][newSessions[sessionIndex].comments[replyId].length - 1].id === newComment.id) {
-            return;
-        }
-
-        // Setting state for new comment.
-        newSessions[sessionIndex].comments[replyId].push(newComment);
-        setSessions(newSessions);
+        // Adding comment to the session
+        addComment(newComment);
     }
 
     return <main id="Map">
@@ -208,22 +143,10 @@ const Map: FunctionComponent<Props> = (props) => {
             </button>
         </div>
         <Header
-            action={action}
-            setAction={setAction}
-            map={map}
-            setMap={setMap}
-            sessions={sessions}
-            selectedSession={selectedSession}
-            setSessions={setSessions}
-            sideMenuData={sideMenuData}
-            setSideMenuData={setSideMenuData}
-            tempComment={tempComment}
-            setTempComment={setTempComment}
-            setNotification={setNotification}
             userData={pageProps.userData}
         ></Header>
         <div className="MenuSplit">
-            <div className="BodyScroll" onMouseDown={handleCloseSideMenu} onTouchStart={handleCloseSideMenu} style={{
+            <div className="BodyScroll" onMouseDown={closeSideMenu} onTouchStart={closeSideMenu} style={{
                 cursor: action !== '' ? action === 'MoveNode' ? 'grabbing' : 'copy' : 'auto'
             }}>
                 <div className="Body">
@@ -231,14 +154,7 @@ const Map: FunctionComponent<Props> = (props) => {
                         {map.rows.length > 0 ?
                             map.rows.map((_, i) => {
                                 return <Fragment key={i}>
-                                    <Row 
-                                        map={map}
-                                        setMap={setMap}
-                                        action={action}
-                                        setAction={setAction}
-                                        rowIndex={i}
-                                        setSideMenuData={setSideMenuData}
-                                    ></Row>
+                                    <Row rowIndex={i} />
                                 </Fragment>
                             })
                         :
@@ -249,71 +165,15 @@ const Map: FunctionComponent<Props> = (props) => {
                         return <Fragment key={i}>
                             <MapComment
                                 commentData={comment}
-                                setSideMenuData={setSideMenuData}
                                 commentIndex={i}
                             ></MapComment>
                         </Fragment>
                     }) : <></>}
                 </div>
             </div>
-            <div className={`SideMenuScroll ${sideMenuData ? 'Opened' : ' '}`}>
-                {sideMenuData ? <>
-                    {sideMenuData.type === 'node' ? 
-                        <NodeSideMenu
-                            map={map}
-                            setMap={setMap}
-                            sideMenuData={sideMenuData}
-                            setSideMenuData={setSideMenuData}
-                            sessions={sessions}
-                            selectedSession={selectedSession}
-                            setSessions={setSessions}
-                            userData={pageProps.userData}
-                            setNotification={setNotification}
-                        ></NodeSideMenu>
-                    : <></>}
-                    {sideMenuData.type === 'comment' ?
-                        <div className="comment">
-                            <Comment
-                                comment={selectedSession > -1 && sessions[selectedSession].comments['' + sideMenuData.dataPointer[0]] ? 
-                                sessions[selectedSession].comments['' + sideMenuData.dataPointer[0]][sideMenuData.dataPointer[1]] : undefined}
-                                sessions={sessions}
-                                selectedSession={selectedSession}
-                                setSessions={setSessions}
-                                tempComment={tempComment}
-                                setTempComment={setTempComment}
-                                setNotification={setNotification}
-                                marginLeft={0}
-                                userData={pageProps.userData}
-                            ></Comment>
-                        </div>
-                    : <></>}
-                    {sideMenuData.type === 'sessions' ? 
-                        <div className="sessions">
-                            <h2>Comment Sessions:</h2>
-                            <button className="AddSession" onClick={handleNewSession}>+ New Session</button>
-                            {sessions.map((_, i) => {
-                                return <Fragment key={i}>
-                                    <SessionOption
-                                        index={i}
-                                        sessions={sessions}
-                                        setSessions={setSessions}
-                                        selectedSession={selectedSession}
-                                        setSelectedSession={setSelectedSession}
-                                        isSelected={selectedSession === i}
-                                        setNotification={setNotification}
-                                        userData={pageProps.userData}
-                                    ></SessionOption>
-                                </Fragment>
-                            })}
-                        </div>
-                    : <></>}
-                    {sideMenuData.type === 'tags' ? 
-                        <TagsEditor 
-                            tags={map.tags}
-                        />
-                    : <></>}
-                </> : <></>}
-            </div>
+            <SideMenu
+                userData={pageProps.userData}
+            />
         </div>
     </main>
 }

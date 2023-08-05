@@ -4,10 +4,8 @@ type Action = 'AddComment' | 'AddNode' | 'MoveNode' | 'AddRow' | '';
 
 export const actionSlice = createSlice({
     name: 'action',
-    initialState: 0,
+    initialState: '' as Action,
     reducers: {
         
     }
-});
-
-export default actionSlice.reducer;
+}); 
