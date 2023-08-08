@@ -1,4 +1,6 @@
 import React, { FunctionComponent } from "react";
+import { setComment } from "../store/sideMenuData";
+import { useDispatch } from "../store/store";
 
 type Props = {
     commentData: CommentDoc,
@@ -7,19 +9,20 @@ type Props = {
 
 /**
  * A component that renders a pin for any comment placed on the map.
- * 
  * @param commentData The contents of this comment.
  * @param commentIndex The index of the comment in the session data.
  */
 const MapComment: FunctionComponent<Props> = (props) => {
+    const dispatch = useDispatch();
+
     /**
      * Event handler to open the side menu for the selected comment.
      */
     function openComment() {
-        props.setSideMenuData({
-            type: 'comment',
-            dataPointer: [props.commentData.replyId ? props.commentData.replyId : 0, props.commentIndex]
-        })
+        dispatch(setComment({
+            sessionIndex: props.commentData.replyId ? props.commentData.replyId : 0,
+            commentIndex: props.commentIndex
+        }));
     }
     
     return <button className="Comment" onClick={openComment} style={{

@@ -2,13 +2,6 @@ import React, { FunctionComponent } from "react";
 import TextEditor from "./TextEditor";
 
 type Props = {
-    map: FullMapDoc
-    setMap: React.Dispatch<React.SetStateAction<FullMapDoc>>,
-    sideMenuData: {
-        type: 'node' | 'comment' | 'sessions' | 'tags';
-        dataPointer: [number, number];
-    },
-    setNotification: React.Dispatch<React.SetStateAction<string>>,
     userData?: {
         userId: number
         firstName: string,
@@ -20,12 +13,6 @@ type Props = {
 
 /**
  * A component for the side menu to render the inputs to change the contents of a node.
- * 
- * @param node A state variable representing the current edits of this node.
- * @param setNode The set state function to change the edits on this node.
- * @param setMap A set state function to edit any information on the map.
- * @param sideMenuData A state variable pointing to what data is currently being viewed/edited in the side menu.
- * @param setNotification A set state function to open a pop-up menu to notify the user.
  * @param userData (optional) Data of the logged in user.
  */
 const NodeEditor: FunctionComponent<Props> = (props) => {
@@ -47,36 +34,26 @@ const NodeEditor: FunctionComponent<Props> = (props) => {
      * Event handler to parse an uploaded file into a base64 string and add it to the node's gallery array.
      */
     async function uploadFile(e: React.ChangeEvent<HTMLInputElement>) {
-        /**
-        * If it's file size is greater than 1MB, do nothing.
-        */
+        // If it's file size is greater than 1MB, do nothing.
         if(e.target.files![0].size > 1000000) {
             props.setNotification('Image cannot be larger than 1MB.')
             return;
         }
 
-        /**
-        * Parsing the uploaded file into base64
-        */
+        // Parsing the uploaded file into base64.
         const base64image = await readFileAsDataURL(e.target.files![0]);
         if(!base64image) return;
         let image = base64image.toString();
        
-        /**
-        * If the image is not the correct format, return.
-        */
+        // If the image is not the correct format, return.
         if(!image.toString().includes('image/png') && !image.toString().includes('image/jpg') && !image.toString().includes('image/jpeg') && !image.toString().includes('image/webp') && !image.toString().includes('image/gif') && !image.toString().includes('image/svg')) {
             props.setNotification('Image must be .png, .jpg, .jpeg, .webp, .gif, or .svg');
             return;
         }
 
-        /**
-         * If the user is logged in, then we'll upload the image to the server.
-         */
+        // If the user is logged in, then we'll upload the image to the server.
         if(props.userData) {
-            /**
-             * Making a POST request to upload the image.
-             */
+            // Making a POST request to upload the image.
             const response = await (await fetch('/image', {
                 method: 'POST',
                 headers: {
@@ -89,17 +66,13 @@ const NodeEditor: FunctionComponent<Props> = (props) => {
                 })
             })).json();
 
-            /**
-             * If the upload failures, just notify user.
-             */
+            // If the upload failures, just notify user.
             if(!response.success) {
                 props.setNotification(response.message);
                 return;
             }
 
-            /**
-             * Otherwise update image to be its url.
-             */
+            // Otherwise update image to be its url.
             image = response.url;
         }
         
@@ -113,10 +86,8 @@ const NodeEditor: FunctionComponent<Props> = (props) => {
      * @param index The index of the file in the array.
      */
     function deleteImage(index: number) {
-        /**
-         * Making a post call to the server to delete the image on AWS.
-         * Doesn't really matter what the response is.
-         */
+        // Making a post call to the server to delete the image on AWS.
+        // Doesn't really matter what the response is.
         if(props.userData) {
             fetch('/image', {
                 method: 'DELETE',

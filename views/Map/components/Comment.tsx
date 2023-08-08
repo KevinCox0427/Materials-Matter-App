@@ -1,5 +1,8 @@
 import React, { Fragment, FunctionComponent, useEffect, useRef, useState } from "react";
 import { socket } from '../Map';
+import { setNotification } from "../store/notification";
+import { addNewComment, removeTempComment } from "../store/tempComment";
+import { useDispatch, useSelector } from "../store/store";
 
 type Props = {
     comment: CommentDoc | undefined,
@@ -21,17 +24,12 @@ type Props = {
  */
 const Comment: FunctionComponent<Props> = (props) => {
     if(!props.comment) return <></>;
+    const dispatch = useDispatch();
 
     // State variables to keep track of a comment's content and whether its replies are visible.
     const [showReplies, setShowReplies] = useState(true);
     const [commentMessage, setCommentMessage] = useState('');
-
-    /**
-     * Event handler to toggle whether the replies are visible or not.
-     */
-    function toggleReplies() {
-        setShowReplies(!showReplies);
-    }
+    const selectedSession = useSelector(state => state.sessions[state.selectedSession]);
 
     /**
      * Event handler to change the text of a comment.
@@ -55,61 +53,15 @@ const Comment: FunctionComponent<Props> = (props) => {
     function reply() {
         // A user must be logged in to reply.
         if(!props.userData) {
-            props.setNotification('You must be logged in to comment.');
+            dispatch(setNotification('You must be logged in to comment.'));
             return;
         }
 
-        const newSessions = [...props.sessions];
-
-        /**
-         * If the reply array doesn't exist in the session, create one.
-         */
-        if(!newSessions[props.selectedSession].comments["" + props.comment!.id]) {
-            newSessions[props.selectedSession].comments = {...newSessions[props.selectedSession].comments,
-                [props.comment!.id]: []
-            }
-        }
-
-        /**
-         * If the user is already replying, remove it from the session.
-         */
-        if(props.tempComment) {
-            newSessions[props.selectedSession].comments[props.tempComment.replyId].splice(props.tempComment.commentIndex, 1);
-        }
-
-        /**
-         * Setting the temp comment state variable.
-         */
-        props.setTempComment({
-            replyId: props.comment!.id,
-            commentIndex: 0
-        })
-
-        /**
-         * Adding a temporary comment at the first index into the reply array.
-         */
-        newSessions[props.selectedSession].comments["" + props.comment!.id].splice(0, 0, {
-            ...props.userData,
-            id: -1,
-            commentsessionId: newSessions[props.selectedSession].id,
-            replyId: props.comment!.id,
-            timestamp: (new Date()).toLocaleString(),
-            content: '',
-            x: null,
-            y: null
-        })
-        props.setSessions(newSessions);
-    }
-
-    /**
-     * Event handler to remove the temp comment.
-     */
-    function cancel() {
-        if(!props.tempComment) return;
-        const newSessions = [...props.sessions];
-        newSessions[props.selectedSession].comments[props.tempComment.replyId].splice(props.tempComment.commentIndex, 1);
-        props.setTempComment(null);
-        props.setSessions(newSessions);
+        // Setting the temp comment state variable.
+        addNewComment({
+            userData: props.userData!,
+            replyId: props.comment!.id
+        });
     }
 
     /**
@@ -126,12 +78,7 @@ const Comment: FunctionComponent<Props> = (props) => {
         });
 
         // Deleting the temp comment that was uploaded.
-        if(props.tempComment) {
-            const newSessions = [...props.sessions];
-            newSessions[props.selectedSession].comments[props.tempComment.replyId].splice(props.tempComment.commentIndex, 1);
-            props.setTempComment(null);
-            props.setSessions(newSessions);
-        }
+        removeTempComment();
     }
 
     /**
@@ -164,48 +111,42 @@ const Comment: FunctionComponent<Props> = (props) => {
         }}>
             <div className="Top">
                 <h3>{props.comment.firstName} {props.comment.lastName}</h3>
-                {props.comment.id === -1 ? 
-                    <button className="Reply" onClick={post}>post</button>
-                :
-                    <button className="Reply" onClick={reply}>reply</button>
-                }
-                {props.comment.id === -1 ?
-                    <button className="Reply" onClick={cancel}>cancel</button>
-                : <></>}
+                {props.comment.id === -1
+                    ? <button className="Reply" onClick={post}>post</button>
+                    : <button className="Reply" onClick={reply}>reply</button>}
+                {props.comment.id === -1
+                    ? <button className="Reply" onClick={() => removeTempComment}>cancel</button>
+                    : <></>}
                 <p>{toLocalDate(props.comment.timestamp.split(' ')[0])}</p>
             </div>
-            {props.comment.id === -1 ? 
-                <textarea className="EditContent" placeholder="Enter your comment..." value={commentMessage} onChange={changeMessage}></textarea>
-            :
-                <p className="Content">{props.comment.content}</p>
-            }
-            {props.comment.replyId !== null && typeof props.sessions[props.selectedSession].comments[props.comment.id] !== 'undefined' && props.sessions[props.selectedSession].comments[props.comment.id].length > 0 ?
-                <button className={`HideReplies ${showReplies ? ' ' : 'Activated'}`} onClick={toggleReplies}>
+            {props.comment.id === -1
+                ? <textarea
+                    className="EditContent"
+                    placeholder="Enter your comment..."
+                    value={commentMessage}
+                    onChange={changeMessage}
+                ></textarea>
+                : <p className="Content">{props.comment.content}</p>}
+            {props.comment.replyId !== null && typeof selectedSession.comments[props.comment.id] !== 'undefined' && selectedSession.comments[props.comment.id].length > 0
+                ? <button
+                    className={`HideReplies ${showReplies ? ' ' : 'Activated'}`}
+                    onClick={() => setShowReplies(!showReplies)}
+                >
                     <div className="Triangle"></div>
                 </button>
-            :   
-                <></>
-            }
+                : <></>}
         </div>
-        {showReplies && typeof props.sessions[props.selectedSession].comments[props.comment.id] !== 'undefined' ?
-            props.sessions[props.selectedSession].comments[props.comment.id].map((reply, i) => {
+        {showReplies && typeof selectedSession.comments[props.comment.id] !== 'undefined'
+            ? selectedSession.comments[props.comment.id].map((reply, i) => {
                 return <Fragment key={i}>
                     <Comment
                         comment={reply}
-                        sessions={props.sessions}
-                        selectedSession={props.selectedSession}
-                        setSessions={props.setSessions}
-                        tempComment={props.tempComment}
-                        setTempComment={props.setTempComment}
-                        setNotification={props.setNotification}
                         marginLeft={props.marginLeft + 3}
                         userData={props.userData}
                     ></Comment>
                 </Fragment>
             })
-        :
-            <></>
-        }
+            : <></>}
     </>
 }
 

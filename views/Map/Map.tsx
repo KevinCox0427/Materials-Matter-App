@@ -135,6 +135,14 @@ const Map: FunctionComponent<Props> = (props) => {
         addComment(newComment);
     }
 
+    /**
+     * An event handler to close the side menu.
+     */
+    function toggleSideMenu (e:React.MouseEvent | React.TouchEvent) {
+        if((e.target as HTMLElement).classList.contains('Node') || (e.target as HTMLElement).classList.contains('Comment')) return;
+        closeSideMenu();
+    }
+
     return <main id="Map">
         <div className={`Notification ${notification ? 'Activated' : ' '}`}>
             <p>{notification}</p>
@@ -146,9 +154,18 @@ const Map: FunctionComponent<Props> = (props) => {
             userData={pageProps.userData}
         ></Header>
         <div className="MenuSplit">
-            <div className="BodyScroll" onMouseDown={closeSideMenu} onTouchStart={closeSideMenu} style={{
-                cursor: action !== '' ? action === 'MoveNode' ? 'grabbing' : 'copy' : 'auto'
-            }}>
+            <div
+                className="BodyScroll"
+                onMouseDown={toggleSideMenu}
+                onTouchStart={toggleSideMenu}
+                style={{
+                    cursor: action !== '' 
+                        ? action === 'MoveNode' 
+                            ? 'grabbing' 
+                            : 'copy' 
+                        : 'auto'
+                }}
+            >
                 <div className="Body">
                     <div className="Rows">
                         {map.rows.length > 0 ?

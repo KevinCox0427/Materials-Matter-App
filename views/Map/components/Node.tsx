@@ -1,35 +1,26 @@
 import React, { FunctionComponent, useEffect, useRef, useState } from "react";
+import { setAction } from "../store/action";
+import { setNode } from "../store/sideMenuData";
+import { useSelector, useDispatch } from "../store/store";
+import { moveNode } from "../store/map";
 
 type Props = {
-    action: 'AddComment' | 'AddNode' | 'MoveNode' | 'AddRow' | '',
-    setAction: React.Dispatch<React.SetStateAction<Props["action"]>>,
-    map: FullMapDoc,
-    setMap: React.Dispatch<React.SetStateAction<FullMapDoc>>
     rowIndex: number,
     nodeIndex: number,
-    node: NodeDoc,
-    setSideMenuData: React.Dispatch<React.SetStateAction<null | {
-        type: 'node' | 'comment' | 'sessions' | 'tags';
-        dataPointer: [number, number];
-    }>>
+    node: NodeDoc
 }
 
 /**
  * The React component that renders a node inside a row on the map.
- * 
- * @param action A state variable representing what action the user is currently performing. An empty string means they're not doing anything.
- * @param setAction A set state function to change what action is being performed.
- * @param map A state variable containing all the information for the rows and nodes on the map.
- * @param setMap A set state function to edit any information on the map.
  * @param rowIndex The index of the row this node belongs to.
  * @param nodeIndex The index of the node in the row.
  * @param node The content's data for the node.
- * @param setSideMenuData The set state function for the side menu's data to point it to this node's data upon a user's click.
  */
 const Node: FunctionComponent<Props> = (props) => {
-    /**
-     * Refernce for keeping track of mouse position
-     */
+    const dispatch = useDispatch();
+    const map = useSelector(state => state.map);
+
+    // Reference for keeping track of mouse position
     const mousePosition = useRef([-1,-1]);
     const [isMoving, setIsMoving] = useState(false)
 
@@ -37,12 +28,10 @@ const Node: FunctionComponent<Props> = (props) => {
      * Setting event listeners when the user is moving the node.
      */
     function startMoveNode(e:React.MouseEvent | React.TouchEvent) {
-        props.setAction('MoveNode');
+        dispatch(setAction('MoveNode'));
         setIsMoving(true);
         
-        /**
-         * Setting the initial mouse coordinates and setting event listeners for when the mouse ends.
-         */
+        // Setting the initial mouse coordinates and setting event listeners for when the mouse ends.
         // @ts-ignore      another typescript L
         const x = e.clientX ? e.clientX : e.touches[0].clientX;
         // @ts-ignore
@@ -56,7 +45,6 @@ const Node: FunctionComponent<Props> = (props) => {
 
     /**
      * A function to move a node to the map based on mouse position.
-     * 
      * @param target The element that is being hovered over.
      * @param x The x coordinate of the mouse position.
      */
@@ -79,13 +67,13 @@ const Node: FunctionComponent<Props> = (props) => {
             const mapEl = document.getElementById('Map') as HTMLDivElement;
             mapEl.removeEventListener('touchend', endMoveNode);
             mapEl.removeEventListener('mouseup', endMoveNode);
-            props.setAction('');
+            dispatch(setAction(''));
             setIsMoving(false);
 
-            props.setSideMenuData({
-                type: 'node',
-                dataPointer: [props.rowIndex, props.nodeIndex]
-            });
+            dispatch(setNode({
+                rowIndex: props.rowIndex,
+                nodeIndex: props.nodeIndex
+            }));
             
             return;
         }
@@ -94,15 +82,12 @@ const Node: FunctionComponent<Props> = (props) => {
         if(isNaN(parseInt(target.id))) return;
 
         // Finding the index position of the new node based on the X position of the cursor.
-        // Since the wrapper has "space-around" for its justify-content, the space inbetween the nodes are not even.
-        const newMap = {...props.map}
-
-        // Gettitng reference to the element responsible for wrapping the nodes and having a horiozontal scroll.
+        // Getting reference to the element responsible for wrapping the nodes and having a horiozontal scroll.
         const scrollElement = target.getElementsByClassName('Nodes')[0] as HTMLDivElement
         // Percent of the cursor's X position relative to the row, 0 is left side and 100 is right side.
         const xPercent = ((x - scrollElement.getBoundingClientRect().left + scrollElement.scrollLeft) / scrollElement.scrollWidth) * 100;
         // Percent of the spacing inbetween nodes for "space-around." This will be twice the length of the array.
-        const indexPercent = 100 / (props.map.rows[parseInt(target.id)].nodes.length * 2);
+        const indexPercent = 100 / (map.rows[parseInt(target.id)].nodes.length * 2);
 
         // Finding the mouse position in one of these spacing columns. This will be used to find the index of the new node.
         let newNodeIndex = Math.ceil(Math.floor(xPercent / indexPercent) / 2);
@@ -114,31 +99,19 @@ const Node: FunctionComponent<Props> = (props) => {
         }
 
         // Deleting the node at its current spot and adding it to its new spot.
-        newMap.rows[props.rowIndex].nodes.splice(props.nodeIndex, 1);
-        newMap.rows[newRowIndex].nodes.splice(newNodeIndex, 0, {...props.node});
-
-        // Updating the indeces for all nodes
-        newMap.rows[props.rowIndex].nodes = newMap.rows[props.rowIndex].nodes.map((node, i) => {
-            return {...node,
-                index: i
-            }
-        });
-        newMap.rows[newRowIndex].nodes = newMap.rows[newRowIndex].nodes.map((node, i) => {
-            return {...node,
-                index: i
-            }
-        });
-
-        /**
-         * Updating state to reflect changes.
-         */
-        props.setMap(newMap);
+        dispatch(moveNode({
+            nodeData: props.node,
+            fromNodeIndex: props.nodeIndex,
+            fromRowIndex: props.rowIndex,
+            toNodeIndex: newNodeIndex,
+            toRowIndex: newRowIndex
+        }));
 
         const mapEl = document.getElementById('Map') as HTMLDivElement;
         mapEl.removeEventListener('touchend', endMoveNode);
         mapEl.removeEventListener('mouseup', endMoveNode);
 
-        props.setAction('');
+        dispatch(setAction(''));
         setIsMoving(false);
     }
     
@@ -147,10 +120,10 @@ const Node: FunctionComponent<Props> = (props) => {
      */ 
     function openNode(e:React.KeyboardEvent<HTMLButtonElement>) {
         if(e.key !== 'Enter') return;
-        props.setSideMenuData({
-            type: 'node',
-            dataPointer: [props.rowIndex, props.nodeIndex]
-        });
+        dispatch(setNode({
+            rowIndex: props.rowIndex,
+            nodeIndex: props.nodeIndex
+        }));
     }
     
     return <button className="Node" id={`${props.rowIndex}.${props.nodeIndex}`} onKeyDown={openNode} onMouseDown={e => startMoveNode(e)} onTouchStart={e => startMoveNode(e)} style={{

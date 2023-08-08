@@ -12,17 +12,23 @@ export const sideMenuDataSlice = createSlice({
     name: 'sideMenuData',
     initialState: initialState as SideMenuData,
     reducers: {
-        setNode: (state, action:PayloadAction<[number, number]>) => {
+        setNode: (state, action:PayloadAction<{
+            nodeIndex: number,
+            rowIndex: number
+        }>) => {
             state = {
                 type: 'node',
-                dataPointer: action.payload
+                dataPointer: [action.payload.rowIndex, action.payload.nodeIndex]
             }
         },
 
-        setComment: (state, action:PayloadAction<[number, number]>) => {
+        setComment: (state, action:PayloadAction<{
+            sessionIndex: number,
+            commentIndex: number
+        }>) => {
             state = {
                 type: 'comment',
-                dataPointer: action.payload
+                dataPointer: [action.payload.sessionIndex, action.payload.commentIndex]
             }
         },
 
@@ -44,8 +50,7 @@ export const sideMenuDataSlice = createSlice({
          * An event handler to close the side menu when a node isn't clicked.
          * @param e The click event.
          */
-        closeSideMenu: (state:SideMenuData, action:PayloadAction<React.MouseEvent | React.TouchEvent>) => {
-            if((action.payload.target as HTMLElement).classList.contains('Node') || (action.payload.target as HTMLElement).classList.contains('Comment')) return;
+        closeSideMenu: (state:SideMenuData) => {
             state = null;
         }
     }

@@ -259,10 +259,13 @@ map.route('/:id')
                     commentsessionId: session.id
                 });
             
-                // Using a table of ids to store the replies
+                // Using a map of ids to store the replies
+                // 0 should always exist since that represents comments on the map.
                 let commentMap:{
                     [replyId: string]: CommentDoc[]
-                } = {}
+                } = {
+                    ['0']: []
+                }
 
                 // Adding each comment to the table based on its reply id.
                 comments.forEach(comment => {
