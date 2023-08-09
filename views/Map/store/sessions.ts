@@ -26,6 +26,26 @@ export const sessionsSlice = createSlice({
             // Adding the comment to the comment hashmap.
             const replyId = action.payload.replyId ? action.payload.replyId : 0;
             state[sessionIndex].comments[replyId].push(action.payload);
+        },
+
+        changeSessionName: (state, action: PayloadAction<{
+            sessionIndex: number,
+            name: string
+        }>) => {
+            state[action.payload.sessionIndex].name = action.payload.name;
+        },
+
+        changeSessionTimes: (state, action: PayloadAction<{
+            sessionIndex: number,
+            key: 'start' | 'expires',
+            type: 'date' | 'time',
+            value: string
+        }>) => {
+            const newDate = action.payload.type === 'date'
+                ? `${action.payload.value} ${state[action.payload.sessionIndex][action.payload.key].split(' ')[1]}`
+                : `${state[action.payload.sessionIndex][action.payload.key].split(' ')[0]} ${action.payload.value}`;
+
+            state[action.payload.sessionIndex][action.payload.key] = newDate;
         }
     }
 });

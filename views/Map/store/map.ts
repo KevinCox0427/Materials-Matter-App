@@ -10,6 +10,74 @@ export const mapSlice = createSlice({
             }
         },
 
+        insertRow: (state, action: PayloadAction<number>) => {
+            state.rows.splice(action.payload, 0, {
+                id: -1,
+                mapId: state.id,
+                index: action.payload,
+                name: 'New Row',
+                nodes: []
+            });
+
+            // Updating row indeces after splice
+            state.rows = state.rows.map((row, i) => {
+                return {...row,
+                    index: i
+                }
+            });
+        },
+
+        changeRowName: (state, action: PayloadAction<{
+            rowIndex: number,
+            name: string
+        }>) => {
+            state.rows[action.payload.rowIndex].name = action.payload.name
+        },
+
+        moveRowUp: (state, action: PayloadAction<{
+            rowIndex: number
+        }>) => {
+            if(action.payload.rowIndex === 0) return;
+            // Removing row.
+            const currentRow = state.rows.splice(action.payload.rowIndex, 1)[0];
+            // Inserting row.
+            state.rows.splice(action.payload.rowIndex - 1, 0, currentRow);
+            // Reassigning the row's indeces since they will be wrong
+            state.rows = state.rows.map((row, i) => {
+                return {...row,
+                    index: i
+                }
+            });
+        },
+
+        moveRowDown: (state, action: PayloadAction<{
+            rowIndex: number
+        }>) => {
+            if(action.payload.rowIndex >= state.rows.length - 1) return;
+            // Removing row.
+            const currentRow = state.rows.splice(action.payload.rowIndex, 1)[0];
+            // Inserting row.
+            state.rows.splice(action.payload.rowIndex + 1, 0, currentRow);
+            // Reassigning the row's indeces since they will be wrong
+            state.rows = state.rows.map((row, i) => {
+                return {...row,
+                    index: i
+                }
+            });
+        },
+
+        removeRow: (state, action: PayloadAction<{
+            rowIndex: number
+        }>) => {
+            state.rows.splice(action.payload.rowIndex, 1);
+            // Reassigning the row's indeces since they will be wrong
+            state.rows = state.rows.map((row, i) => {
+                return {...row,
+                    index: i
+                }
+            });
+        },
+
         insertNode: (state, action: PayloadAction<{
             rowIndex: number,
             nodeIndex: number
@@ -60,23 +128,69 @@ export const mapSlice = createSlice({
             });
         },
 
-        insertRow: (state, action: PayloadAction<number>) => {
-            state.rows.splice(action.payload, 0, {
-                id: -1,
-                mapId: state.id,
-                index: action.payload,
-                name: 'New Row',
-                nodes: []
-            });
-
-            // Updating row indeces after splice
-            state.rows = state.rows.map((row, i) => {
-                return {...row,
-                    index: i
-                }
-            });
+        removeNode: (state, action: PayloadAction<{
+            rowIndex: number,
+            nodeIndex: number
+        }>) => {
+            state.rows[action.payload.rowIndex].nodes.splice(action.payload.nodeIndex, 1);
         },
+
+        changeNodeName: (state, action: PayloadAction<{
+            rowIndex: number,
+            nodeIndex: number,
+            name: string
+        }>) => {
+            state.rows[action.payload.rowIndex].nodes[action.payload.nodeIndex].name = action.payload.name;
+        },
+
+        changeNodeContent: (state, action: PayloadAction<{
+            rowIndex: number,
+            nodeIndex: number,
+            content: string
+        }>) => {
+            state.rows[action.payload.rowIndex].nodes[action.payload.nodeIndex].htmlContent = action.payload.content;
+        },
+
+        addImageToNode: (state, action:PayloadAction<{
+            rowIndex: number,
+            nodeIndex: number,
+            image: string
+        }>) => {
+            state.rows[action.payload.rowIndex].nodes[action.payload.nodeIndex].gallery.push(action.payload.image);
+        },
+
+        removeImageFromNode: (state, action:PayloadAction<{
+            rowIndex: number,
+            nodeIndex: number,
+            imageIndex: number
+        }>) => {
+            state.rows[action.payload.rowIndex].nodes[action.payload.nodeIndex].gallery.splice(action.payload.imageIndex, 1);
+        },
+
+        moveImageUp: (state, action:PayloadAction<{
+            rowIndex: number,
+            nodeIndex: number,
+            imageIndex: number
+        }>) => {
+            if(action.payload.imageIndex === 0) return;
+            // Removing image
+            state.rows[action.payload.rowIndex].nodes[action.payload.nodeIndex].gallery.splice(action.payload.imageIndex, 1);
+            // Inserting image up an index.
+            state.rows[action.payload.rowIndex].nodes[action.payload.nodeIndex].gallery.splice(action.payload.imageIndex - 1, 0, state.rows[action.payload.rowIndex].nodes[action.payload.nodeIndex].gallery[action.payload.imageIndex]);
+        },
+
+        moveImageDown: (state, action:PayloadAction<{
+            rowIndex: number,
+            nodeIndex: number,
+            imageIndex: number
+        }>) => {
+            if(action.payload.imageIndex >= state.rows[action.payload.rowIndex].nodes.length - 1) return;
+            // Removing image
+            state.rows[action.payload.rowIndex].nodes[action.payload.nodeIndex].gallery.splice(action.payload.imageIndex, 1);
+            // Inserting image down an index.
+            state.rows[action.payload.rowIndex].nodes[action.payload.nodeIndex].gallery.splice(action.payload.imageIndex + 1, 0, state.rows[action.payload.rowIndex].nodes[action.payload.nodeIndex].gallery[action.payload.imageIndex]);
+        }
     }
 });
 
-export const { changeMapName, insertNode, moveNode, insertRow } = mapSlice.actions;
+export const { changeMapName, insertRow, changeRowName, removeRow, moveRowDown, moveRowUp, insertNode, moveNode, removeNode, changeNodeContent, changeNodeName, addImageToNode, moveImageDown, moveImageUp, removeImageFromNode } = mapSlice.actions;

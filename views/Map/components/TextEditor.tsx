@@ -1,11 +1,6 @@
 import React, { FunctionComponent, useEffect, useRef } from "react";
 import QuillType from "quill";
 
-type Props = {
-    content: string,
-    setContent: (content: string) => void,
-}
-
 /**
  * Because the @types/Quill package was throwing syntax errors.
  */
@@ -17,10 +12,8 @@ declare const Quill: any;
  * @param content The state variable containing the content.
  * @param setContent The function to set the state variable.
  */
-const TextEditor: FunctionComponent<Props> = (props) => {
-    /**
-     * References to the wrapper div and the Quill class.
-     */
+const TextEditor: FunctionComponent = () => {
+    // References to the wrapper div and the Quill class.
     const editor = useRef<HTMLDivElement>(null);
     const quill = useRef<QuillType | null>(null);
 
@@ -51,14 +44,10 @@ const TextEditor: FunctionComponent<Props> = (props) => {
             }
         });
 
-        /**
-         * Loading the initial content.
-         */
+        // Loading the initial content.
         editor.current!.children[0].innerHTML = `${props.content}`;
 
-        /**
-         * Creating an event listener to set the state variable when a user types.
-         */
+        // Creating an event listener to set the state variable when a user types.
         quill.current!.on('text-change', (_, __, source) => {
             if(source === 'user') props.setContent(editor.current!.children[0].innerHTML);
         });

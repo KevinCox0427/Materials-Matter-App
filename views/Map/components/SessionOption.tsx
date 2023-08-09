@@ -1,5 +1,7 @@
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { socket } from "../Map";
+import { useDispatch, useSelector } from "../store/store";
+import { setNotification } from "../store/notification";
 
 type Props = {
     index: number
@@ -14,24 +16,25 @@ type Props = {
 
 /**
  * A react component to render a comment session in the side menu to be able to edit its conents.
- * 
  * @param index. The index of this session in the sessions array.
  * @param userData (optional) Data of the logged in user.
  */
 const SessionOption: FunctionComponent<Props> = (props) => {
+    const sessions = useSelector(state => state.sessions);
+
+    const dispatch = useDispatch();
+
     /**
      * State variable keeping track of whether the user is editing, and to keep track of the data on the session.
      */
-    const [isEditing, setIsEditing] = useState(props.sessions[props.index].id === -1);
-    const [session, setSession] = useState(props.sessions[props.index]);
+    const [isEditing, setIsEditing] = useState(sessions[props.index].id === -1);
 
     /**
-     * Resetting initial states when inherited props change..
+     * Resetting initial states when inherited props change.
      */
     useEffect(() => {
         setIsEditing(props.sessions[props.index].id === -1);
-        setSession(props.sessions[props.index]);
-    }, [props.sessions]);
+    }, [sessions]);
 
     /**
      * Event handler to toggle between editing and viewing.
@@ -39,23 +42,19 @@ const SessionOption: FunctionComponent<Props> = (props) => {
     function toggleIsEditing() {
         // Only admins can edit, add, or delete sessions
         if(!props.userData || (props.userData && !props.userData.isAdmin)) {
-            props.setNotification('You must be an administrator to change comment sessions.');
+            dispatch(setNotification('You must be an administrator to change comment sessions.'));
             return;
         }
 
         // This means it's being cancelled.
         if(isEditing) {
-            /**
-             * If it was a temporary session, then we need to delete it
-             */
+            // If it was a temporary session, then we need to delete it.
             if(session.id === -1) {
                 const newSessions = [...props.sessions];
                 newSessions.splice(newSessions.length-1, 1);
                 props.setSessions(newSessions);
             }
-            /**
-             * Otherwise we'll just reload the initial state.
-             */
+            // Otherwise we'll just reload the initial state.
             else {
                 setSession(props.sessions[props.index]);
             }
@@ -68,28 +67,6 @@ const SessionOption: FunctionComponent<Props> = (props) => {
      */
     function selectSession() {
         props.setSelectedSession(props.isSelected ? -1 : props.index);
-    }
-
-    /**
-     * Event handler to change the session's name from the input element.
-     */
-    function changeName(e:React.ChangeEvent<HTMLInputElement>) {
-        setSession({...session,
-            name: e.target.value
-        })
-    }
-
-    /**
-     * Event handler to change the start and expiration times based on the time and date input elements.
-     * @param key Whether the start or expiration time is being changed
-     * @param type Whether the date or time of day is being changed.
-     */
-    function changeTimes(e:React.ChangeEvent<HTMLInputElement>, key:'start' | 'expires', type:'date' | 'time') {
-        const newDate = type === 'date' ? `${e.target.value} ${session[key].split(' ')[1]}` : `${session[key].split(' ')[0]} ${e.target.value}`;
-
-        setSession({...session,
-            [key]: newDate
-        });
     }
 
     /**

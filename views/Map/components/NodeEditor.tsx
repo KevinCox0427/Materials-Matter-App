@@ -1,5 +1,9 @@
 import React, { FunctionComponent } from "react";
 import TextEditor from "./TextEditor";
+import { useDispatch, useSelector } from "../store/store";
+import { setNotification } from "../store/notification";
+import { addImageToNode, changeNodeName, moveImageDown, moveImageUp, removeImageFromNode, removeNode } from "../store/map";
+import { closeSideMenu } from "../store/sideMenuData";
 
 type Props = {
     userData?: {
@@ -16,7 +20,12 @@ type Props = {
  * @param userData (optional) Data of the logged in user.
  */
 const NodeEditor: FunctionComponent<Props> = (props) => {
-    const node = props.map.rows[props.sideMenuData.dataPointer[0]].nodes[props.sideMenuData.dataPointer[1]];
+    const sideMenuData = useSelector(state => state.sideMenuData);
+    if(!sideMenuData || sideMenuData.type !== 'node') return <></>;
+    const node = useSelector(state => state.map.rows[sideMenuData.dataPointer[0]].nodes[sideMenuData.dataPointer[1]]);
+
+    const dispatch = useDispatch();
+
     /**
      * An asynchronous helper function to read a file from an input
      * @param file The File object created by the input
@@ -36,7 +45,7 @@ const NodeEditor: FunctionComponent<Props> = (props) => {
     async function uploadFile(e: React.ChangeEvent<HTMLInputElement>) {
         // If it's file size is greater than 1MB, do nothing.
         if(e.target.files![0].size > 1000000) {
-            props.setNotification('Image cannot be larger than 1MB.')
+            dispatch(setNotification('Image cannot be larger than 1MB.'));
             return;
         }
 
@@ -46,8 +55,15 @@ const NodeEditor: FunctionComponent<Props> = (props) => {
         let image = base64image.toString();
        
         // If the image is not the correct format, return.
-        if(!image.toString().includes('image/png') && !image.toString().includes('image/jpg') && !image.toString().includes('image/jpeg') && !image.toString().includes('image/webp') && !image.toString().includes('image/gif') && !image.toString().includes('image/svg')) {
-            props.setNotification('Image must be .png, .jpg, .jpeg, .webp, .gif, or .svg');
+        if(
+            !image.toString().includes('image/png') &&
+            !image.toString().includes('image/jpg') && 
+            !image.toString().includes('image/jpeg') &&
+            !image.toString().includes('image/webp') &&
+            !image.toString().includes('image/gif') &&
+            !image.toString().includes('image/svg')
+        ) {
+            dispatch(setNotification('Image must be .png, .jpg, .jpeg, .webp, .gif, or .svg'));
             return;
         }
 
@@ -68,7 +84,7 @@ const NodeEditor: FunctionComponent<Props> = (props) => {
 
             // If the upload failures, just notify user.
             if(!response.success) {
-                props.setNotification(response.message);
+                dispatch(setNotification(response.message));
                 return;
             }
 
@@ -76,17 +92,18 @@ const NodeEditor: FunctionComponent<Props> = (props) => {
             image = response.url;
         }
         
-        const newMap = {...props.map};
-        newMap.rows[props.sideMenuData.dataPointer[0]].nodes[props.sideMenuData.dataPointer[1]].gallery.push(image);
-        props.setMap(newMap);
+        dispatch(addImageToNode({
+            rowIndex: sideMenuData!.dataPointer[0],
+            nodeIndex: sideMenuData!.dataPointer[1],
+            image: image
+        }));
     }
 
     /**
-     * Event handler to remove a file from the node's gallery array.
-     * @param index The index of the file in the array.
+     * Event handler to remove this node from the row.
      */
-    function deleteImage(index: number) {
-        // Making a post call to the server to delete the image on AWS.
+    function deleteNode() {
+        // Making a post call to the server to delete the images on AWS.
         // Doesn't really matter what the response is.
         if(props.userData) {
             fetch('/image', {
@@ -96,84 +113,67 @@ const NodeEditor: FunctionComponent<Props> = (props) => {
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    urls: [node.gallery[index]]
+                    urls: node.gallery
                 })
             });
         }
 
-        const newMap = {...props.map};
-        newMap.rows[props.sideMenuData.dataPointer[0]].nodes[props.sideMenuData.dataPointer[1]].gallery.splice(index, 1);
-        props.setMap(newMap);
-    }
-    /**
-     * Event handler to move an image in the gallery up one index.
-     * @param index Index of the image being moved.
-     */
-    function moveImageUp(index: number) {
-        if(index === 0) return;
-        const newMap = {...props.map};
-        const newNode = newMap.rows[props.sideMenuData.dataPointer[0]].nodes[props.sideMenuData.dataPointer[1]];
-        
-        newNode.gallery.splice(index, 1);
-        newNode.gallery.splice(index - 1, 0, newNode.gallery[index]);
-
-        props.setMap(newMap);
-    }
-
-    /**
-     * Event handler to move an image in the gallery down one index.
-     * @param index Index of the image being moved.
-     */
-    function moveImageDown(index: number) {
-        if(index === node.gallery.length - 1) return;
-        const newMap = {...props.map};
-        const newNode = newMap.rows[props.sideMenuData.dataPointer[0]].nodes[props.sideMenuData.dataPointer[1]];
-
-        newNode.gallery.splice(index, 1);
-        newNode.gallery.splice(index + 1, 0, newNode.gallery[index]);
-
-        props.setMap(newMap);
-    }
-
-    /**
-     * Event handler to change the name of the node.
-     */
-    function changeName(e: React.ChangeEvent<HTMLInputElement>) {
-        const newMap = {...props.map}
-        newMap.rows[props.sideMenuData.dataPointer[0]].nodes[props.sideMenuData.dataPointer[1]].name = e.target.value;
-        props.setMap(newMap);
-    }
-
-    /**
-     * Event handler to change the text a node.
-     * @param newContent The new html string to set.
-     */
-    function changeText(newContent: string) {
-        const newMap = {...props.map}
-        newMap.rows[props.sideMenuData.dataPointer[0]].nodes[props.sideMenuData.dataPointer[1]].htmlContent = newContent;
-        props.setMap(newMap);
+        dispatch(removeNode({
+            rowIndex: sideMenuData!.dataPointer[0],
+            nodeIndex: sideMenuData!.dataPointer[1]
+        }));
+        dispatch(closeSideMenu());
     }
 
     return <>
-        <input className="Title" value={node.name} onChange={changeName}></input>
+        <div className="TitleWrapper">9
+            <input
+                className="Title"
+                value={node.name}
+                    onChange={e => dispatch(changeNodeName({
+                    rowIndex: sideMenuData.dataPointer[0],
+                    nodeIndex: sideMenuData.dataPointer[1],
+                    name: e.target.value
+                }))}
+            ></input>
+            <button onClick={deleteNode}>
+                <i className="fa-solid fa-trash-can"></i>
+                Delete
+            </button>
+        </div>
         <div className="GalleryUpload">
             <h3>Gallery:</h3>
             <div className="FileUpload">
-                <input type="file" accept="image/png, image/jpg, image/jpeg, image/webp, image/svg,
-                image/gif" onChange={uploadFile}></input>
+                <input
+                    type="file"
+                    accept="image/png, image/jpg, image/jpeg, image/webp, image/svg, image/gif"
+                    onChange={uploadFile}
+                ></input>
                 <label>Click or drag to upload +</label>
             </div>
             <div className="GalleryEdit">
                 {node.gallery.map((image, i) => {
                     return <div key={i} className="ImageWrapper">
                         <img src={image} alt={`${node.name} Gallery Image ${i+1}`}></img>
-                        <button onClick={() => moveImageUp(i)}>
+                        <button onClick={() => dispatch(moveImageUp({
+                            rowIndex: sideMenuData.dataPointer[0],
+                            nodeIndex: sideMenuData.dataPointer[1],
+                            imageIndex: i
+                        }))}>
                             <i className="fa-solid fa-arrow-up"></i>
                         </button>
-                        <button onClick={() => deleteImage(i)}>
+                        <button onClick={() => dispatch(removeImageFromNode({
+                            rowIndex: sideMenuData.dataPointer[0],
+                            nodeIndex: sideMenuData.dataPointer[1],
+                            imageIndex: i
+                        }))}>
                             <i className="fa-solid fa-trash-can"></i>
                         </button>
-                        <button onClick={() => moveImageDown(i)}>
+                        <button onClick={() => dispatch(moveImageDown({
+                            rowIndex: sideMenuData.dataPointer[0],
+                            nodeIndex: sideMenuData.dataPointer[1],
+                            imageIndex: i
+                        }))}>
                             <i className="fa-solid fa-arrow-down"></i>
                         </button>
                     </div>
@@ -182,7 +182,7 @@ const NodeEditor: FunctionComponent<Props> = (props) => {
         </div>
         <div className="TextEditorWrapper">
             <h3>Content:</h3>
-            <TextEditor content={node.htmlContent ? node.htmlContent : ''} setContent={changeText}></TextEditor>
+            <TextEditor></TextEditor>
         </div>
     </>
 }
