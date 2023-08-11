@@ -60,6 +60,7 @@ const Comment: FunctionComponent<Props> = (props) => {
         // Setting the temp comment state variable.
         addNewComment({
             userData: props.userData!,
+            sessionId: selectedSession.id,
             replyId: props.comment!.id
         });
     }

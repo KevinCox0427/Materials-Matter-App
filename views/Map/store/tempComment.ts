@@ -1,5 +1,4 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { useSelector } from './store';
 
 type TempComment = null | CommentDoc
 
@@ -9,16 +8,14 @@ export const tempCommentSlice = createSlice({
     reducers: {
         addNewComment: (state, action: PayloadAction<{
             replyId: number,
+            sessionId: number,
             userData: UserData,
             position?: [number, number]
         }>) => {
-            // Getting the current selected session 
-            const selectedSessionId = useSelector(state => state.sessions[state.selectedSession].id);
-
-            state = {
+            return {
                 ...action.payload.userData!,
                 id: -1,
-                commentsessionId: selectedSessionId,
+                commentsessionId: action.payload.sessionId,
                 replyId: action.payload.replyId,
                 timestamp: (new Date()).toLocaleString(),
                 content: '',
@@ -28,7 +25,7 @@ export const tempCommentSlice = createSlice({
         },
 
         removeTempComment: (state) => {
-            state = null;
+            return null;
         }
     }
 });

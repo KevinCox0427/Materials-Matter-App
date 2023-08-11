@@ -2,6 +2,8 @@ import React, { FunctionComponent, useEffect, useState } from "react";
 import { socket } from "../Map";
 import { useDispatch, useSelector } from "../store/store";
 import { setNotification } from "../store/notification";
+import { removeNewSession } from "../store/tempSession";
+import { setSelectedSession } from "../store/selectedSession";
 
 type Props = {
     index: number
@@ -16,24 +18,23 @@ type Props = {
 
 /**
  * A react component to render a comment session in the side menu to be able to edit its conents.
- * @param index. The index of this session in the sessions array.
+ * @param index. The index of this session in the sessions array. -1 means it's temporary.
  * @param userData (optional) Data of the logged in user.
  */
 const SessionOption: FunctionComponent<Props> = (props) => {
     const sessions = useSelector(state => state.sessions);
-
+    const selectedSession = useSelector(state => state.selectedSession);
     const dispatch = useDispatch();
 
-    /**
-     * State variable keeping track of whether the user is editing, and to keep track of the data on the session.
-     */
+    const [session, setSession] = useState(props.index === -1 ? useSelector(state => state.tempSession!) : sessions[props.index]);
+
+    // State variable keeping track of whether the user is editing, and to keep track of the data on the session.
     const [isEditing, setIsEditing] = useState(sessions[props.index].id === -1);
 
-    /**
-     * Resetting initial states when inherited props change.
-     */
+    // Resetting initial states when inherited props change.
     useEffect(() => {
-        setIsEditing(props.sessions[props.index].id === -1);
+        setIsEditing(sessions[props.index].id === -1);
+        if(props.index !== -1) setSession(sessions[props.index]);
     }, [sessions]);
 
     /**
@@ -49,24 +50,15 @@ const SessionOption: FunctionComponent<Props> = (props) => {
         // This means it's being cancelled.
         if(isEditing) {
             // If it was a temporary session, then we need to delete it.
-            if(session.id === -1) {
-                const newSessions = [...props.sessions];
-                newSessions.splice(newSessions.length-1, 1);
-                props.setSessions(newSessions);
+            if(props.index === -1) {
+                dispatch(removeNewSession());
             }
             // Otherwise we'll just reload the initial state.
             else {
-                setSession(props.sessions[props.index]);
+                setSession(sessions[props.index]);
             }
         }
         setIsEditing(!isEditing);
-    }
-
-    /**
-     * Event handler to select this session on the map.
-     */
-    function selectSession() {
-        props.setSelectedSession(props.isSelected ? -1 : props.index);
     }
 
     /**
@@ -75,7 +67,7 @@ const SessionOption: FunctionComponent<Props> = (props) => {
     function deleteSession() {
         // Only admins can edit, add, or delete sessions
         if(!props.userData || (props.userData && !props.userData.isAdmin)) {
-            props.setNotification('You must be an administrator to delete comment sessions.');
+            dispatch(setNotification('You must be an administrator to delete comment sessions.'));
             return;
         }
         socket.emit("deleteSession", session.id);
@@ -87,7 +79,7 @@ const SessionOption: FunctionComponent<Props> = (props) => {
     function saveSession() {
         // Only admins can edit, add, or delete sessions
         if(!props.userData || (props.userData && !props.userData.isAdmin)) {
-            props.setNotification('You must be an administrator to change comment sessions.');
+            dispatch(setNotification('You must be an administrator to change comment sessions.'));
             return;
         }
 
@@ -103,81 +95,29 @@ const SessionOption: FunctionComponent<Props> = (props) => {
     }
 
     /**
-     * Callback funciton when we recieve a new sesison from Socket.io
+     * An event handler to change the value of the session name.
+     * @param e The change event on the input
      */
-    useEffect(() => {
-        socket.on('recieveSession', addSession);
-        socket.on('recieveDeleteSession', confirmDeleteSession);
-    }, [socket, addSession, confirmDeleteSession]);
-
-    /**
-     * Helper function to add or edit the session recieved from Socket.io
-     * @param newSession The data representing the new or editted session, or a string error message.
-     */
-    function addSession(newSession: FullSessionDoc | string) {
-        // If it's a string, that means it's an error message.
-        if(typeof newSession === 'string') {
-            props.setNotification(newSession);
-            return;
-        }
-
-        // Finding the session's index given its id.
-        const newSessions = [...props.sessions];
-        const sessionIndex = newSessions.reduce((previousIndex, session, currentIndex) => {
-            return session.id === (newSession as FullSessionDoc).id ? currentIndex : previousIndex;
-        }, -1);
-
-        // If not found, push the new session
-        if(sessionIndex === -1) {
-            newSessions.push({...newSession,
-                comments: {}
-            });
-        }
-        // Otherwise overwrite the previous one.
-        else {
-            newSession = {...newSession,
-                comments: newSessions[sessionIndex].comments ? newSessions[sessionIndex].comments : {}
-            }
-            newSessions[sessionIndex] = newSession
-        }
-
-        // Removing any temp sessions.
-        const tempSessionIndex = newSessions.reduce((previousIndex, session, currentIndex) => {
-            return session.id === -1 ? currentIndex : previousIndex;
-        }, -1);
-        if(tempSessionIndex > -1) {
-            newSessions.splice(tempSessionIndex, 1);
-        }
-        
-        props.setSessions(newSessions);
+    function changeSessionName(e: React.ChangeEvent<HTMLInputElement>) {
+        const newSession = {...session};
+        newSession.name = e.target.value;
+        setSession(newSession);
     }
 
     /**
-     * Helper function to remove the comment session at a given id from Socket.io.
-     * @param id The id of the session to be removed.
+     * An event handler to change the datetime values on the start and end dates of the session.
+     * @param e The change event of the input.
+     * @param key Whether it's changing the start or end date value.
+     * @param type Whether it's changing the date or time value.
      */
-    function confirmDeleteSession(id:number | string) {
-        // If it's a string, that means it's an error message.
-        if(typeof id === 'string') {
-            props.setNotification(id);
-            return;
-        }
+    function changeSessionTimes(e: React.ChangeEvent<HTMLInputElement>, key: 'start' | 'expires', type: 'date' | 'time') {
+        const newSession = {...session};
+        const newDate = type === 'date'
+            ? `${e.target.value} ${newSession[key].split(' ')[1]}`
+            : `${newSession[key].split(' ')[0]} ${e.target.value}`;
 
-        // Getting the index of the session by its id.
-        const index = props.sessions.reduce((previousIndex, session, currentIndex) => {
-            return session.id === id ? currentIndex : previousIndex;
-        }, -1);
-
-        if(index === -1) return;
-
-        // If the user currently is selecting this session, unselect it.
-        if(props.selectedSession === index) {
-            props.setSelectedSession(-1);
-        } 
-
-        let newSessions = [...props.sessions];
-        newSessions.splice(index, 1);
-        props.setSessions(newSessions);
+        newSession[key] = newDate;
+        setSession(newSession);
     }
 
     /**
@@ -201,31 +141,38 @@ const SessionOption: FunctionComponent<Props> = (props) => {
         order: session.id === -1 ? 1 : 2
     }}>
         <div className="Row">
-            <button className={props.isSelected && !isEditing ? 'Activated' : ' '} onClick={() => {
-                if(isEditing) saveSession();
-                else selectSession();
-            }}>
-                {isEditing ? <>
-                    <i className="fa-solid fa-floppy-disk"></i>
-                    Save
-                </> :
-                    props.isSelected ? <>
-                        <i className="fa-solid fa-x"></i>
-                        Deselect
-                    </> : <>
-                        <i className="fa-solid fa-check"></i>
-                        Select
+            <button
+                className={props.index === selectedSession && !isEditing ? 'Activated' : ' '}
+                onClick={() => {
+                    if(isEditing) saveSession();
+                    else dispatch(setSelectedSession(props.index === selectedSession ? -1 : props.index));
+                }}
+            >
+                {isEditing 
+                    ? <>
+                        <i className="fa-solid fa-floppy-disk"></i>
+                        Save
                     </> 
-            }
+                    : props.index === selectedSession 
+                        ? <>
+                            <i className="fa-solid fa-x"></i>
+                            Deselect
+                        </> 
+                        : <>
+                            <i className="fa-solid fa-check"></i>
+                            Select
+                        </>}
             </button>
             <button className={isEditing ? 'Activated' : ' '} onClick={toggleIsEditing}>
-                {isEditing ? <>
-                    <i className="fa-solid fa-x"></i>
-                    Cancel
-                </> : <>
-                    <i className="fa-solid fa-pen-to-square"></i>
-                    Edit
-                </>}
+                {isEditing 
+                    ? <>
+                        <i className="fa-solid fa-x"></i>
+                        Cancel
+                    </>
+                    : <>
+                        <i className="fa-solid fa-pen-to-square"></i>
+                        Edit
+                    </>}
             </button>
             {session.id !== -1 ? 
                 <button onClick={deleteSession}>
@@ -236,9 +183,13 @@ const SessionOption: FunctionComponent<Props> = (props) => {
         </div>
         <div className="Row">
             {isEditing ?
-                <input className="TitleInput" value={session.name} onChange={changeName}></input>
+                <input
+                    className="TitleInput"
+                    value={session.name}
+                    onChange={changeSessionName}
+                ></input>
             :
-                <h3>{props.sessions[props.index].name}</h3>
+                <h3>{session.name}</h3>
             }
         </div>
         <div className="Row">
@@ -246,14 +197,22 @@ const SessionOption: FunctionComponent<Props> = (props) => {
                 <p>Starts:</p>
                 {isEditing ?
                     <>
-                        <input value={session.start.split(' ')[1]} type="time" onChange={e => changeTimes(e, 'start', 'time')}></input>
-                        <input value={session.start.split(' ')[0]} type="date" onChange={e => changeTimes(e, 'start', 'date')}></input>
+                        <input
+                            value={session.start.split(' ')[1]}
+                            type="time"
+                            onChange={e => changeSessionTimes(e, 'start', 'time')}
+                        ></input>
+                        <input
+                            value={session.start.split(' ')[0]}
+                            type="date"
+                            onChange={e => changeSessionTimes(e, 'start', 'date')}
+                        ></input>
                     </>
                 :
                     <p>
-                        {toLocalTime(props.sessions[props.index].start.split(' ')[1])},
+                        {toLocalTime(session.start.split(' ')[1])},
                         <br></br>
-                        {toLocalDate(props.sessions[props.index].start.split(' ')[0])}
+                        {toLocalDate(session.start.split(' ')[0])}
                     </p>
                 }
             </div>
@@ -261,14 +220,21 @@ const SessionOption: FunctionComponent<Props> = (props) => {
                 <p>Ends:</p>
                 {isEditing ? 
                     <>
-                        <input value={session.expires.split(' ')[1]} type="time" onChange={e => changeTimes(e, 'expires', 'time')}></input>
-                        <input value={session.expires.split(' ')[0]} type="date" onChange={e => changeTimes(e, 'expires', 'date')}></input>
+                        <input
+                            value={session.expires.split(' ')[1]}
+                            type="time"
+                            onChange={e => changeSessionTimes(e, 'expires', 'time')}></input>
+                        <input
+                            value={session.expires.split(' ')[0]}
+                            type="date"
+                            onChange={e => changeSessionTimes(e, 'expires', 'date')}
+                        ></input>
                     </>
                 :
                     <p>
-                        {toLocalTime(props.sessions[props.index].expires.split(' ')[1])},
+                        {toLocalTime(session.expires.split(' ')[1])},
                         <br></br>
-                        {toLocalDate(props.sessions[props.index].expires.split(' ')[0])}
+                        {toLocalDate(session.expires.split(' ')[0])}
                     </p>
                 }
             </div>

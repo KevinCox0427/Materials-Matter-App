@@ -1,46 +1,46 @@
-import { createSlice, PayloadAction, Reducer } from '@reduxjs/toolkit';
-import { PageLimit } from 'aws-sdk/clients/directoryservice';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-type SideMenuData = null | {
-    type: 'node' | 'comment' | 'sessions' | 'tags',
+type SideMenuData = {
+    type: 'node' | 'comment' | 'sessions' | 'tags' | 'closed',
     dataPointer: [number, number]
 }
 
-const initialState: SideMenuData = null;
-
 export const sideMenuDataSlice = createSlice({
     name: 'sideMenuData',
-    initialState: initialState as SideMenuData,
+    initialState: {
+        type: 'closed',
+        dataPointer: [0, 0]
+    } as SideMenuData,
     reducers: {
         setNode: (state, action:PayloadAction<{
             nodeIndex: number,
             rowIndex: number
         }>) => {
-            state = {
+            return {
                 type: 'node',
                 dataPointer: [action.payload.rowIndex, action.payload.nodeIndex]
-            }
+            };
         },
 
         setComment: (state, action:PayloadAction<{
             sessionIndex: number,
             commentIndex: number
         }>) => {
-            state = {
+            return {
                 type: 'comment',
                 dataPointer: [action.payload.sessionIndex, action.payload.commentIndex]
             }
         },
 
         setSessions: (state) => {
-            state = {
+            return {
                 type: 'sessions',
                 dataPointer: [0, 0]
             }
         },
 
         setTags: (state) => {
-            state = {
+            return {
                 type: 'tags',
                 dataPointer: [0, 0]
             }
@@ -50,8 +50,11 @@ export const sideMenuDataSlice = createSlice({
          * An event handler to close the side menu when a node isn't clicked.
          * @param e The click event.
          */
-        closeSideMenu: (state:SideMenuData) => {
-            state = null;
+        closeSideMenu: (state) => {
+            return {
+                type: 'closed',
+                dataPointer: [0, 0]
+            };
         }
     }
 });

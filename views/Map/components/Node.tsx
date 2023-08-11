@@ -17,8 +17,8 @@ type Props = {
  * @param node The content's data for the node.
  */
 const Node: FunctionComponent<Props> = (props) => {
-    const dispatch = useDispatch();
     const map = useSelector(state => state.map);
+    const dispatch = useDispatch();
 
     // Reference for keeping track of mouse position
     const mousePosition = useRef([-1,-1]);
@@ -100,7 +100,6 @@ const Node: FunctionComponent<Props> = (props) => {
 
         // Deleting the node at its current spot and adding it to its new spot.
         dispatch(moveNode({
-            nodeData: props.node,
             fromNodeIndex: props.nodeIndex,
             fromRowIndex: props.rowIndex,
             toNodeIndex: newNodeIndex,

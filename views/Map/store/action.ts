@@ -7,7 +7,7 @@ export const actionSlice = createSlice({
     initialState: '' as Action,
     reducers: {
         setAction: (state, action: PayloadAction<Action>) => {
-            state = action.payload;
+            return action.payload;
         }
     }
 }); 

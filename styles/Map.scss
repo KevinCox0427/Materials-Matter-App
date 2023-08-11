@@ -351,20 +351,31 @@ body {
                 flex-direction: row;
                 flex-wrap: wrap;
                 justify-content: space-between;
-                gap: 3em;
+                gap: 4em;
     
-                .Buttons {
+                .TitleWrapper {
                     display: flex;
-                    flex-direction: row;
+                    flex-direction: row-reverse;
                     flex-wrap: wrap;
+                    gap: 0.5em 1em;
                     justify-content: space-between;
                     align-items: center;
+                    justify-content: center;
                     flex-basis: 100%;
-                    padding-bottom: 0.75em;
-                    border-bottom: 0.15em solid var(--black);
     
                     * {
                         display: flex;
+                    }
+
+                    .Title {
+                        display: flex;
+                        flex-basis: 10em;
+                        flex-grow: 1;
+                        font-family: var(--rubik);
+                        font-size: 1.75em;
+                        font-weight: 500;
+                        text-align: center;
+                        min-width: 1em;
                     }
     
                     button {
@@ -396,16 +407,6 @@ body {
                         }
                     }
                 }
-    
-                .Title {
-                    display: flex;
-                    flex-basis: 100%;
-                    font-family: var(--rubik);
-                    font-size: 1.75em;
-                    font-weight: 500;
-                    text-align: center;
-                    min-width: 1em;
-                }
                 
                 input {
                     background: none;
@@ -421,7 +422,7 @@ body {
                     flex-direction: row;
                     flex-wrap: wrap;
                     flex-basis: 100%;
-                    gap: 1em;
+                    gap: 0.5em 1em;
                     margin: auto 0;
     
                     * {
@@ -430,8 +431,8 @@ body {
     
                     h3 {
                         flex-basis: 100%;
-                        font-size: 1.6em;
-                        font-weight: 400;
+                        font-size: 2em;
+                        font-weight: 500;
                     }
     
                     .FileUpload {
@@ -868,6 +869,86 @@ body {
                                 }
                             }
                         }
+                    }
+                }
+            }
+
+            .tags {
+                padding: 1em;
+                height: fit-content;
+                display: flex;
+                flex-direction: row;
+                justify-content: center;
+                flex-wrap: wrap;
+                gap: 1em;
+
+                * {
+                    display: flex;
+                }
+
+                h2 {
+                    flex-basis: 100%;
+                    font-size: 2em;
+                    font-weight: 400;
+                    margin-top: 1em;
+                    text-align: center;
+                }
+
+                & > button {
+                    margin-bottom: 1.25em;
+                }
+
+                button {
+                    font-size: 1.25em;
+                    font-weight: 500;
+                    flex-direction: row;
+                    background: var(--white);
+                    gap: 0.4em;
+                    align-items: center;
+                    padding: 0.25em 0.6em;
+                    border-radius: 0.5em;
+                    transition: background-color 0.1s linear, transform 0.1s linear;
+
+                    i {
+                        font-size: 1.2em;
+                    }
+
+                    &:hover, &:focus-visible {
+                        background-color: var(--yellow);
+                        transform: scale(1.05);
+                        cursor: pointer;
+                    }
+
+                    &.Activated {
+                        background-color: var(--yellow);
+                    }
+                }
+
+                .Tag {
+                    flex-direction: row;
+                    flex-wrap: wrap;
+                    justify-content: center;
+                    align-items: center;
+                    gap: 0.25em;
+                    flex-basis: 100%;
+                    background-color: var(--white);
+                    padding: 0.5em 0.75em;
+                    border-radius: 0.25em;
+
+                    input {
+                        flex-basis: 10em;
+                        flex-grow: 1;
+                        font-size: 1.3em;
+                        font-weight: 500;
+                        border-bottom: 0.1em dashed;
+
+                        &:hover, &:focus {
+                            border-bottom: 0.1em solid;
+                        }
+                    }
+
+                    button i { 
+                        font-size: 1.1em;
                     }
                 }
             }

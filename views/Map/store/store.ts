@@ -19,7 +19,7 @@ export const store = configureStore({
         sideMenuData: sideMenuDataSlice.reducer,
         tempComment: tempCommentSlice.reducer,
         tempSession: tempSessionSlice.reducer
-    }
+    },
 });
 
 // Typing the useDispatch and useSelector hooks.

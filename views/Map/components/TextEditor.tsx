@@ -1,5 +1,7 @@
 import React, { FunctionComponent, useEffect, useRef } from "react";
 import QuillType from "quill";
+import { useDispatch, useSelector } from "../store/store";
+import { changeNodeContent } from "../store/map";
 
 /**
  * Because the @types/Quill package was throwing syntax errors.
@@ -13,6 +15,12 @@ declare const Quill: any;
  * @param setContent The function to set the state variable.
  */
 const TextEditor: FunctionComponent = () => {
+    const sideMenuData = useSelector(state => state.sideMenuData);
+    if(sideMenuData.type !== 'node') return <></>;
+    const content = useSelector(state => state.map.rows[sideMenuData.dataPointer[0]].nodes[sideMenuData.dataPointer[1]].htmlContent);
+
+    const dispatch = useDispatch();
+
     // References to the wrapper div and the Quill class.
     const editor = useRef<HTMLDivElement>(null);
     const quill = useRef<QuillType | null>(null);
@@ -45,11 +53,15 @@ const TextEditor: FunctionComponent = () => {
         });
 
         // Loading the initial content.
-        editor.current!.children[0].innerHTML = `${props.content}`;
+        editor.current!.children[0].innerHTML = `${content}`;
 
         // Creating an event listener to set the state variable when a user types.
         quill.current!.on('text-change', (_, __, source) => {
-            if(source === 'user') props.setContent(editor.current!.children[0].innerHTML);
+            if(source === 'user') dispatch(changeNodeContent({
+                rowIndex: sideMenuData.dataPointer[0],
+                nodeIndex: sideMenuData.dataPointer[1],
+                content: editor.current!.children[0].innerHTML
+            }));
         });
     }, [editor]);
     

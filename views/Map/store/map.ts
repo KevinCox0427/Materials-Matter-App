@@ -5,9 +5,7 @@ export const mapSlice = createSlice({
     initialState: window.ServerProps.mapPageProps!.map as FullMapDoc,
     reducers: {
         changeMapName: (state, action: PayloadAction<string>) => {
-            state = {...state,
-                name: action.payload
-            }
+            state.name = action.payload;
         },
 
         insertRow: (state, action: PayloadAction<number>) => {
@@ -37,7 +35,7 @@ export const mapSlice = createSlice({
         moveRowUp: (state, action: PayloadAction<{
             rowIndex: number
         }>) => {
-            if(action.payload.rowIndex === 0) return;
+            if(action.payload.rowIndex === 0) return state;
             // Removing row.
             const currentRow = state.rows.splice(action.payload.rowIndex, 1)[0];
             // Inserting row.
@@ -53,7 +51,7 @@ export const mapSlice = createSlice({
         moveRowDown: (state, action: PayloadAction<{
             rowIndex: number
         }>) => {
-            if(action.payload.rowIndex >= state.rows.length - 1) return;
+            if(action.payload.rowIndex >= state.rows.length - 1) return state;
             // Removing row.
             const currentRow = state.rows.splice(action.payload.rowIndex, 1)[0];
             // Inserting row.
@@ -104,16 +102,15 @@ export const mapSlice = createSlice({
         },
 
         moveNode: (state, action: PayloadAction<{
-            nodeData: NodeDoc,
             fromRowIndex: number,
             fromNodeIndex: number,
             toRowIndex: number,
             toNodeIndex: number
         }>) => {
             // Removing node
-            state.rows[action.payload.fromRowIndex].nodes.splice(action.payload.fromNodeIndex, 1);
+            const currentNode = state.rows[action.payload.fromRowIndex].nodes.splice(action.payload.fromNodeIndex, 1)[0];
             // Inserting the new node.
-            state.rows[action.payload.toRowIndex].nodes.splice(action.payload.toNodeIndex, 0, action.payload.nodeData);
+            state.rows[action.payload.toRowIndex].nodes.splice(action.payload.toNodeIndex, 0, currentNode);
 
             // Updating the nodes' indeces since they will be wrong
             state.rows[action.payload.fromRowIndex].nodes = state.rows[action.payload.fromRowIndex].nodes.map((node, i) => {
@@ -172,11 +169,11 @@ export const mapSlice = createSlice({
             nodeIndex: number,
             imageIndex: number
         }>) => {
-            if(action.payload.imageIndex === 0) return;
+            if(action.payload.imageIndex <= 0) return state;
             // Removing image
-            state.rows[action.payload.rowIndex].nodes[action.payload.nodeIndex].gallery.splice(action.payload.imageIndex, 1);
+            const currentImage = state.rows[action.payload.rowIndex].nodes[action.payload.nodeIndex].gallery.splice(action.payload.imageIndex, 1)[0];
             // Inserting image up an index.
-            state.rows[action.payload.rowIndex].nodes[action.payload.nodeIndex].gallery.splice(action.payload.imageIndex - 1, 0, state.rows[action.payload.rowIndex].nodes[action.payload.nodeIndex].gallery[action.payload.imageIndex]);
+            state.rows[action.payload.rowIndex].nodes[action.payload.nodeIndex].gallery.splice(action.payload.imageIndex - 1, 0, currentImage);
         },
 
         moveImageDown: (state, action:PayloadAction<{
@@ -184,11 +181,11 @@ export const mapSlice = createSlice({
             nodeIndex: number,
             imageIndex: number
         }>) => {
-            if(action.payload.imageIndex >= state.rows[action.payload.rowIndex].nodes.length - 1) return;
+            if(action.payload.imageIndex >= state.rows[action.payload.rowIndex].nodes[action.payload.nodeIndex].gallery.length - 1) return state;
             // Removing image
-            state.rows[action.payload.rowIndex].nodes[action.payload.nodeIndex].gallery.splice(action.payload.imageIndex, 1);
+            const currentImage = state.rows[action.payload.rowIndex].nodes[action.payload.nodeIndex].gallery.splice(action.payload.imageIndex, 1)[0];
             // Inserting image down an index.
-            state.rows[action.payload.rowIndex].nodes[action.payload.nodeIndex].gallery.splice(action.payload.imageIndex + 1, 0, state.rows[action.payload.rowIndex].nodes[action.payload.nodeIndex].gallery[action.payload.imageIndex]);
+            state.rows[action.payload.rowIndex].nodes[action.payload.nodeIndex].gallery.splice(action.payload.imageIndex + 1, 0, currentImage);
         }
     }
 });

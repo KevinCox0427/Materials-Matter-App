@@ -1,5 +1,4 @@
-import { createSlice } from '@reduxjs/toolkit';
-import { useSelector } from './store';
+import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 
 type TempSession = null | FullSessionDoc
 
@@ -7,27 +6,28 @@ export const tempSessionSlice = createSlice({
     name: 'tempSession',
     initialState: null as TempSession,
     reducers: {
-        addNewSession: (state) => {
-            // Getting map state
-            const map = useSelector(mapState => mapState.map);
-
+        addNewSession: (state, action: PayloadAction<number>) => {
             // Adding an extra day to the expiration date by default.
             const expirationDate = new Date();
             expirationDate.setDate(expirationDate.getDate() + 1);
 
-            state = {
+            return {
                 id: -1,
-                mapId: map.id,
+                mapId: action.payload,
                 name: `New Session - ${(new Date()).toLocaleDateString()}`,
                 start: convertDatetime((new Date()).toLocaleString()),
                 expires: convertDatetime(expirationDate.toLocaleString()),
                 comments: {}
             }
+        },
+
+        removeNewSession: (state) => {
+            return null;
         }
     }
 });
 
-export const { addNewSession } = tempSessionSlice.actions;
+export const { addNewSession, removeNewSession } = tempSessionSlice.actions;
 
 /**
  * A helper function to convert HH:MM:SS AM/PM to HH:MM:SS

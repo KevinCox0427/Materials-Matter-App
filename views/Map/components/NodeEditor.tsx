@@ -21,7 +21,7 @@ type Props = {
  */
 const NodeEditor: FunctionComponent<Props> = (props) => {
     const sideMenuData = useSelector(state => state.sideMenuData);
-    if(!sideMenuData || sideMenuData.type !== 'node') return <></>;
+    if(sideMenuData.type !== 'node') return <></>;
     const node = useSelector(state => state.map.rows[sideMenuData.dataPointer[0]].nodes[sideMenuData.dataPointer[1]]);
 
     const dispatch = useDispatch();
@@ -125,8 +125,8 @@ const NodeEditor: FunctionComponent<Props> = (props) => {
         dispatch(closeSideMenu());
     }
 
-    return <>
-        <div className="TitleWrapper">9
+    return <div className="node">
+        <div className="TitleWrapper">
             <input
                 className="Title"
                 value={node.name}
@@ -184,7 +184,7 @@ const NodeEditor: FunctionComponent<Props> = (props) => {
             <h3>Content:</h3>
             <TextEditor></TextEditor>
         </div>
-    </>
+    </div>
 }
 
 export default NodeEditor;

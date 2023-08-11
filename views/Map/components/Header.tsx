@@ -129,7 +129,7 @@ const Header: FunctionComponent<Props> = (props) => {
         dispatch(insertRow(newRowIndex));
 
         // Since we're moving the maps content around, there's a chance the current side menu data pointer is incorrect.
-        if(sideMenuData && sideMenuData.type === 'node' && sideMenuData.dataPointer[0] >= newRowIndex) {
+        if(sideMenuData.type === 'node' && sideMenuData.dataPointer[0] >= newRowIndex) {
             dispatch(setNode({
                 rowIndex: sideMenuData.dataPointer[0] + 1, 
                 nodeIndex: sideMenuData.dataPointer[1]
@@ -160,6 +160,7 @@ const Header: FunctionComponent<Props> = (props) => {
         // Adding an empty comment
         dispatch(addNewComment({
             replyId: 0,
+            sessionId: selectedSession.id,
             userData: props.userData,
             position: [
                 Math.round((x / mapBody.clientWidth) * 100),
@@ -178,14 +179,16 @@ const Header: FunctionComponent<Props> = (props) => {
      * Event handler to toggle opening the comment sessions on the side menu.
      */
     function toggleSessions() {
-        sideMenuData ? dispatch(setSessions()) : dispatch(closeSideMenu());
+        if(sideMenuData.type !== 'sessions') dispatch(setSessions());
+        else dispatch(closeSideMenu());
     }
 
     /**
      * Event handler to toggle opening the tags on the side menu.
      */
     function toggleTags() {
-        sideMenuData ? dispatch(setTags()) : dispatch(closeSideMenu());
+        if(sideMenuData.type !== 'tags') dispatch(setTags());
+        else dispatch(closeSideMenu());
     }
 
     /**
@@ -252,14 +255,14 @@ const Header: FunctionComponent<Props> = (props) => {
             </button>
             <button
                 className={`Tags ${sideMenuData?.type === 'tags' ? 'Activated' : ''}`}
-                onClick={toggleTags}
+                onClick={() => toggleTags()}
             >
                 <i className="fa-solid fa-tag"></i>
                 <p>Edit Tags</p>
             </button>
             <button
                 className={`Sessions ${sideMenuData?.type === 'sessions' ? 'Activated' : ''}`}
-                onClick={toggleSessions}
+                onClick={() => toggleSessions()}
             >
                 <i className="fa-solid fa-bars"></i>
                 <p>Sessions</p>

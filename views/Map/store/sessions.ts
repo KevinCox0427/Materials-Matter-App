@@ -1,4 +1,7 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
+import { useDispatch } from "./store";
+import { removeNewSession } from "./tempSession";
+import { removeSelectedSession } from "./selectedSession";
 
 export const sessionsSlice = createSlice({
     name: 'sessions',
@@ -9,7 +12,7 @@ export const sessionsSlice = createSlice({
             const sessionIndex = state.reduce((previousIndex, session, i) => {
                 return action.payload.commentsessionId === session.id ? i : previousIndex;
             }, -1);
-            if(sessionIndex === -1) return;
+            if(sessionIndex === -1) return state;
 
             // If the array to reply to this comment doesn't exist, add it.
             if(!state[sessionIndex].comments[action.payload.id]) {
@@ -28,26 +31,32 @@ export const sessionsSlice = createSlice({
             state[sessionIndex].comments[replyId].push(action.payload);
         },
 
-        changeSessionName: (state, action: PayloadAction<{
-            sessionIndex: number,
-            name: string
-        }>) => {
-            state[action.payload.sessionIndex].name = action.payload.name;
+        saveSession: (state, action: PayloadAction<FullSessionDoc>) => {
+            // Finding the session's index given its id.
+            const sessionIndex = state.reduce((previousIndex, session, currentIndex) => {
+                return session.id === action.payload.id ? currentIndex : previousIndex;
+            }, -1);
+
+            // If not found, push the new session
+            if(sessionIndex === -1) {
+                state.push({...action.payload,
+                    comments: {}
+                });
+            }
+            // Otherwise overwrite the previous one.
+            else {
+                action.payload = {...action.payload,
+                    comments: state[sessionIndex].comments ? state[sessionIndex].comments : {}
+                }
+                state[sessionIndex] = action.payload;
+            }
         },
 
-        changeSessionTimes: (state, action: PayloadAction<{
-            sessionIndex: number,
-            key: 'start' | 'expires',
-            type: 'date' | 'time',
-            value: string
-        }>) => {
-            const newDate = action.payload.type === 'date'
-                ? `${action.payload.value} ${state[action.payload.sessionIndex][action.payload.key].split(' ')[1]}`
-                : `${state[action.payload.sessionIndex][action.payload.key].split(' ')[0]} ${action.payload.value}`;
-
-            state[action.payload.sessionIndex][action.payload.key] = newDate;
+        removeSession: (state, action: PayloadAction<number>) => {
+            if(action.payload < 0 || action.payload >= state.length - 1) return state;
+            state.splice(action.payload, 1);
         }
     }
 });
 
-export const { addComment } = sessionsSlice.actions;
+export const { addComment, saveSession, removeSession } = sessionsSlice.actions;

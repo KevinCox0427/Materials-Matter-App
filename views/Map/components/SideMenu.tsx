@@ -5,6 +5,7 @@ import TagsEditor from "./TagsEditor";
 import { useDispatch, useSelector } from "../store/store";
 import { addNewSession } from "../store/tempSession";
 import NodeEditor from "./NodeEditor";
+import { setNotification } from "../store/notification";
 
 type Props = {
     userData: UserData
@@ -12,21 +13,34 @@ type Props = {
 
 const SideMenu: FunctionComponent<Props> = (props) => {
     const dispatch = useDispatch();
+    const mapId = useSelector(state => state.map.id);
     const sideMenuData = useSelector(state => state.sideMenuData);
+    const tempSession = useSelector(state => state.tempSession);
     const sessions = useSelector(state => state.sessions);
     const selectedSession = useSelector(state => state.selectedSession);
+
+    function addSession() {
+        if(!props.userData) {
+            dispatch(setNotification('You must be an administrator to add sessions.'));
+        }
+        else {
+            dispatch(addNewSession(mapId));
+        }
+    }
     
-    return <div className={`SideMenuScroll ${sideMenuData ? 'Opened' : ' '}`}>
-        {sideMenuData 
-            ? <>
+    return <div className={`SideMenuScroll ${sideMenuData.type === 'closed' ? ' ' : 'Opened'}`}>
+        {sideMenuData.type === 'closed'
+            ? <></>
+            : <>
                 {sideMenuData.type === 'node'
                     ? <NodeEditor userData={props.userData} ></NodeEditor>
                     : <></>}
                 {sideMenuData.type === 'comment'
                     ? <div className="comment">
                         <Comment
-                            comment={selectedSession > -1 && sessions[selectedSession].comments['' + sideMenuData.dataPointer[0]] ? 
-                            sessions[selectedSession].comments['' + sideMenuData.dataPointer[0]][sideMenuData.dataPointer[1]] : undefined}
+                            comment={selectedSession > -1 && sessions[selectedSession].comments['' + sideMenuData.dataPointer[0]] 
+                                ? sessions[selectedSession].comments['' + sideMenuData.dataPointer[0]][sideMenuData.dataPointer[1]] 
+                                : undefined}
                             marginLeft={0}
                             userData={props.userData}
                         ></Comment>
@@ -35,7 +49,16 @@ const SideMenu: FunctionComponent<Props> = (props) => {
                 {sideMenuData.type === 'sessions'
                     ? <div className="sessions">
                         <h2>Comment Sessions:</h2>
-                        <button className="AddSession" onClick={() => dispatch(addNewSession())}>+ New Session</button>
+                        <button
+                            className="AddSession"
+                            onClick={() => addSession()}
+                        >+ New Session</button>
+                        {tempSession
+                            ? <SessionOption
+                                index={-1}
+                                userData={props.userData}
+                            ></SessionOption>
+                            : <></>}
                         {sessions.map((_, i) => {
                             return <Fragment key={i}>
                                 <SessionOption
@@ -49,8 +72,7 @@ const SideMenu: FunctionComponent<Props> = (props) => {
                 {sideMenuData.type === 'tags' 
                     ? <TagsEditor />
                     : <></>}
-            </> 
-            : <></>}
+            </>}
     </div>
 }
 
