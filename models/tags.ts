@@ -10,7 +10,8 @@ declare global {
     }
 
     interface TagDoc extends Tag {
-        id: number
+        id: number,
+        nodeIds: number[]
     }
 }
 

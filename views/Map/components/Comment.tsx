@@ -1,8 +1,9 @@
 import React, { Fragment, FunctionComponent, useEffect, useRef, useState } from "react";
 import { socket } from '../Map';
 import { setNotification } from "../store/notification";
-import { addNewComment, removeTempComment } from "../store/tempComment";
+import { addNewComment, removeTempComment, setCommentMessage } from "../store/tempComment";
 import { useDispatch, useSelector } from "../store/store";
+import { closeSideMenu } from "../store/sideMenuData";
 
 type Props = {
     comment: CommentDoc | undefined,
@@ -28,8 +29,8 @@ const Comment: FunctionComponent<Props> = (props) => {
 
     // State variables to keep track of a comment's content and whether its replies are visible.
     const [showReplies, setShowReplies] = useState(true);
-    const [commentMessage, setCommentMessage] = useState('');
     const selectedSession = useSelector(state => state.sessions[state.selectedSession]);
+    const tempComment = useSelector(state => state.tempComment);
 
     /**
      * Event handler to change the text of a comment.
@@ -39,10 +40,8 @@ const Comment: FunctionComponent<Props> = (props) => {
             post();
             return;
         }
-        setCommentMessage(e.target.value);
-        /**
-         * Making text area wrap content.
-         */
+        dispatch(setCommentMessage(e.target.value));
+        // Making text area wrap content.
         e.target.style.height = '0px';
         e.target.style.height = e.target.scrollHeight + 'px';
     }
@@ -58,11 +57,11 @@ const Comment: FunctionComponent<Props> = (props) => {
         }
 
         // Setting the temp comment state variable.
-        addNewComment({
+        dispatch(addNewComment({
             userData: props.userData!,
             sessionId: selectedSession.id,
             replyId: props.comment!.id
-        });
+        }));
     }
 
     /**
@@ -70,16 +69,21 @@ const Comment: FunctionComponent<Props> = (props) => {
      */
     function post() {
         socket.emit("postComment", {
-            content: commentMessage,
+            content: props.comment!.content,
             x: props.comment!.x ? props.comment!.x : -1,
             y: props.comment!.y ? props.comment!.y : -1,
             userId: props.comment!.userId,
             commentsessionId: props.comment!.commentsessionId,
-            replyId: props.comment!.replyId ? props.comment!.replyId : -1
+            replyId: props.comment!.replyId ? props.comment!.replyId : null
         });
 
         // Deleting the temp comment that was uploaded.
-        removeTempComment();
+        dispatch(removeTempComment());
+    }
+
+    function cancelTempComment() {
+        dispatch(removeTempComment());
+        dispatch(closeSideMenu());
     }
 
     /**
@@ -113,10 +117,10 @@ const Comment: FunctionComponent<Props> = (props) => {
             <div className="Top">
                 <h3>{props.comment.firstName} {props.comment.lastName}</h3>
                 {props.comment.id === -1
-                    ? <button className="Reply" onClick={post}>post</button>
-                    : <button className="Reply" onClick={reply}>reply</button>}
+                    ? <button className="Reply" onClick={() => post()}>post</button>
+                    : <button className="Reply" onClick={() => reply()}>reply</button>}
                 {props.comment.id === -1
-                    ? <button className="Reply" onClick={() => removeTempComment}>cancel</button>
+                    ? <button className="Reply" onClick={() => cancelTempComment()}>cancel</button>
                     : <></>}
                 <p>{toLocalDate(props.comment.timestamp.split(' ')[0])}</p>
             </div>
@@ -124,8 +128,8 @@ const Comment: FunctionComponent<Props> = (props) => {
                 ? <textarea
                     className="EditContent"
                     placeholder="Enter your comment..."
-                    value={commentMessage}
-                    onChange={changeMessage}
+                    value={props.comment.content}
+                    onChange={e => changeMessage(e)}
                 ></textarea>
                 : <p className="Content">{props.comment.content}</p>}
             {props.comment.replyId !== null && typeof selectedSession.comments[props.comment.id] !== 'undefined' && selectedSession.comments[props.comment.id].length > 0
@@ -137,6 +141,13 @@ const Comment: FunctionComponent<Props> = (props) => {
                 </button>
                 : <></>}
         </div>
+        {showReplies && tempComment && tempComment.replyId === props.comment.id
+            ? <Comment
+                comment={tempComment}
+                marginLeft={props.marginLeft + 3}
+                userData={props.userData}
+            ></Comment>
+            : <></>}
         {showReplies && typeof selectedSession.comments[props.comment.id] !== 'undefined'
             ? selectedSession.comments[props.comment.id].map((reply, i) => {
                 return <Fragment key={i}>

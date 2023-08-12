@@ -5,9 +5,10 @@
   "main": "dist/server.js",
   "scripts": {
     "build": "npm i && tsc && sass styles:dist/public/css && vite build",
-    "dev": "node utils/watch.js",
+    "dev": "vite",
     "start": "node dist/server.js",
-    "nodemon": "nodemon server.ts --exec 'tsc && node dist/server.js' -e ts,tsx --ignore node_modules/ --ignore dist/"
+    "nodemon": "nodemon server.ts --exec 'tsc && node dist/server.js' -e ts,tsx --ignore node_modules/ --ignore dist/",
+    "sass": "sass styles:dist/public/css --watch"
   },
   "repository": {
     "type": "git",

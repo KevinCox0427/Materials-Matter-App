@@ -20,11 +20,11 @@ type Props = {
  * @param userData (optional) Data of the logged in user.
  */
 const NodeEditor: FunctionComponent<Props> = (props) => {
+    const dispatch = useDispatch();
     const sideMenuData = useSelector(state => state.sideMenuData);
     if(sideMenuData.type !== 'node') return <></>;
     const node = useSelector(state => state.map.rows[sideMenuData.dataPointer[0]].nodes[sideMenuData.dataPointer[1]]);
-
-    const dispatch = useDispatch();
+    const tags = useSelector(state => state.map.tags);
 
     /**
      * An asynchronous helper function to read a file from an input
@@ -130,7 +130,7 @@ const NodeEditor: FunctionComponent<Props> = (props) => {
             <input
                 className="Title"
                 value={node.name}
-                    onChange={e => dispatch(changeNodeName({
+                onChange={e => dispatch(changeNodeName({
                     rowIndex: sideMenuData.dataPointer[0],
                     nodeIndex: sideMenuData.dataPointer[1],
                     name: e.target.value
@@ -140,6 +140,31 @@ const NodeEditor: FunctionComponent<Props> = (props) => {
                 <i className="fa-solid fa-trash-can"></i>
                 Delete
             </button>
+        </div>
+        <div className="ActionSelector">
+            <h3>Action:</h3>
+            <div>
+                <select value={node.action}>
+                    <option value={'content'}>Content</option>
+                    <option value={'filter'}>Filter</option>
+                </select>
+                <i className="fa-solid fa-chevron-down"></i>
+            </div>
+        </div>
+        <div className="TagsSelector">
+            <h3>Tags:</h3>
+            <select value={-1}>
+                <option value={-1}>Add Tag +</option>
+                {tags.map((tag, i) => <option key={i} value={i}>{tag.name}</option>)}
+            </select>
+            <div className="TagsWrapper">
+                {tags.filter(tag => tag.nodeIds.includes(node.id)).map((tag, i) => <div key={i} className="Tag">
+                    <p>{tag.name}</p>
+                    <button>
+                        <i className="fa-solid fa-x"></i>
+                    </button>
+                </div>)}
+            </div>
         </div>
         <div className="GalleryUpload">
             <h3>Gallery:</h3>

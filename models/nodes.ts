@@ -15,8 +15,7 @@ declare global {
     } 
 
     interface NodeDoc extends NodeType {
-        id: number,
-        tags: TagDoc[],
+        id: number
     }
 }
 
@@ -74,8 +73,7 @@ const Nodes = {
             const result = await knex('nodes')
                 .where('id', id)
                 .update({...data,
-                    gallery: JSON.stringify(data.gallery),
-                    tags: JSON.stringify(data.tags)
+                    gallery: JSON.stringify(data.gallery)
                 });
 
             return result === 1;

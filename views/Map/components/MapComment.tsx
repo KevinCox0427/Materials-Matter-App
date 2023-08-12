@@ -27,7 +27,7 @@ const MapComment: FunctionComponent<Props> = (props) => {
     
     return <button className="Comment" onClick={openComment} style={{
         //backgroundImage: `url("${props.commentData.image}")`,
-        left: `${props.commentData.x}vw`,
+        left: `${props.commentData.x}%`,
         top: `${props.commentData.y}%`
     }}>
         {props.commentData.firstName.charAt(0)}{props.commentData.lastName.charAt(0)}

@@ -57,6 +57,7 @@ const Map: FunctionComponent<Props> = (props) => {
     const selectedSession = useSelector(state => state.selectedSession);
     const sessions = useSelector(state => state.sessions);
     const tempSession = useSelector(state => state.tempSession);
+    const tempComment = useSelector(state => state.tempComment);
     const action = useSelector(state => state.action);
     const notification = useSelector(state => state.notification);
 
@@ -222,6 +223,12 @@ const Map: FunctionComponent<Props> = (props) => {
                             <p className="StartText">Start by adding your first row...</p>
                         }
                     </div>
+                    {tempComment && tempComment.replyId === 0
+                        ? <MapComment
+                            commentData={tempComment}
+                            commentIndex={-1}
+                        ></MapComment> 
+                        : <></>}
                     {selectedSession > -1 && sessions[selectedSession].comments['0'] ? sessions[selectedSession].comments['0'].map((comment, i) => {
                         return <Fragment key={i}>
                             <MapComment

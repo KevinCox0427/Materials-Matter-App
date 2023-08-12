@@ -1,7 +1,4 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
-import { useDispatch } from "./store";
-import { removeNewSession } from "./tempSession";
-import { removeSelectedSession } from "./selectedSession";
 
 export const sessionsSlice = createSlice({
     name: 'sessions',
@@ -15,9 +12,9 @@ export const sessionsSlice = createSlice({
             if(sessionIndex === -1) return state;
 
             // If the array to reply to this comment doesn't exist, add it.
-            if(!state[sessionIndex].comments[action.payload.id]) {
+            if(!state[sessionIndex].comments['' + action.payload.replyId]) {
                 state[sessionIndex].comments = {...state[sessionIndex].comments,
-                    ['' + action.payload.id]: []
+                    ['' + action.payload.replyId]: []
                 }
             }
 
@@ -27,8 +24,7 @@ export const sessionsSlice = createSlice({
             // }
 
             // Adding the comment to the comment hashmap.
-            const replyId = action.payload.replyId ? action.payload.replyId : 0;
-            state[sessionIndex].comments[replyId].push(action.payload);
+            state[sessionIndex].comments['' + action.payload.replyId].push(action.payload);
         },
 
         saveSession: (state, action: PayloadAction<FullSessionDoc>) => {

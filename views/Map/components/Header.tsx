@@ -167,11 +167,11 @@ const Header: FunctionComponent<Props> = (props) => {
                 Math.round(((y - mapBody.getBoundingClientRect().top) / mapBody.clientHeight) * 100)
             ]
         }));
-        
+
         // Opening side menu to enter comment.
         dispatch(setComment({
             sessionIndex: selectedSessionIndex, 
-            commentIndex: selectedSession.comments['0'].length
+            commentIndex: -1
         }));
     }
 

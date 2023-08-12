@@ -45,16 +45,35 @@ const Maps = {
                 SELECT
                     m.id,
                     m.name,
-                    IF(COUNT(*) = 0, JSON_ARRAY(), JSON_ARRAYAGG(JSON_OBJECT('id', t.id, 'name', t.name, 'mapId', t.mapId))) AS 'tags',
                     IFNULL((
-                        WITH
-                            rowData as (
-                                SELECT
-                                    r.id, r.name, r.index, r.mapId,
-                                    ROW_NUMBER() OVER(PARTITION BY r.index ORDER BY r.index) AS array_index
-                                FROM \`rows\` r
-                                WHERE r.mapId = ?
-                            )
+                        WITH tagData AS (
+                            SELECT 
+                                t.id,
+                                t.name,
+                                t.mapId,
+                                IF(COUNT(n2.id) = 0, JSON_ARRAY(), JSON_ARRAYAGG(n2.id)) as 'nodeIds'
+                            FROM \`tags\` t
+                            LEFT JOIN \`nodesToTags\` nt ON nt.tagId = t.id
+                            LEFT JOIN \`nodes\` n2 ON n2.id = nt.nodeId
+                            GROUP BY t.id
+                        )
+                        SELECT JSON_ARRAYAGG(JSON_OBJECT(
+                            'id', t.id,
+                            'name', t.name,
+                            'mapId', t.mapId,
+                            'nodeIds', t.nodeIds
+                        ))
+                        FROM \`tagData\` t
+                        WHERE t.mapId = m.id
+                    ), JSON_ARRAY()) as 'tags',
+                    IFNULL((
+                        WITH rowData AS (
+                            SELECT
+                                r.id, r.name, r.index, r.mapId,
+                                ROW_NUMBER() OVER(PARTITION BY r.index ORDER BY r.index) AS array_index
+                            FROM \`rows\` r
+                            WHERE r.mapId = ?
+                        )
                         SELECT JSON_ARRAYAGG(
                             JSON_INSERT(
                                 JSON_OBJECT(
@@ -76,12 +95,8 @@ const Maps = {
                                                 n.htmlContent,
                                                 n.action,
                                                 n.filter,
-                                                IF(COUNT(t2.id) = 0, JSON_ARRAY(),  JSON_ARRAYAGG(JSON_OBJECT('id', t2.id, 'name', t2.name, 'mapId', t2.mapId))) as 'tags',
                                                 ROW_NUMBER() OVER(PARTITION BY n.index ORDER BY n.index) AS array_index
                                             FROM \`nodes\` n
-                                            LEFT JOIN \`tags\` t1 on n.filter = t1.id
-                                            LEFT JOIN \`nodestotags\` ntt ON n.id = ntt.nodeId
-                                            LEFT JOIN \`tags\` t2 on ntt.tagId = t2.id
                                             WHERE n.rowId = r.id
                                             GROUP BY n.id
                                         )
@@ -93,7 +108,6 @@ const Maps = {
                                             'rowId', r.id,
                                             'gallery', n.gallery,
                                             'htmlContent', n.htmlContent,
-                                            'tags', n.tags,
                                             'action', n.action,
                                             'filter', n.filter
                                         )) as 'nodes'
@@ -110,10 +124,9 @@ const Maps = {
                         ORDER BY r.array_index
                     ), JSON_ARRAY()) as 'rows'
                 FROM \`maps\` m
-                LEFT JOIN \`tags\` t ON t.mapId = m.id
                 WHERE m.id = ?
                 GROUP BY m.id
-                Limit 1
+                LIMIT 1
             `, [id, id, id]);
             
             if(result[0].length === 0) {

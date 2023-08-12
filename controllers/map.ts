@@ -187,7 +187,7 @@ map.post('/props/:id', async (req, res) => {
             });
         
             // Using a table of ids to store the replies
-            let commentMap:{
+            let commentMap: {
                 [replyId: string]: CommentDoc[]
             } = {}
 
@@ -215,13 +215,13 @@ map.post('/props/:id', async (req, res) => {
         mapPageProps: {
             map: map,
             sessions: fullSessions,
-            userData: req.user ? {
-                userId: req.user.id,
-                firstName: req.user.firstName,
-                lastName: req.user.lastName,
-                image: req.user.image,
-                isAdmin: req.user.admin
-            } : undefined
+            userData: {
+                userId: 1,
+                firstName: "Kevin",
+                lastName: "Cox",
+                image: "",
+                isAdmin: true
+            }
         }
     });
 });
@@ -263,9 +263,7 @@ map.route('/:id')
                 // 0 should always exist since that represents comments on the map.
                 let commentMap:{
                     [replyId: string]: CommentDoc[]
-                } = {
-                    ['0']: []
-                }
+                } = {}
 
                 // Adding each comment to the table based on its reply id.
                 comments.forEach(comment => {
@@ -278,7 +276,7 @@ map.route('/:id')
                     }
 
                     commentMap[key].push(comment);
-                })
+                });
 
                 return {...session,
                     comments: commentMap
@@ -374,7 +372,6 @@ map.route('/:id')
                     gallery: node.gallery,
                     htmlContent: node.htmlContent,
                     action: node.action,
-                    tags: node.tags,
                     filter: null
                 }
             })))) {

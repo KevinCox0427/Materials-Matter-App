@@ -88,7 +88,6 @@ export const mapSlice = createSlice({
                 index: action.payload.nodeIndex,
                 gallery: [],
                 htmlContent: '',
-                tags: [],
                 action: 'content',
                 filter: null    
             });
@@ -186,8 +185,32 @@ export const mapSlice = createSlice({
             const currentImage = state.rows[action.payload.rowIndex].nodes[action.payload.nodeIndex].gallery.splice(action.payload.imageIndex, 1)[0];
             // Inserting image down an index.
             state.rows[action.payload.rowIndex].nodes[action.payload.nodeIndex].gallery.splice(action.payload.imageIndex + 1, 0, currentImage);
+        },
+
+        setTagName: (state, action: PayloadAction<{
+            tagIndex: number,
+            name: string
+        }>) => {
+            state.tags[action.payload.tagIndex].name = action.payload.name;
+        },
+
+        addTag: (state, action: PayloadAction<{
+            name: string,
+            mapId: number
+        }>) => {
+            state.tags.push({
+                id: -1,
+                name: action.payload.name,
+                mapId: action.payload.mapId,
+                nodeIds: []
+            })
+        },
+
+        removeTag: (state, action: PayloadAction<number>) => {
+            if(action.payload < 0 || action.payload >= state.tags.length) return state;
+            state.tags.splice(action.payload, 1);
         }
     }
 });
 
-export const { changeMapName, insertRow, changeRowName, removeRow, moveRowDown, moveRowUp, insertNode, moveNode, removeNode, changeNodeContent, changeNodeName, addImageToNode, moveImageDown, moveImageUp, removeImageFromNode } = mapSlice.actions;
+export const { changeMapName, insertRow, changeRowName, removeRow, moveRowDown, moveRowUp, insertNode, moveNode, removeNode, changeNodeContent, changeNodeName, addImageToNode, moveImageDown, moveImageUp, removeImageFromNode, setTagName, addTag, removeTag } = mapSlice.actions;
