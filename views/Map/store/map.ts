@@ -209,8 +209,43 @@ export const mapSlice = createSlice({
         removeTag: (state, action: PayloadAction<number>) => {
             if(action.payload < 0 || action.payload >= state.tags.length) return state;
             state.tags.splice(action.payload, 1);
+        },
+
+        addNodeToTag: (state, action: PayloadAction<{
+            nodeId: number,
+            tagIndex: number
+        }>) => {
+            if(!state.tags[action.payload.tagIndex].nodeIds.includes(action.payload.nodeId)) {
+                state.tags[action.payload.tagIndex].nodeIds.push(action.payload.nodeId);
+            }
+        },
+
+        removeNodeFromTag: (state, action: PayloadAction<{
+            nodeId: number,
+            tagIndex: number
+        }>) => {
+            const nodeIndex = state.tags[action.payload.tagIndex].nodeIds.indexOf(action.payload.nodeId);
+            if(nodeIndex !== -1) {
+                state.tags[action.payload.tagIndex].nodeIds.splice(nodeIndex, 1);
+            }
+        },
+
+        changeNodeAction: (state, action: PayloadAction<{
+            rowIndex: number,
+            nodeIndex: number,
+            action: "filter" | "content"
+        }>) => {
+            state.rows[action.payload.rowIndex].nodes[action.payload.nodeIndex].action = action.payload.action;
+        },
+
+        changeNodeFilter: (state, action: PayloadAction<{
+            rowIndex: number,
+            nodeIndex: number,
+            tagId: number | null
+        }>) => {
+            state.rows[action.payload.rowIndex].nodes[action.payload.nodeIndex].filter = action.payload.tagId;
         }
     }
 });
 
-export const { changeMapName, insertRow, changeRowName, removeRow, moveRowDown, moveRowUp, insertNode, moveNode, removeNode, changeNodeContent, changeNodeName, addImageToNode, moveImageDown, moveImageUp, removeImageFromNode, setTagName, addTag, removeTag } = mapSlice.actions;
+export const { changeMapName, insertRow, changeRowName, removeRow, moveRowDown, moveRowUp, insertNode, moveNode, removeNode, changeNodeContent, changeNodeName, addImageToNode, moveImageDown, moveImageUp, removeImageFromNode, setTagName, addTag, removeTag, addNodeToTag, removeNodeFromTag, changeNodeAction, changeNodeFilter } = mapSlice.actions;

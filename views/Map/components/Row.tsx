@@ -12,6 +12,7 @@ type Props = {
  * @param rowIndex The index of the row this node belongs to.
  */
 const Row: FunctionComponent<Props> = (props) => {
+    const preview = useSelector(state => state.preview);
     const rowData = useSelector(state => state.map.rows[props.rowIndex]);
     const dispatch = useDispatch();
     
@@ -28,22 +29,26 @@ const Row: FunctionComponent<Props> = (props) => {
             })}
         </div>
         <div className="Name">
-            <input value={rowData.name} onChange={e => dispatch(changeRowName({
-                rowIndex: props.rowIndex,
-                name: e.target.value
-            }))}></input>
+            {preview ?
+                <h2>{rowData.name}</h2>
+                : <input value={rowData.name} onChange={e => dispatch(changeRowName({
+                    rowIndex: props.rowIndex,
+                    name: e.target.value
+                }))}></input>}
         </div>
-        <div className="LeftButtons">
-            <button onClick={() => dispatch(moveRowUp({rowIndex: props.rowIndex}))}>
-                <i className="fa-solid fa-arrow-up"></i>
-            </button>
-            <button onClick={() => dispatch(removeRow({rowIndex: props.rowIndex}))}>
-                <i className="fa-solid fa-trash-can"></i>
-            </button>
-            <button onClick={() => dispatch(moveRowDown({rowIndex: props.rowIndex}))}>
-                <i className="fa-solid fa-arrow-down"></i>
-            </button>
-        </div>
+        {preview ? 
+            <></>
+            : <div className="LeftButtons">
+                <button onClick={() => dispatch(moveRowUp({rowIndex: props.rowIndex}))}>
+                    <i className="fa-solid fa-arrow-up"></i>
+                </button>
+                <button onClick={() => dispatch(removeRow({rowIndex: props.rowIndex}))}>
+                    <i className="fa-solid fa-trash-can"></i>
+                </button>
+                <button onClick={() => dispatch(moveRowDown({rowIndex: props.rowIndex}))}>
+                    <i className="fa-solid fa-arrow-down"></i>
+                </button>
+            </div>}
     </div>
 }
 

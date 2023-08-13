@@ -1,8 +1,8 @@
-import React, { FunctionComponent } from "react";
+import React, { Fragment, FunctionComponent } from "react";
 import TextEditor from "./TextEditor";
 import { useDispatch, useSelector } from "../store/store";
 import { setNotification } from "../store/notification";
-import { addImageToNode, changeNodeName, moveImageDown, moveImageUp, removeImageFromNode, removeNode } from "../store/map";
+import { addImageToNode, addNodeToTag, changeNodeAction, changeNodeFilter, changeNodeName, moveImageDown, moveImageUp, removeImageFromNode, removeNode, removeNodeFromTag } from "../store/map";
 import { closeSideMenu } from "../store/sideMenuData";
 
 type Props = {
@@ -125,6 +125,51 @@ const NodeEditor: FunctionComponent<Props> = (props) => {
         dispatch(closeSideMenu());
     }
 
+    /**
+     * An event handler to add a tag to the node from the list.
+     * @param e the change event from the select element.
+     */
+    function addTag(e: React.ChangeEvent<HTMLSelectElement>) {
+        dispatch(addNodeToTag({
+            tagIndex: parseInt(e.target.value),
+            nodeId: node.id
+        }))
+    }
+
+    /**
+     * An event handler to remove a tag from the node.
+     * @param tagIndex the index of the tag in the array.
+     */
+    function removeTag(tagIndex:number) {
+        dispatch(removeNodeFromTag({
+            tagIndex: tagIndex,
+            nodeId: node.id
+        }))
+    }
+
+    /**
+     * An event handler to change the action of the node.
+     * @param e The change event from the select element.
+     */
+    function toggleAction(e: React.ChangeEvent<HTMLSelectElement>) {
+        dispatch(changeNodeAction({
+            rowIndex: sideMenuData.dataPointer[0],
+            nodeIndex: sideMenuData.dataPointer[1],
+            action: e.target.value as "content" | "filter"
+        }))
+    }
+
+    /**
+     * Helper function to get a tag's index in the array by its id.
+     * @param id The id of the tag
+     */
+    function getTagIndexById(id: number) {
+        return tags.reduce((previousValue, currentValue, i) => {
+            if(currentValue.id === id) return i;
+            else return previousValue;
+        }, -1);
+    }
+
     return <div className="node">
         <div className="TitleWrapper">
             <input
@@ -144,7 +189,7 @@ const NodeEditor: FunctionComponent<Props> = (props) => {
         <div className="ActionSelector">
             <h3>Action:</h3>
             <div>
-                <select value={node.action}>
+                <select value={node.action} onChange={e => toggleAction(e)}>
                     <option value={'content'}>Content</option>
                     <option value={'filter'}>Filter</option>
                 </select>
@@ -153,62 +198,87 @@ const NodeEditor: FunctionComponent<Props> = (props) => {
         </div>
         <div className="TagsSelector">
             <h3>Tags:</h3>
-            <select value={-1}>
+            <select value={-1} onChange={e => addTag(e)}>
                 <option value={-1}>Add Tag +</option>
                 {tags.map((tag, i) => <option key={i} value={i}>{tag.name}</option>)}
             </select>
             <div className="TagsWrapper">
-                {tags.filter(tag => tag.nodeIds.includes(node.id)).map((tag, i) => <div key={i} className="Tag">
-                    <p>{tag.name}</p>
-                    <button>
-                        <i className="fa-solid fa-x"></i>
-                    </button>
-                </div>)}
-            </div>
-        </div>
-        <div className="GalleryUpload">
-            <h3>Gallery:</h3>
-            <div className="FileUpload">
-                <input
-                    type="file"
-                    accept="image/png, image/jpg, image/jpeg, image/webp, image/svg, image/gif"
-                    onChange={uploadFile}
-                ></input>
-                <label>Click or drag to upload +</label>
-            </div>
-            <div className="GalleryEdit">
-                {node.gallery.map((image, i) => {
-                    return <div key={i} className="ImageWrapper">
-                        <img src={image} alt={`${node.name} Gallery Image ${i+1}`}></img>
-                        <button onClick={() => dispatch(moveImageUp({
-                            rowIndex: sideMenuData.dataPointer[0],
-                            nodeIndex: sideMenuData.dataPointer[1],
-                            imageIndex: i
-                        }))}>
-                            <i className="fa-solid fa-arrow-up"></i>
-                        </button>
-                        <button onClick={() => dispatch(removeImageFromNode({
-                            rowIndex: sideMenuData.dataPointer[0],
-                            nodeIndex: sideMenuData.dataPointer[1],
-                            imageIndex: i
-                        }))}>
-                            <i className="fa-solid fa-trash-can"></i>
-                        </button>
-                        <button onClick={() => dispatch(moveImageDown({
-                            rowIndex: sideMenuData.dataPointer[0],
-                            nodeIndex: sideMenuData.dataPointer[1],
-                            imageIndex: i
-                        }))}>
-                            <i className="fa-solid fa-arrow-down"></i>
-                        </button>
-                    </div>
+                {tags.map((tag, i) => {
+                    if(tag.nodeIds.includes(node.id)) {
+                        return <div key={i} className="Tag" onClick={() => removeTag(i)}>
+                            <p>{tag.name}</p>
+                            <button>
+                                <i className="fa-solid fa-x"></i>
+                            </button>
+                        </div>
+                    }
+                    return <Fragment key={i}></Fragment>
                 })}
             </div>
         </div>
-        <div className="TextEditorWrapper">
-            <h3>Content:</h3>
-            <TextEditor></TextEditor>
-        </div>
+        {node.action === "content" 
+            ? <>
+                <div className="GalleryUpload">
+                    <h3>Gallery:</h3>
+                    <div className="FileUpload">
+                        <input
+                            type="file"
+                            accept="image/png, image/jpg, image/jpeg, image/webp, image/svg, image/gif"
+                            onChange={uploadFile}
+                        ></input>
+                        <label>Click or drag to upload +</label>
+                    </div>
+                    <div className="GalleryEdit">
+                        {node.gallery.map((image, i) => {
+                            return <div key={i} className="ImageWrapper">
+                                <img src={image} alt={`${node.name} Gallery Image ${i+1}`}></img>
+                                <button onClick={() => dispatch(moveImageUp({
+                                    rowIndex: sideMenuData.dataPointer[0],
+                                    nodeIndex: sideMenuData.dataPointer[1],
+                                    imageIndex: i
+                                }))}>
+                                    <i className="fa-solid fa-arrow-up"></i>
+                                </button>
+                                <button onClick={() => dispatch(removeImageFromNode({
+                                    rowIndex: sideMenuData.dataPointer[0],
+                                    nodeIndex: sideMenuData.dataPointer[1],
+                                    imageIndex: i
+                                }))}>
+                                    <i className="fa-solid fa-trash-can"></i>
+                                </button>
+                                <button onClick={() => dispatch(moveImageDown({
+                                    rowIndex: sideMenuData.dataPointer[0],
+                                    nodeIndex: sideMenuData.dataPointer[1],
+                                    imageIndex: i
+                                }))}>
+                                    <i className="fa-solid fa-arrow-down"></i>
+                                </button>
+                            </div>
+                        })}
+                    </div>
+                </div>
+                <div className="TextEditorWrapper">
+                    <h3>Content:</h3>
+                    <TextEditor></TextEditor>
+                </div>
+            </>
+            : <div className="FilterWrapper">
+                <h3>Filter:</h3>
+                <div>
+                    <select
+                        value={node.filter === null ? -1 : getTagIndexById(node.filter)}
+                        onChange={e => dispatch(changeNodeFilter({
+                            rowIndex: sideMenuData.dataPointer[0],
+                            nodeIndex: sideMenuData.dataPointer[1],
+                            tagId: parseInt(e.target.value) === -1 ? null : tags[parseInt(e.target.value)].id
+                        }))}
+                    >
+                        <option value={-1}>None</option>
+                        {tags.map((tag, i) => <option key={i} value={i}>{tag.name}</option>)}
+                    </select>
+                    <i className="fa-solid fa-chevron-down"></i>
+                </div>
+            </div>}
     </div>
 }
 

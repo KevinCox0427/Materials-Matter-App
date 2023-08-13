@@ -106,6 +106,12 @@ const Node: FunctionComponent<Props> = (props) => {
             toRowIndex: newRowIndex
         }));
 
+        // Adjusting the side menu pointer to point to the new position
+        dispatch(setNode({
+            rowIndex: newRowIndex,
+            nodeIndex: newNodeIndex
+        }));
+
         const mapEl = document.getElementById('Map') as HTMLDivElement;
         mapEl.removeEventListener('touchend', endMoveNode);
         mapEl.removeEventListener('mouseup', endMoveNode);

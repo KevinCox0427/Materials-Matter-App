@@ -8,10 +8,14 @@ import { selectedSessionSlice } from "./selectedSession";
 import { sessionsSlice } from "./sessions";
 import { tempCommentSlice } from "./tempComment";
 import { tempSessionSlice } from "./tempSession";
+import { filterSlice } from "./filter";
+import { previewSlice } from "./preview";
 
 export const store = configureStore({
     reducer: {
         action: actionSlice.reducer,
+        filter: filterSlice.reducer,
+        preview: previewSlice.reducer,
         map: mapSlice.reducer,
         notification: notificationSlice.reducer,
         selectedSession: selectedSessionSlice.reducer,

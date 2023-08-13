@@ -11,7 +11,7 @@ declare global {
         gallery: string[],
         htmlContent: string,
         action: 'filter' | 'content',
-        filter: string | null
+        filter: number | null
     } 
 
     interface NodeDoc extends NodeType {

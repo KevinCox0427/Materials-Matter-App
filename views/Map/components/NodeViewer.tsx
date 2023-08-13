@@ -1,30 +1,25 @@
 import React, { FunctionComponent, useEffect, useRef, useState } from "react";
 import parse from "html-react-parser";
-
-type Props = {
-    node: NodeDoc
-}
+import { useSelector } from "../store/store";
 
 /**
  * A react component to render the contents of a node in the side menu.
  * 
  * @param node The contents of the node being viewed.
  */
-const NodeViewer: FunctionComponent<Props> = (props) => {
-    /**
-     * State variable and reference to keep track of the gallery slider's position.
-     */
+const NodeViewer: FunctionComponent = () => {
+    const sideMenuData = useSelector(state => state.sideMenuData);
+    if(sideMenuData.type !== 'node') return <></>;
+    const node = useSelector(state => state.map.rows[sideMenuData.dataPointer[0]].nodes[sideMenuData.dataPointer[1]]);
+
+    // State variable and reference to keep track of the gallery slider's position.
     const galleryEl = useRef<HTMLDivElement>(null);
     const [galleryPosition, setGalleryPosition] = useState(0);
 
-    /**
-     * Callback function to move the horizontal scrollbar 
-     */
+    // Callback function to move the horizontal scrollbar.
     useEffect(adjustGallery, [galleryPosition]);
 
-    /**
-     * Buffered callback functions when the screen is resized or a user moves the scrollbar
-     */
+    // Buffered callback functions when the screen is resized or a user moves the scrollbar.
     const resizeBuffer = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
@@ -49,7 +44,7 @@ const NodeViewer: FunctionComponent<Props> = (props) => {
     function adjustGallery() {
         if(!galleryEl.current) return;
         // Getting the length of each image.
-        const imageLength = Math.round((galleryEl.current.scrollWidth / props.node.gallery.length));
+        const imageLength = Math.round((galleryEl.current.scrollWidth / node.gallery.length));
         // Getting how many pixels the total gaps between images will be
         const gapAdjustment = 2 * galleryPosition-1;
         const newPosition = (imageLength * galleryPosition) + gapAdjustment;
@@ -62,7 +57,7 @@ const NodeViewer: FunctionComponent<Props> = (props) => {
     function snapGallery() {
         if(!galleryEl.current) return;
         const percentScrolled = galleryEl.current.scrollLeft / galleryEl.current.scrollWidth;
-        const roundedIndex = Math.round(props.node.gallery.length * percentScrolled);
+        const roundedIndex = Math.round(node.gallery.length * percentScrolled);
 
         // If the rounded index is different, then change the state variable
         if(roundedIndex !== galleryPosition) moveGallery(roundedIndex);
@@ -78,48 +73,43 @@ const NodeViewer: FunctionComponent<Props> = (props) => {
         setGalleryPosition(index);
     }
     
-    
-    return <>
-        <h2 className="Title">{props.node.name}</h2>
-        {props.node.gallery.length > 0 ?
+    return <div className="node">
+        <h2 className="Title">{node.name}</h2>
+        {node.gallery.length > 0 ?
             <div className="GalleryPaginationWrapper">
                 <div ref={galleryEl} className="GalleryWrapper">
                     <div className="Gallery">
-                        {props.node.gallery.map((image, i) => {
+                        {node.gallery.map((image, i) => {
                             return <div key={i} className="ImageWrapper">
-                                <img src={image} alt={`${props.node.name} Gallery Image ${i+1}`}></img>
+                                <img src={image} alt={`${node.name} Gallery Image ${i+1}`}></img>
                             </div>
                         })}
                     </div>
                 </div>
-                {props.node.gallery.length > 1 ?
-                    <div className="Pagination">
-                        {props.node.gallery.map((_, i) => {
+                {node.gallery.length > 1 
+                    ? <div className="Pagination">
+                        {node.gallery.map((_, i) => {
                             return <button key={i} className={galleryPosition === i ? 'Activated' : ' '} onClick={() => moveGallery(i)}></button>
                         })}
                     </div>
-                :< ></>}
+                    : <></>}
             </div>
         : <></>}
-        {props.node.htmlContent ? 
-            <div className="NodeContent">{
-                /**
-                 * An imported function that will convert HTML strings into React elements
-                 */
-                parse(props.node.htmlContent, {
-                    /**
-                     * A callback function to filter only accepted HTML elements.
-                     */
-                    replace: (node) => {
-                        const validTags = ['P', 'H3', 'A', 'SPAN', 'EM', 'STRONG', 'SMALL', 'IMAGE'];
-                        if(!(props.node instanceof Element)) return props.node;
-                        if(validTags.includes(props.node.tagName)) return props.node;
-                        return false;
-                    }
-                })
-            }</div>
-        : <></>}
-    </>
+        {node.htmlContent 
+            ? <div className="NodeContent">{
+                    // An imported function that will convert HTML strings into React elements.
+                    parse(node.htmlContent, {
+                        // A callback function to filter only accepted HTML elements.
+                        replace: (el) => {
+                            const validTags = ['P', 'H3', 'A', 'SPAN', 'EM', 'STRONG', 'SMALL', 'IMAGE'];
+                            if(!(el instanceof Element)) return el;
+                            if(validTags.includes(el.tagName)) return el;
+                            return false;
+                        }
+                    })
+                }</div>
+            : <></>}
+    </div>
 }
 
 export default NodeViewer;

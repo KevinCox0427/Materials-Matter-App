@@ -19,14 +19,10 @@ const deleteRegex = new RegexTester({
 
 image.route('/')
     .post(isAuth, async (req, res) => {
-        /**
-         * Parsing the incoming request with regex.
-         */
+        // Parsing the incoming request with regex.
         const parsedReq = postRegex.runTest(req.body);
 
-        /**
-         * If it returns a string, it's an error message and we can return it.
-         */
+        // If it returns a string, it's an error message and we can return it.
         if(typeof parsedReq === 'string') {
             res.status(400).send({
                 error: parsedReq,
@@ -39,14 +35,10 @@ image.route('/')
             image: string
         }
 
-        /**
-         * Inserting the info into the database.
-         */
+        // Inserting the info into the database.
         const newImage = await Image.create(parsedReq.image);
 
-        /**
-         * If it fails, return an error message.
-         */
+        // If it fails, return an error message.
         if(!newImage) {
             res.status(400).send({
                 error: 'Server failed to create image.',
@@ -55,23 +47,17 @@ image.route('/')
             return;
         }
 
-        /**
-         * Returning the url if successful.
-         */
+        // Returning the url if successful.
         res.status(200).send({
             url: newImage,
             success: true
         });
     })
     .delete(isAuth, async (req, res) => {
-        /**
-         * Parsing the incoming request with regex.
-         */
+        // Parsing the incoming request with regex.
         const parsedReq = deleteRegex.runTest(req.body);
 
-        /**
-         * If it returns a string, it's an error message and we can return it.
-         */
+        // If it returns a string, it's an error message and we can return it.
         if(typeof parsedReq === 'string') {
             res.status(400).send({
                 error: parsedReq,
@@ -84,14 +70,10 @@ image.route('/')
             urls: string[]
         }
 
-        /**
-         * Inserting the info into the database.
-         */
+        // Inserting the info into the database.
         const result = await Image.delete(typedReq.urls);
 
-        /**
-         * Returning the url if successful.
-         */
+        // Returning the url if successful.
         res.status(200).send({
             success: result
         });

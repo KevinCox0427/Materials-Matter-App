@@ -5,6 +5,7 @@ import { setAction } from "../store/action";
 import { setNotification } from "../store/notification";
 import { closeSideMenu, setComment, setNode, setSessions, setTags } from "../store/sideMenuData";
 import { addNewComment } from "../store/tempComment";
+import { togglePreview } from "../store/preview";
 
 type Props = {
     userData?: {
@@ -24,6 +25,7 @@ const Header: FunctionComponent<Props> = (props) => {
     const dispatch = useDispatch();
     const map = useSelector(state => state.map);
     const action = useSelector(state => state.action);
+    const preview = useSelector(state => state.preview);
     const sideMenuData = useSelector(state => state.sideMenuData);
     const selectedSessionIndex = useSelector(state => state.selectedSession);
     const selectedSession = useSelector(state => state.sessions[state.selectedSession]);
@@ -224,10 +226,9 @@ const Header: FunctionComponent<Props> = (props) => {
             <input value={map.name} onChange={e => dispatch(changeMapName(e.target.value))}></input>
         </div>
         <div className="Group">
-            <button className="Preview">
-                <i className="fa-solid fa-eye"></i>
-                {/* {props.action === 'Preview' ? <i className="fa-solid fa-eye"></i> : <i className="fa-solid fa-eye-slash"></i>} */}
-                <p>Preview</p>
+            <button className="Preview" onClick={() => dispatch(togglePreview())}>
+                {preview ? <i className="fa-solid fa-pen-to-square"></i> : <i className="fa-solid fa-eye"></i>}
+                <p>{preview ? 'Edit' : 'Preview'}</p>
             </button>
             <button
                 className={`AddComment ${action === 'AddComment' ? 'Activated' : ' '}`}
@@ -237,29 +238,33 @@ const Header: FunctionComponent<Props> = (props) => {
                 <i className="fa-solid fa-comment"></i>
                 <p>Add Comment</p>
             </button>
-            <button
-                className={`AddNode ${action === 'AddNode' ? 'Activated' : ' '}`}
-                onMouseDown={() => dispatch(setAction('AddNode'))}
-                onTouchStart={() => dispatch(setAction('AddNode'))}
-            >
-                <i className="fa-solid fa-plus"></i>
-                <p>Add Node</p>
-            </button>
-            <button
-                className={`AddRow ${action === 'AddRow' ? 'Activated' : ' '}`} 
-                onMouseDown={() => dispatch(setAction('AddRow'))}
-                onTouchStart={() => dispatch(setAction('AddRow'))}
-            >
-                <i className="fa-solid fa-plus"></i>
-                <p>Add Row</p>
-            </button>
-            <button
-                className={`Tags ${sideMenuData?.type === 'tags' ? 'Activated' : ''}`}
-                onClick={() => toggleTags()}
-            >
-                <i className="fa-solid fa-tag"></i>
-                <p>Edit Tags</p>
-            </button>
+            {preview
+                ? <></>
+                : <>
+                    <button
+                        className={`AddNode ${action === 'AddNode' ? 'Activated' : ' '}`}
+                        onMouseDown={() => dispatch(setAction('AddNode'))}
+                        onTouchStart={() => dispatch(setAction('AddNode'))}
+                    >
+                        <i className="fa-solid fa-plus"></i>
+                        <p>Add Node</p>
+                    </button>
+                    <button
+                        className={`AddRow ${action === 'AddRow' ? 'Activated' : ' '}`} 
+                        onMouseDown={() => dispatch(setAction('AddRow'))}
+                        onTouchStart={() => dispatch(setAction('AddRow'))}
+                    >
+                        <i className="fa-solid fa-plus"></i>
+                        <p>Add Row</p>
+                    </button>
+                    <button
+                        className={`Tags ${sideMenuData?.type === 'tags' ? 'Activated' : ''}`}
+                        onClick={() => toggleTags()}
+                    >
+                        <i className="fa-solid fa-tag"></i>
+                        <p>Edit Tags</p>
+                    </button>
+                </>}
             <button
                 className={`Sessions ${sideMenuData?.type === 'sessions' ? 'Activated' : ''}`}
                 onClick={() => toggleSessions()}
@@ -267,10 +272,12 @@ const Header: FunctionComponent<Props> = (props) => {
                 <i className="fa-solid fa-bars"></i>
                 <p>Sessions</p>
             </button>
-            <button className="Save" onClick={handleSaveMap}>
-                <i className="fa-solid fa-floppy-disk"></i>
-                <p>Save</p>
-            </button>
+            {preview 
+                ? <></>
+                    : <button className="Save" onClick={handleSaveMap}>
+                    <i className="fa-solid fa-floppy-disk"></i>
+                    <p>Save</p>
+                </button>}
         </div>
     </header>
 }

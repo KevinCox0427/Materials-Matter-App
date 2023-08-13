@@ -423,7 +423,7 @@ body {
                     font-weight: 500;
                 }
 
-                .ActionSelector {
+                .ActionSelector, .FilterWrapper {
                     display: flex;
                     flex-direction: row;
                     flex-wrap: wrap;
@@ -503,6 +503,8 @@ body {
                     }
 
                     .TagsWrapper {
+                        flex-direction: row;
+                        flex-wrap: wrap;
                         flex-basis: 100%;
                         gap: 0.5em 1em;
 

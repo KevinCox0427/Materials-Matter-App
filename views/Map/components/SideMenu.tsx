@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from "../store/store";
 import { addNewSession } from "../store/tempSession";
 import NodeEditor from "./NodeEditor";
 import { setNotification } from "../store/notification";
+import NodeViewer from "./NodeViewer";
 
 type Props = {
     userData: UserData
@@ -19,6 +20,7 @@ const SideMenu: FunctionComponent<Props> = (props) => {
     const tempComment = useSelector(state => state.tempComment);
     const sessions = useSelector(state => state.sessions);
     const selectedSession = useSelector(state => state.selectedSession);
+    const preview = useSelector(state => state.preview);
 
     function addSession() {
         if(!props.userData) {
@@ -34,7 +36,9 @@ const SideMenu: FunctionComponent<Props> = (props) => {
             ? <></>
             : <>
                 {sideMenuData.type === 'node'
-                    ? <NodeEditor userData={props.userData} ></NodeEditor>
+                    ? preview
+                        ? <NodeViewer></NodeViewer>
+                        : <NodeEditor userData={props.userData} ></NodeEditor>
                     : <></>}
                 {sideMenuData.type === 'comment'
                     ? <div className="comment">

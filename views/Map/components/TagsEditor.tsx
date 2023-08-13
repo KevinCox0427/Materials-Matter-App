@@ -8,7 +8,7 @@ const TagsEditor: FunctionComponent = () => {
     const map = useSelector(state => state.map);
     
     return <div className="tags">
-        <h2>Tags</h2>
+        <h2>Tags:</h2>
         <button onClick={() => dispatch(addTag({
             name: 'Untitled',
             mapId: map.id
