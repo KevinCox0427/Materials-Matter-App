@@ -11,6 +11,7 @@ const image = express.Router();
  */
 const postRegex = new RegexTester({
     image: /^data:image\/(?:jpg|png|jpeg|webp)(?:;charset=utf-8)?;base64,(?:[A-Za-z0-9+\/])+={0,2}/,
+    nodeId: /^[0-9]{1,10}/
 });
 
 const deleteRegex = new RegexTester({
@@ -32,11 +33,12 @@ image.route('/')
         }
 
         const typedReq = parsedReq as {
-            image: string
+            image: string,
+            nodeId: number
         }
 
         // Inserting the info into the database.
-        const newImage = await Image.create(parsedReq.image);
+        const newImage = await Image.create(typedReq.image, typedReq.nodeId);
 
         // If it fails, return an error message.
         if(!newImage) {

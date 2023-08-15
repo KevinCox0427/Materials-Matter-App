@@ -13,24 +13,36 @@ type Props = {
  */
 const Row: FunctionComponent<Props> = (props) => {
     const preview = useSelector(state => state.preview);
+    const tags = useSelector(state => state.map.tags);
+    const filter = useSelector(state => state.filter);
     const rowData = useSelector(state => state.map.rows[props.rowIndex]);
     const dispatch = useDispatch();
     
     return <div className="Row" id={'' + props.rowIndex}>
         <div className="Nodes">
-            {rowData.nodes.map((node, i) => {
-                return <Fragment key={i}>
-                    <Node
-                        node={node}
-                        nodeIndex={i}
-                        rowIndex={props.rowIndex}
-                    ></Node>
-                </Fragment>
-            })}
+            {preview && filter !== null && filter > -1
+                ? rowData.nodes.filter(node => node.action === 'filter' || tags[filter].nodeIds.includes(node.id)).map((node, i) => {
+                    return <Fragment key={i}>
+                        <Node
+                            node={node}
+                            nodeIndex={i}
+                            rowIndex={props.rowIndex}
+                        ></Node>
+                    </Fragment>
+                })
+                : rowData.nodes.map((node, i) => {
+                    return <Fragment key={i}>
+                        <Node
+                            node={node}
+                            nodeIndex={i}
+                            rowIndex={props.rowIndex}
+                        ></Node>
+                    </Fragment>
+                })}
         </div>
         <div className="Name">
-            {preview ?
-                <h2>{rowData.name}</h2>
+            {preview
+                ? <h2>{rowData.name}</h2>
                 : <input value={rowData.name} onChange={e => dispatch(changeRowName({
                     rowIndex: props.rowIndex,
                     name: e.target.value

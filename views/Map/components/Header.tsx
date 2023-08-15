@@ -6,6 +6,7 @@ import { setNotification } from "../store/notification";
 import { closeSideMenu, setComment, setNode, setSessions, setTags } from "../store/sideMenuData";
 import { addNewComment } from "../store/tempComment";
 import { togglePreview } from "../store/preview";
+import { removeFilter } from "../store/filter";
 
 type Props = {
     userData?: {
@@ -26,6 +27,7 @@ const Header: FunctionComponent<Props> = (props) => {
     const map = useSelector(state => state.map);
     const action = useSelector(state => state.action);
     const preview = useSelector(state => state.preview);
+    const filter = useSelector(state => state.filter);
     const sideMenuData = useSelector(state => state.sideMenuData);
     const selectedSessionIndex = useSelector(state => state.selectedSession);
     const selectedSession = useSelector(state => state.sessions[state.selectedSession]);
@@ -216,6 +218,22 @@ const Header: FunctionComponent<Props> = (props) => {
             dispatch(setNotification('You must have a registered Binghamton University account to save.'));
         }
     }
+
+    /**
+     * Event handler to toggle the preview state.
+     */
+    function handlePreview() {
+        dispatch(togglePreview());
+        
+        // If something that's for the editor is shown in the side menu, then close it.
+        if(
+            (sideMenuData.type === 'node' && map.rows[sideMenuData.dataPointer[0]].nodes[sideMenuData.dataPointer[1]].action === 'filter') ||
+            sideMenuData.type === 'sessions' ||
+            sideMenuData.type === 'tags'
+        ) {
+            dispatch(closeSideMenu());
+        }
+    }
     
     return <header className="Head">
         <div className="Group">
@@ -223,10 +241,20 @@ const Header: FunctionComponent<Props> = (props) => {
                 <i className="fa-solid fa-backward-step"></i>
                 <p>Back</p>
             </a>
-            <input value={map.name} onChange={e => dispatch(changeMapName(e.target.value))}></input>
+            {preview
+                ? <h1>{map.name}</h1>
+                : <input value={map.name} onChange={e => dispatch(changeMapName(e.target.value))}></input>}
         </div>
+        {preview && filter !== null && filter > -1
+            ? <div className="Group">
+                <div className="Filter">
+                    <p>Filtering By Tag: <span>{map.tags[filter].name}</span></p>
+                    <button onClick={() => dispatch(removeFilter())}><i className="fa-solid fa-x"></i></button>
+                </div>
+            </div>
+            : <></>}
         <div className="Group">
-            <button className="Preview" onClick={() => dispatch(togglePreview())}>
+            <button className="Preview" onClick={() => handlePreview()}>
                 {preview ? <i className="fa-solid fa-pen-to-square"></i> : <i className="fa-solid fa-eye"></i>}
                 <p>{preview ? 'Edit' : 'Preview'}</p>
             </button>

@@ -6,8 +6,11 @@ export const filterSlice = createSlice({
     reducers: {
         setFilter: (state, action: PayloadAction<number>) => {
             return action.payload;
+        },
+        removeFilter: (state) => {
+            return null;
         }
     }
 }); 
 
-export const { setFilter } = filterSlice.actions;
+export const { setFilter, removeFilter } = filterSlice.actions;

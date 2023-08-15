@@ -91,7 +91,7 @@ const Maps = {
                                                 n.name,
                                                 n.index,
                                                 n.rowId,
-                                                n.gallery,
+                                                n.thumbnail,
                                                 n.htmlContent,
                                                 n.action,
                                                 n.filter,
@@ -106,7 +106,7 @@ const Maps = {
                                             'name', n.name,
                                             'index', n.index,
                                             'rowId', r.id,
-                                            'gallery', n.gallery,
+                                            'thumbnail', n.thumbnail,
                                             'htmlContent', n.htmlContent,
                                             'action', n.action,
                                             'filter', n.filter

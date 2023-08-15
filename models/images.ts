@@ -1,5 +1,6 @@
 import { isDBready, knex } from "./__init__";
 import { S3, PutObjectCommand, DeleteObjectsCommand } from "@aws-sdk/client-s3";
+import { writeFileSync, rmSync } from 'fs';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -17,13 +18,13 @@ declare global {
 /**
  * Creating the s3 client to upload to aws.
  */
-const s3Client = new S3({
-    region: process.env.awsRegion,
-    credentials:{
-        accessKeyId: process.env.awsKey || '',
-        secretAccessKey: process.env.awsSecret || ''
-    }
-});
+// const s3Client = new S3({
+//     region: process.env.awsRegion,
+//     credentials:{
+//         accessKeyId: process.env.awsKey || '',
+//         secretAccessKey: process.env.awsSecret || ''
+//     }
+// });
 
 /**
  * A function to create the SQL schema if not done so.
@@ -105,7 +106,7 @@ const Images = {
      * @param base64 The base64 encoded image data.
      * @returns The url of the new image. Otherwise return false.
      */
-    create: async (base64:string): Promise<string | false> => {
+    create: async (base64:string, nodeId: number): Promise<string | false> => {
         if(!isDBready) return false;
 
         const extension = base64.split(';base64,')[0].split('data:image/')[1];
@@ -116,25 +117,32 @@ const Images = {
         try{ 
             const createResult = await knex('images')
                 .insert({
-                    extension: extension
+                    extension: extension,
+                    nodeId: nodeId
                 });
 
             if(!createResult[0]) return false;
             
             try {
-                await s3Client.send(new PutObjectCommand({
-                    Bucket: process.env.awsBucket || '',
-                    Key: `${createResult[0]}.${extension}`,
-                    Body: Buffer.from(base64Data, 'base64')
-                }));
+                writeFileSync(`./public/assets/${createResult[0]}.${extension}`, Buffer.from(base64Data, 'base64'));
+
+                // await s3Client.send(new PutObjectCommand({
+                //     Bucket: process.env.awsBucket || '',
+                //     Key: `${createResult[0]}.${extension}`,
+                //     Body: Buffer.from(base64Data, 'base64')
+                // }));
             }
             catch(e) {
                 console.log(e);
-                await Images.delete(createResult[0]);
+                await knex('images')
+                    .where('id', createResult[0])
+                    .del();
                 return false;
             }
 
-            return `${process.env.awsUrl || ''}${createResult[0]}.${extension}`;
+            //return `${process.env.awsUrl || ''}${createResult[0]}.${extension}`;
+
+            return `/assets/${createResult[0]}.${extension}`;
         }
         catch(e:any) {
             console.log(e);
@@ -151,19 +159,19 @@ const Images = {
         if(!isDBready) return false;
 
         try {
-            /**
-             * Deleting the file from aws.
-             */
-            await s3Client.send(new DeleteObjectsCommand({
-                Bucket: process.env.awsBucket || '',
-                Delete: {
-                    Objects: urls.map(url => {
-                        return {
-                            Key: url.split(process.env.awsUrl || '')[1],
-                        }
-                    })
-                }
-            }));
+            // Deleting the file from aws.
+            // await s3Client.send(new DeleteObjectsCommand({
+            //     Bucket: process.env.awsBucket || '',
+            //     Delete: {
+            //         Objects: urls.map(url => {
+            //             return {
+            //                 Key: url.split(process.env.awsUrl || '')[1],
+            //             }
+            //         })
+            //     }
+            // }));
+
+            urls.forEach(url => rmSync(`./public${url}`));
 
             const result = await knex('images')
                 .whereIn('id', urls.map(url => parseInt(url.split(process.env.awsUrl || '')[1].split('.')[0])))
@@ -171,9 +179,7 @@ const Images = {
 
             return result !== 0;
         }
-        /**
-         * If aws fails, return false.
-         */
+        // If delete fails, return false.
         catch(e) {
             console.log(e);
             return false;

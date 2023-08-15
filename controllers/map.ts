@@ -369,7 +369,7 @@ map.route('/:id')
                     name: node.name,
                     index: node.index,
                     rowId: node.rowId,
-                    gallery: node.gallery,
+                    thumbnail: node.thumbnail,
                     htmlContent: node.htmlContent,
                     action: node.action,
                     filter: null

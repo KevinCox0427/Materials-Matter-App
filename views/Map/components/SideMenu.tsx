@@ -60,10 +60,12 @@ const SideMenu: FunctionComponent<Props> = (props) => {
                 {sideMenuData.type === 'sessions'
                     ? <div className="sessions">
                         <h2>Comment Sessions:</h2>
-                        <button
-                            className="AddSession"
-                            onClick={() => addSession()}
-                        >+ New Session</button>
+                        {preview 
+                            ? <></>
+                            : <button
+                                className="AddSession"
+                                onClick={() => addSession()}
+                            >+ New Session</button>}
                         {tempSession
                             ? <SessionOption
                                 index={-1}

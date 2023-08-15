@@ -86,7 +86,7 @@ export const mapSlice = createSlice({
                 rowId: state.rows[action.payload.rowIndex].id,
                 name: 'New Node',
                 index: action.payload.nodeIndex,
-                gallery: [],
+                thumbnail: '',
                 htmlContent: '',
                 action: 'content',
                 filter: null    
@@ -147,44 +147,19 @@ export const mapSlice = createSlice({
             state.rows[action.payload.rowIndex].nodes[action.payload.nodeIndex].htmlContent = action.payload.content;
         },
 
-        addImageToNode: (state, action:PayloadAction<{
+        setNodeThumbnail: (state, action:PayloadAction<{
             rowIndex: number,
             nodeIndex: number,
             image: string
         }>) => {
-            state.rows[action.payload.rowIndex].nodes[action.payload.nodeIndex].gallery.push(action.payload.image);
+            state.rows[action.payload.rowIndex].nodes[action.payload.nodeIndex].thumbnail = action.payload.image;
         },
 
-        removeImageFromNode: (state, action:PayloadAction<{
+        removeNodeThumbnail: (state, action:PayloadAction<{
             rowIndex: number,
-            nodeIndex: number,
-            imageIndex: number
+            nodeIndex: number
         }>) => {
-            state.rows[action.payload.rowIndex].nodes[action.payload.nodeIndex].gallery.splice(action.payload.imageIndex, 1);
-        },
-
-        moveImageUp: (state, action:PayloadAction<{
-            rowIndex: number,
-            nodeIndex: number,
-            imageIndex: number
-        }>) => {
-            if(action.payload.imageIndex <= 0) return state;
-            // Removing image
-            const currentImage = state.rows[action.payload.rowIndex].nodes[action.payload.nodeIndex].gallery.splice(action.payload.imageIndex, 1)[0];
-            // Inserting image up an index.
-            state.rows[action.payload.rowIndex].nodes[action.payload.nodeIndex].gallery.splice(action.payload.imageIndex - 1, 0, currentImage);
-        },
-
-        moveImageDown: (state, action:PayloadAction<{
-            rowIndex: number,
-            nodeIndex: number,
-            imageIndex: number
-        }>) => {
-            if(action.payload.imageIndex >= state.rows[action.payload.rowIndex].nodes[action.payload.nodeIndex].gallery.length - 1) return state;
-            // Removing image
-            const currentImage = state.rows[action.payload.rowIndex].nodes[action.payload.nodeIndex].gallery.splice(action.payload.imageIndex, 1)[0];
-            // Inserting image down an index.
-            state.rows[action.payload.rowIndex].nodes[action.payload.nodeIndex].gallery.splice(action.payload.imageIndex + 1, 0, currentImage);
+            state.rows[action.payload.rowIndex].nodes[action.payload.nodeIndex].thumbnail = '';
         },
 
         setTagName: (state, action: PayloadAction<{
@@ -248,4 +223,4 @@ export const mapSlice = createSlice({
     }
 });
 
-export const { changeMapName, insertRow, changeRowName, removeRow, moveRowDown, moveRowUp, insertNode, moveNode, removeNode, changeNodeContent, changeNodeName, addImageToNode, moveImageDown, moveImageUp, removeImageFromNode, setTagName, addTag, removeTag, addNodeToTag, removeNodeFromTag, changeNodeAction, changeNodeFilter } = mapSlice.actions;
+export const { changeMapName, insertRow, changeRowName, removeRow, moveRowDown, moveRowUp, insertNode, moveNode, removeNode, changeNodeContent, changeNodeName, setNodeThumbnail, removeNodeThumbnail, setTagName, addTag, removeTag, addNodeToTag, removeNodeFromTag, changeNodeAction, changeNodeFilter } = mapSlice.actions;

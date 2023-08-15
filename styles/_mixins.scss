@@ -4,6 +4,11 @@
         height: fit-content;
     }
 
+    .ql-tooltip {
+        z-index: 10000;
+        left: 0px !important;
+    }
+
     .ql-toolbar {
         display: flex;
         flex-direction: row;
@@ -160,6 +165,15 @@
         margin: 0.25em 0;
         font-size: 1.5em;
     }
+
+    img {
+        max-width: clamp(0%, 100%, 600px);
+    }
+
+    iframe {
+        width: clamp(0%, 100%, 600px);
+        height: 300px;
+    }
 }
 
 @mixin QuillDisplayStyles {
@@ -235,5 +249,14 @@
 
     span, sub, sup, strong, em, a, u, s {
         display: inline !important;
+    }
+
+    img {
+        max-width: clamp(0%, 100%, 600px);
+    }
+
+    iframe {
+        width: clamp(0%, 100%, 600px);
+        height: 300px;
     }
 }

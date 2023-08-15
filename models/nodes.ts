@@ -8,7 +8,7 @@ declare global {
         name: string,
         index: number,
         rowId: number,
-        gallery: string[],
+        thumbnail: string,
         htmlContent: string,
         action: 'filter' | 'content',
         filter: number | null
@@ -72,9 +72,7 @@ const Nodes = {
         try{ 
             const result = await knex('nodes')
                 .where('id', id)
-                .update({...data,
-                    gallery: JSON.stringify(data.gallery)
-                });
+                .update(data);
 
             return result === 1;
         } catch (e) {

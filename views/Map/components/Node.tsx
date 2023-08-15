@@ -1,8 +1,9 @@
-import React, { FunctionComponent, useEffect, useRef, useState } from "react";
+import React, { FunctionComponent, useRef, useState } from "react";
 import { setAction } from "../store/action";
-import { setNode } from "../store/sideMenuData";
+import { closeSideMenu, setNode } from "../store/sideMenuData";
 import { useSelector, useDispatch } from "../store/store";
 import { moveNode } from "../store/map";
+import { setFilter } from "../store/filter";
 
 type Props = {
     rowIndex: number,
@@ -18,6 +19,7 @@ type Props = {
  */
 const Node: FunctionComponent<Props> = (props) => {
     const map = useSelector(state => state.map);
+    const preview = useSelector(state => state.preview);
     const dispatch = useDispatch();
 
     // Reference for keeping track of mouse position
@@ -49,10 +51,42 @@ const Node: FunctionComponent<Props> = (props) => {
      * @param x The x coordinate of the mouse position.
      */
     function endMoveNode(e:MouseEvent | TouchEvent) {
+        // If this is in preview mode, then the node shouldn't be moved at all.
+        if(preview) {
+            const mapEl = document.getElementById('Map') as HTMLDivElement;
+            mapEl.removeEventListener('touchend', endMoveNode);
+            mapEl.removeEventListener('mouseup', endMoveNode);
+
+            dispatch(setAction(''));
+            setIsMoving(false);
+
+            // If its a filter node, then set the filter.
+            if(map.rows[props.rowIndex].nodes[props.nodeIndex].action === 'filter' && map.rows[props.rowIndex].nodes[props.nodeIndex].filter !== null) {
+                // Getting the index of the tag in the array based on its id.
+                const tagIndex = map.tags.reduce((previousValue, tag, i) => {
+                    if(tag.id === map.rows[props.rowIndex].nodes[props.nodeIndex].filter!) return i;
+                    else return previousValue;
+                }, -1);
+                // Setting the map filter to the tag.
+                if(tagIndex > -1) dispatch(setFilter(tagIndex));
+
+                // Close the side menu if open
+                dispatch(closeSideMenu());
+            }
+            // Otherwise just open its content.
+            else {
+                dispatch(setNode({
+                    rowIndex: props.rowIndex,
+                    nodeIndex: props.nodeIndex
+                }));
+            }
+            return;
+        }
+
         // Getting the target element that the cursor was on when mouse up.
         // This could be the map or a row.
         let target = e.target as HTMLElement;
-        while(target.id !== 'Map' && !target.classList.contains('Row')) {
+        while((!target.id || target.id !== 'Map') && !target.classList.contains('Row')) {
             // If the header button is being clicked, ignore.
             if(target.classList.contains('MoveButton')) return;
             target = target.parentElement as HTMLElement;
@@ -67,14 +101,14 @@ const Node: FunctionComponent<Props> = (props) => {
             const mapEl = document.getElementById('Map') as HTMLDivElement;
             mapEl.removeEventListener('touchend', endMoveNode);
             mapEl.removeEventListener('mouseup', endMoveNode);
+
             dispatch(setAction(''));
             setIsMoving(false);
-
+            
             dispatch(setNode({
                 rowIndex: props.rowIndex,
                 nodeIndex: props.nodeIndex
             }));
-            
             return;
         }
         
@@ -125,6 +159,23 @@ const Node: FunctionComponent<Props> = (props) => {
      */ 
     function openNode(e:React.KeyboardEvent<HTMLButtonElement>) {
         if(e.key !== 'Enter') return;
+
+        // If we're in preview mode and this is a filter node, then set the filter.
+        if(preview && map.rows[props.rowIndex].nodes[props.nodeIndex].action === 'filter' && map.rows[props.rowIndex].nodes[props.nodeIndex].filter !== null) {
+            // Getting the index of the tag in the array based on its id.
+            const tagIndex = map.tags.reduce((previousValue, tag, i) => {
+                if(tag.id === map.rows[props.rowIndex].nodes[props.nodeIndex].filter!) return i;
+                else return previousValue;
+            }, -1);
+            // Setting the map filter to the tag.
+            if(tagIndex > -1) dispatch(setFilter(tagIndex));
+
+            // Close the side menu if open
+            dispatch(closeSideMenu());
+            return;
+        }
+
+        // Otherwise just open side menu
         dispatch(setNode({
             rowIndex: props.rowIndex,
             nodeIndex: props.nodeIndex
@@ -133,7 +184,7 @@ const Node: FunctionComponent<Props> = (props) => {
     
     return <button className="Node" id={`${props.rowIndex}.${props.nodeIndex}`} onKeyDown={openNode} onMouseDown={e => startMoveNode(e)} onTouchStart={e => startMoveNode(e)} style={{
         opacity: isMoving ? 0.5 : 1,
-        backgroundImage: props.node.gallery[0] ? `url("${props.node.gallery[0]}")` : 'none'
+        backgroundImage: props.node.thumbnail ? `url("${props.node.thumbnail}")` : 'none'
     }}>
         <h3>{props.node.name}</h3>
     </button>

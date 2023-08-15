@@ -82,6 +82,13 @@ body {
                 flex-grow: 1000;
             }
 
+            h1 {
+                font-family: var(--rubik);
+                font-weight: 400;
+                font-size: 1.75em;
+                flex-grow: 1;
+            }
+
             input {
                 background: none;
                 font-family: var(--rubik);
@@ -144,6 +151,49 @@ body {
                     background-color: var(--yellow);
                     transform: scale(1.05);
                     cursor: pointer;
+                }
+            }
+
+            .Filter {
+                flex-direction: row;
+                gap: 0.5em;
+                justify-content: center;
+                align-items: center;
+                font-size: 1.5em;
+                background-color: var(--yellow);
+                border-radius: 10em;
+                padding: 0.2em 0.3em 0.2em 0.75em;
+
+                p {
+                    font-size: 0.95em;
+                    font-style: italic;
+                    flex-direction: row;
+                    flex-wrap: wrap;
+                    align-items: baseline;
+                    justify-content: center;
+                    gap: 0 0.25em;
+                    font-family: var(--rubik);
+                    
+                    span {
+                        font-size: 1.1em;
+                        font-weight: 600;
+                        font-style: normal;
+                    }
+                }
+
+                button {
+                    background-color: var(--white);
+                    padding: 0.25em 0.3em;
+                    border-radius: 10em;
+                    transition: transform 0.1s linear, box-shadow 0.1s linear;
+
+                    &:hover, &:focus-visible {
+                        box-shadow: 0 0 0 0.075em;
+                    }
+                }
+
+                button i {
+                    font-size: 0.6em;
                 }
             }
         }
@@ -215,10 +265,19 @@ body {
                             position: absolute;
                             left: 1em;
                             top: 1em;
+
+                            h2 {
+                                font-family: var(--rubik);
+                                font-size: 1.45em;
+                                font-weight: 500;
+                                text-shadow: -2px -2px 0 var(--yellow), 2px -2px 0 var(--yellow), -2px 2px 0 var(--yellow), 2px 2px 0 var(--yellow);
+                                margin-top: 0.15em;
+                            }
         
                             input {
+                                font-family: var(--rubik);
                                 font-size: 1.4em;
-                                font-weight: 600;
+                                font-weight: 500;
                                 text-shadow: -2px -2px 0 var(--yellow), 2px -2px 0 var(--yellow), -2px 2px 0 var(--yellow), 2px 2px 0 var(--yellow);
                                 width: fit-content;
                                 background: none;
@@ -352,6 +411,18 @@ body {
                 flex-wrap: wrap;
                 justify-content: space-between;
                 gap: 4em;
+
+                .Title {
+                    display: flex;
+                    flex-basis: 10em;
+                    flex-grow: 1;
+                    font-family: var(--rubik);
+                    font-size: 2.25em;
+                    font-weight: 500;
+                    text-align: center;
+                    min-width: 1em;
+                    margin-top: 1.25em;
+                }
     
                 .TitleWrapper {
                     display: flex;
@@ -362,20 +433,14 @@ body {
                     align-items: center;
                     justify-content: center;
                     flex-basis: 100%;
+
+                    .Title {
+                        font-size: 1.75em;
+                        margin-top: 0;
+                    }
     
                     * {
                         display: flex;
-                    }
-
-                    .Title {
-                        display: flex;
-                        flex-basis: 10em;
-                        flex-grow: 1;
-                        font-family: var(--rubik);
-                        font-size: 1.75em;
-                        font-weight: 500;
-                        text-align: center;
-                        min-width: 1em;
                     }
     
                     button {
@@ -405,6 +470,26 @@ body {
                         &.Activated {
                             background-color: var(--yellow);
                         }
+                    }
+                }
+
+                & > .TagsWrapper {
+                    display: flex;
+                    flex-direction: row;
+                    flex-wrap: wrap;
+                    justify-content: flex-end;
+                    align-items: center;
+                    gap: 0.25em 0.5em;
+                    flex-basis: 100%;
+                    margin-top: -4em;
+
+                    .Tag {
+                        display: flex;
+                        width: fit-content;
+                        background-color: var(--yellow);
+                        font-size: 1.4em;
+                        padding: 0.2em 0.75em;
+                        border-radius: 10em;
                     }
                 }
                 
@@ -466,6 +551,7 @@ body {
                             right: 0;
                             transform: translate(-0.5em, -50%);
                             transition: transform 0.1s linear;
+                            pointer-events: none;
                         }
                     }
                 }
@@ -511,11 +597,13 @@ body {
                         .Tag {
                             flex-direction: row;
                             align-items: center;
-                            gap: 0.25em;
+                            gap: 0.5em;
                             font-size: 1.4em;
                             height: fit-content;
-                            padding: 0.2em 0.3em;
+                            padding: 0.2em 0.25em 0.2em 0.6em;
                             border-radius: 0.25em;
+                            background-color: var(--yellow);
+                            border-radius: 10em;
 
                             p {
                                 font-weight: 500;
@@ -527,10 +615,10 @@ body {
                                 border-radius: 10em;
                                 cursor: pointer;
                                 background-color: var(--white);
-                                transition: background-color 0.1s linear, transform 0.1s linear;
+                                transition: box-shadow 0.1s linear, transform 0.1s linear;
 
                                 &:hover, &:focus-visible {
-                                    background-color: var(--yellow);
+                                    box-shadow: 0 0 0 0.1em var(--black);
                                     transform: scale(1.1);
                                 }
                             }
@@ -594,118 +682,54 @@ body {
                         align-items: center;
     
                         .ImageWrapper {
-                            width: 8em;
-                            height: 8em;
-                            border-radius: 0.5em;
-                            background-color: var(--white);
+                            width: 10em;
+                            height: 10em;
                             
                             img {
                                 height: 100%;
                                 width: 100%;
-                                object-fit: contain;
+                                object-fit: cover;
                                 object-position: center;
+                                border-radius: 100em;
                             }
-    
-                            button {
-                                position: absolute;
-                                left: 0;
-                                transform: translate(-50%, -50%);
-                                background: var(--white);
-                                height: 1.5em;
-                                width: 1.5em;
-                                border-radius: 10em;
-                                font-size: 1.2em;
-                                box-shadow: 0 0 0 0.1em var(--black);
-                                justify-content: center;
-                                align-items: center;
-                                transition: 0.1s linear transform, 0.1s background-color linear;
+                        }
 
-                                &:nth-child(2) {
-                                    top: calc(50% - 2.15em);
-                                }
-                                &:nth-child(3) {
-                                    top: 50%;
-                                }
-                                &:nth-child(4) {
-                                    top: calc(50% + 2.15em);
-                                }
-    
-                                &:hover, &:focus-visible {
-                                    background-color: var(--yellow);
-                                    transform: translate(-50%, -50%) scale(1.1);
-                                    cursor: pointer;
-                                }
+                        button {
+                            position: absolute;
+                            top: 1em;
+                            left: 1em;
+                            transform: translate(-50%, -50%);
+                            background: var(--white);
+                            height: 1.5em;
+                            width: 1.5em;
+                            border-radius: 10em;
+                            font-size: 1.3em;
+                            box-shadow: 0 0 0 0.1em var(--black);
+                            justify-content: center;
+                            align-items: center;
+                            transition: 0.1s linear transform, 0.1s background-color linear;
+
+                            &:hover, &:focus-visible {
+                                background-color: var(--yellow);
+                                transform: translate(-50%, -50%) scale(1.1);
+                                cursor: pointer;
                             }
                         }
                     }
                 }
 
-                .GalleryPaginationWrapper {
+                .Thumbnail {
                     display: flex;
-                    flex-direction: row;
-                    flex-wrap: wrap;
                     flex-basis: 100%;
                     justify-content: center;
-                    gap: 1em;
 
-                    * {
+                    img {
                         display: flex;
-                    }
-
-                    .GalleryWrapper {
-                        flex-direction: row;
-                        overflow-x: scroll;
-                        overflow-y: hidden;
-                        scroll-behavior: smooth;
-                        flex-basis: 100%;
-
-                        .Gallery {
-                            flex-direction: row;
-                            flex-basis: 100%;
-                            align-items: center;
-                            flex-shrink: 0;
-                            gap: 2px;
-
-                            .ImageWrapper {
-                                width: 100%;
-                                max-height: 25em;
-                                flex-shrink: 0;
-                                pointer-events: none;
-
-                                img {
-                                    height: 100%;
-                                    width: 100%;
-                                    object-fit: contain;
-                                    object-position: center;
-                                    border-radius: 0.25em;
-                                }
-                            }
-                        }
-                    }
-                    
-                    .Pagination {
-                        flex-direction: row;
-                        flex-wrap: wrap;
-                        gap: 0.5em 0.75em;
-
-                        button {
-                            background-color: white;
-                            height: 1.25em;
-                            width: 3em;
-                            border-radius: 0.25em;
-                            box-shadow: 0 0 0 0.05em rgba(0,0,0, 0.2) inset;
-                            transition: background-color 0.1s linear, transform 0.1s linear;
-
-                            &:hover, &:focus-visible {
-                                background-color: var(--yellow);
-                                transform: scale(1.1);
-                                cursor: pointer;
-                            }
-
-                            &.Activated {
-                                background-color: var(--yellow);
-                            }
-                        }
+                        height: 100%;
+                        width: 100%;
+                        object-fit: contain;
+                        object-position: center;
+                        border-radius: 0.25em;
                     }
                 }
     

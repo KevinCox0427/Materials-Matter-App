@@ -1,9 +1,9 @@
-import React, { Fragment, FunctionComponent } from "react";
-import TextEditor from "./TextEditor";
+import React, { Fragment, FunctionComponent, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "../store/store";
 import { setNotification } from "../store/notification";
-import { addImageToNode, addNodeToTag, changeNodeAction, changeNodeFilter, changeNodeName, moveImageDown, moveImageUp, removeImageFromNode, removeNode, removeNodeFromTag } from "../store/map";
+import { setNodeThumbnail, addNodeToTag, changeNodeAction, changeNodeFilter, changeNodeName, removeNodeThumbnail, removeNode, removeNodeFromTag, changeNodeContent } from "../store/map";
 import { closeSideMenu } from "../store/sideMenuData";
+import ReactQuill from "react-quill";
 
 type Props = {
     userData?: {
@@ -21,10 +21,14 @@ type Props = {
  */
 const NodeEditor: FunctionComponent<Props> = (props) => {
     const dispatch = useDispatch();
+
     const sideMenuData = useSelector(state => state.sideMenuData);
     if(sideMenuData.type !== 'node') return <></>;
+
     const node = useSelector(state => state.map.rows[sideMenuData.dataPointer[0]].nodes[sideMenuData.dataPointer[1]]);
     const tags = useSelector(state => state.map.tags);
+
+    const [isUploading, setIsUploading] = useState(false);
 
     /**
      * An asynchronous helper function to read a file from an input
@@ -40,19 +44,37 @@ const NodeEditor: FunctionComponent<Props> = (props) => {
     }
 
     /**
-     * Event handler to parse an uploaded file into a base64 string and add it to the node's gallery array.
+     * Event handler to parse an uploaded file into a base64 string and add it to the node's thumbnail.
+     * @param e The input event handler.
      */
-    async function uploadFile(e: React.ChangeEvent<HTMLInputElement>) {
-        // If it's file size is greater than 1MB, do nothing.
-        if(e.target.files![0].size > 1000000) {
-            dispatch(setNotification('Image cannot be larger than 1MB.'));
-            return;
-        }
-
-        // Parsing the uploaded file into base64.
-        const base64image = await readFileAsDataURL(e.target.files![0]);
+    async function handleThumbnailChange(e: React.ChangeEvent<HTMLInputElement>) {
+        // Getting the file from the input
+        let base64image = await readFileAsDataURL(e.target.files![0]);
         if(!base64image) return;
-        let image = base64image.toString();
+        
+        /// Uploading it to the server.
+        base64image = base64image.toString();
+        const image = await uploadFile(base64image);
+
+        // Changing state. 
+        dispatch(setNodeThumbnail({
+            rowIndex: sideMenuData!.dataPointer[0],
+            nodeIndex: sideMenuData!.dataPointer[1],
+            image: image ? image : base64image
+        }));
+    }
+
+    /**
+     * Helper function to upload an image from a base64 string.
+     * @param image The base64 string.
+     * @returns The new url if logged in, the base64 string if not logged in, or false if it failed.
+     */
+    async function uploadFile(image: string) {
+        // If it's file size is greater than 1MB, do nothing.
+        if(image.length * 0.1 > 1000000) {
+            dispatch(setNotification('Image cannot be larger than 1MB.'));
+            return false;
+        }
        
         // If the image is not the correct format, return.
         if(
@@ -64,7 +86,7 @@ const NodeEditor: FunctionComponent<Props> = (props) => {
             !image.toString().includes('image/svg')
         ) {
             dispatch(setNotification('Image must be .png, .jpg, .jpeg, .webp, .gif, or .svg'));
-            return;
+            return false;
         }
 
         // If the user is logged in, then we'll upload the image to the server.
@@ -85,18 +107,14 @@ const NodeEditor: FunctionComponent<Props> = (props) => {
             // If the upload failures, just notify user.
             if(!response.success) {
                 dispatch(setNotification(response.message));
-                return;
+                return false;
             }
 
             // Otherwise update image to be its url.
-            image = response.url;
+            return response.url as string;
         }
-        
-        dispatch(addImageToNode({
-            rowIndex: sideMenuData!.dataPointer[0],
-            nodeIndex: sideMenuData!.dataPointer[1],
-            image: image
-        }));
+
+        return image;
     }
 
     /**
@@ -113,7 +131,7 @@ const NodeEditor: FunctionComponent<Props> = (props) => {
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    urls: node.gallery
+                    urls: [node.thumbnail]
                 })
             });
         }
@@ -170,6 +188,41 @@ const NodeEditor: FunctionComponent<Props> = (props) => {
         }, -1);
     }
 
+    /**
+     * Event handler to change when the user inputs to the quill editor.
+     * @param e The new content.
+     */
+    async function handleContentChange(e:string) {
+        if(isUploading) return;
+
+        // If there's an img, then upload it.
+        if(e.includes('<img src="data:')) {
+            setIsUploading(true);
+
+            const base64 = e.split('<img src=')[1].split('"/>')[0];
+            // Uploading the image to the server.
+            const image = await uploadFile(base64);
+
+            // If upload was success, change the image src.
+            if(image) {
+                e = e.split(base64).join(image);
+            }
+            // Otherwise remove the image.
+            else {
+                e = e.split(`<img src="${base64}"/>`).join("");
+            }
+
+            setIsUploading(false);
+        }
+
+        // Updating state.
+        dispatch(changeNodeContent({
+            rowIndex: sideMenuData.dataPointer[0],
+            nodeIndex: sideMenuData.dataPointer[1],
+            content: e
+        }));
+    }
+
     return <div className="node">
         <div className="TitleWrapper">
             <input
@@ -216,52 +269,54 @@ const NodeEditor: FunctionComponent<Props> = (props) => {
                 })}
             </div>
         </div>
+        <div className="GalleryUpload">
+            <h3>Thumbnail:</h3>
+            <div className="FileUpload">
+                <input
+                    type="file"
+                    accept="image/png, image/jpg, image/jpeg, image/webp, image/svg, image/gif"
+                    onChange={handleThumbnailChange}
+                ></input>
+                <label>Click or drag to upload +</label>
+            </div>
+            <div className="GalleryEdit">
+                {node.thumbnail.length > 0
+                    ? <div className="ImageWrapper">
+                        <img src={node.thumbnail} alt={`${node.name} Thumbnail`}></img>
+                        <button onClick={() => dispatch(removeNodeThumbnail({
+                            rowIndex: sideMenuData.dataPointer[0],
+                            nodeIndex: sideMenuData.dataPointer[1]
+                        }))}>
+                            <i className="fa-solid fa-trash-can"></i>
+                        </button>
+                    </div>
+                    : <></>}
+            </div>
+        </div>
         {node.action === "content" 
-            ? <>
-                <div className="GalleryUpload">
-                    <h3>Gallery:</h3>
-                    <div className="FileUpload">
-                        <input
-                            type="file"
-                            accept="image/png, image/jpg, image/jpeg, image/webp, image/svg, image/gif"
-                            onChange={uploadFile}
-                        ></input>
-                        <label>Click or drag to upload +</label>
-                    </div>
-                    <div className="GalleryEdit">
-                        {node.gallery.map((image, i) => {
-                            return <div key={i} className="ImageWrapper">
-                                <img src={image} alt={`${node.name} Gallery Image ${i+1}`}></img>
-                                <button onClick={() => dispatch(moveImageUp({
-                                    rowIndex: sideMenuData.dataPointer[0],
-                                    nodeIndex: sideMenuData.dataPointer[1],
-                                    imageIndex: i
-                                }))}>
-                                    <i className="fa-solid fa-arrow-up"></i>
-                                </button>
-                                <button onClick={() => dispatch(removeImageFromNode({
-                                    rowIndex: sideMenuData.dataPointer[0],
-                                    nodeIndex: sideMenuData.dataPointer[1],
-                                    imageIndex: i
-                                }))}>
-                                    <i className="fa-solid fa-trash-can"></i>
-                                </button>
-                                <button onClick={() => dispatch(moveImageDown({
-                                    rowIndex: sideMenuData.dataPointer[0],
-                                    nodeIndex: sideMenuData.dataPointer[1],
-                                    imageIndex: i
-                                }))}>
-                                    <i className="fa-solid fa-arrow-down"></i>
-                                </button>
-                            </div>
-                        })}
-                    </div>
-                </div>
-                <div className="TextEditorWrapper">
-                    <h3>Content:</h3>
-                    <TextEditor></TextEditor>
-                </div>
-            </>
+            ? <div className="TextEditorWrapper">
+                <h3>Content:</h3>
+                <ReactQuill
+                    theme="snow"
+                    value={node.htmlContent}
+                    modules={{
+                        toolbar: [
+                            [{ header: [false, 3] }],
+                            [{ color:  [false, "grey"] }],
+                            ["bold", "italic", "underline", "strike", {script: "sub"}, {script: "super"}],
+                            [{ indent: "-1" }, { indent: "+1" }],
+                            [{align: ""}, {align: "center"}, {align: "right"}],
+                            [{ list: "ordered" }, { list: "bullet" }],
+                            ["blockquote", "link", "video", "image"]
+                        ]
+                    }}
+                    onChange={handleContentChange}
+                    style={{
+                        opacity: isUploading ? 0.5 : 1,
+                        pointerEvents: isUploading ? 'none' : 'all'
+                    }}
+                ></ReactQuill>
+            </div>
             : <div className="FilterWrapper">
                 <h3>Filter:</h3>
                 <div>

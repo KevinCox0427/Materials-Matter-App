@@ -24,16 +24,18 @@ type Props = {
 const SessionOption: FunctionComponent<Props> = (props) => {
     const sessions = useSelector(state => state.sessions);
     const selectedSession = useSelector(state => state.selectedSession);
+    const tempSession = useSelector(state => state.tempSession)
+    const preview = useSelector(state => state.preview);
     const dispatch = useDispatch();
 
     const [session, setSession] = useState(props.index === -1 ? useSelector(state => state.tempSession!) : sessions[props.index]);
 
     // State variable keeping track of whether the user is editing, and to keep track of the data on the session.
-    const [isEditing, setIsEditing] = useState(sessions[props.index].id === -1);
+    const [isEditing, setIsEditing] = useState(props.index === -1);
 
     // Resetting initial states when inherited props change.
     useEffect(() => {
-        setIsEditing(sessions[props.index].id === -1);
+        setIsEditing(props.index === -1);
         if(props.index !== -1) setSession(sessions[props.index]);
     }, [sessions]);
 
@@ -148,7 +150,7 @@ const SessionOption: FunctionComponent<Props> = (props) => {
                     else dispatch(setSelectedSession(props.index === selectedSession ? -1 : props.index));
                 }}
             >
-                {isEditing 
+                {!preview && isEditing 
                     ? <>
                         <i className="fa-solid fa-floppy-disk"></i>
                         Save
@@ -163,23 +165,27 @@ const SessionOption: FunctionComponent<Props> = (props) => {
                             Select
                         </>}
             </button>
-            <button className={isEditing ? 'Activated' : ' '} onClick={toggleIsEditing}>
-                {isEditing 
-                    ? <>
-                        <i className="fa-solid fa-x"></i>
-                        Cancel
-                    </>
-                    : <>
-                        <i className="fa-solid fa-pen-to-square"></i>
-                        Edit
-                    </>}
-            </button>
-            {session.id !== -1 ? 
-                <button onClick={deleteSession}>
-                    <i className="fa-solid fa-trash-can"></i>
-                    Delete
-                </button> 
-            : <></>}
+            {preview
+                ? <></> 
+                : <>
+                    <button className={isEditing ? 'Activated' : ' '} onClick={toggleIsEditing}>
+                        {isEditing 
+                            ? <>
+                                <i className="fa-solid fa-x"></i>
+                                Cancel
+                            </>
+                            : <>
+                                <i className="fa-solid fa-pen-to-square"></i>
+                                Edit
+                            </>}
+                    </button>
+                    {session.id !== -1 ? 
+                        <button onClick={deleteSession}>
+                            <i className="fa-solid fa-trash-can"></i>
+                            Delete
+                        </button>
+                    : <></>}
+                </>}
         </div>
         <div className="Row">
             {isEditing ?
