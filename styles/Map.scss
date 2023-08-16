@@ -215,7 +215,6 @@ body {
         }
 
         .BodyScroll {
-            height: 100%;
             flex-basis: 0em;
             flex-grow: 1;
             overflow-y: scroll;
@@ -227,7 +226,8 @@ body {
             }
 
             .Body {
-                height: fit-content;
+                flex-basis: 0em;
+                flex-grow: 1;
                 margin: auto 0;
                 width: 100%;
                 justify-content: center;
@@ -237,6 +237,10 @@ body {
                     width: calc(100% - 6em);
                     height: fit-content;
                     padding: 2em 0;
+
+                    &.Preview {
+                        width: calc(100% - 3em); 
+                    }
                     
                     .StartText {
                         margin: auto;
@@ -301,7 +305,7 @@ body {
                             gap: 1.25em;
     
                             button {
-                                background-color: var(--grey);
+                                background-color: var(--white);
                                 height: 2.5em;
                                 width: 2.5em;
                                 border-radius: 10em;
@@ -398,10 +402,6 @@ body {
             transition: width 0.25s ease-in-out, flex-basis 0.25s ease-in-out;
             display: flex;
             box-shadow: 0 0 0 0.15em var(--black);
-
-            &.Opened {
-                flex-basis: clamp(25em, 30vw, 35em);
-            }
     
             .node {
                 padding: 1em;
@@ -527,7 +527,8 @@ body {
 
                     div {
                         select {
-                            font-size: 1.5em;
+                            font-size: 1.3em;
+                            font-weight: 500;
                             height: fit-content;
                             padding: 0.2em 1.5em 0.2em 0.3em;
                             border-radius: 0.25em;
@@ -541,7 +542,7 @@ body {
 
                             &:hover, &:focus-visible {
                                 background-color: var(--yellow);
-                                transform: scale(1.05);
+                                transform: scale(1.025);
                             }
                         }
 
@@ -574,9 +575,10 @@ body {
                     }
 
                     select {
-                        font-size: 1.4em;
+                        font-size: 1.25em;
+                        font-weight: 500;
                         height: fit-content;
-                        padding: 0.2em 0.3em;
+                        padding: 0.2em 0.4em;
                         border-radius: 0.25em;
                         background-color: var(--white);
                         transition: background-color 0.1s linear, transform 0.1s linear;
@@ -584,7 +586,7 @@ body {
 
                         &:hover, &:focus-visible {
                             background-color: var(--yellow);
-                            transform: scale(1.05);
+                            transform: scale(1.025);
                         }
                     }
 
@@ -618,7 +620,7 @@ body {
                                 transition: box-shadow 0.1s linear, transform 0.1s linear;
 
                                 &:hover, &:focus-visible {
-                                    box-shadow: 0 0 0 0.1em var(--black);
+                                    box-shadow: 0 0 0 0.15em var(--black);
                                     transform: scale(1.1);
                                 }
                             }
@@ -830,7 +832,7 @@ body {
                         left: -3em;
                         top: 50%;
                         transform: translateY(-50%);
-                        transition: opacity 0.1s linear, transform 0.1s linear;
+                        transition: opacity 0.1s linear, transform 0.1s linear, background-color 0.1s linear;
     
                         &.Activated {
                             transform: translateY(-50%) rotate(-90deg);
@@ -841,12 +843,9 @@ body {
                         }
     
                         &:hover, &:focus-visible {
-                            transform: translateY(-50%) rotate(-15deg);
+                            transform: translateY(-50%) rotate(-15deg) scale(1.1);
                             cursor: pointer;
-    
-                            .Triangle {
-                                opacity: 0.7;
-                            }
+                            background-color: var(--yellow);
                         }
     
                         .Triangle {
@@ -854,9 +853,9 @@ body {
                             left: 50%;
                             top: 55%;
                             transform: translate(-50%, -50%);
-                            border-left: 0.8em solid transparent;
-                            border-right: 0.8em solid transparent;
-                            border-top: 1em solid var(--black);
+                            border-left: 0.75em solid transparent;
+                            border-right: 0.75em solid transparent;
+                            border-top: 0.95em solid var(--black);
                             border-radius: 0.25em;
                         }
                     }
@@ -888,6 +887,13 @@ body {
                     margin-bottom: 1.25em;
                 }
 
+                .AddSessionWrapper {
+                    flex-direction: row;
+                    flex-basis: 100%;
+                    justify-content: center;
+                    align-items: center;
+                }
+
                 button {
                     font-size: 1.25em;
                     font-weight: 500;
@@ -915,7 +921,7 @@ body {
                 }
 
                 .SessionOption {
-                    flex-basis: 100%;
+                    flex-basis: 25em;
                     background-color: var(--white);
                     padding: 0.5em 0.75em 0.75em 0.75em;
                     border-radius: 0.25em;

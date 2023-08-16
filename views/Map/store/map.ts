@@ -1,8 +1,25 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 
+/**
+ * Extending the type to keep track of the incremental ids in the negative direction when making new content.
+ */
+interface EditableFullMapDoc extends FullMapDoc {
+    idCounters: {
+        row: number,
+        node: number,
+        tag: number
+    }
+}
+
 export const mapSlice = createSlice({
     name: 'map',
-    initialState: window.ServerProps.mapPageProps!.map as FullMapDoc,
+    initialState: {...window.ServerProps.mapPageProps!.map,
+        idCounters: {
+            row: -1,
+            node: -1,
+            tag: -1
+        }
+    } as EditableFullMapDoc,
     reducers: {
         changeMapName: (state, action: PayloadAction<string>) => {
             state.name = action.payload;
@@ -10,7 +27,7 @@ export const mapSlice = createSlice({
 
         insertRow: (state, action: PayloadAction<number>) => {
             state.rows.splice(action.payload, 0, {
-                id: -1,
+                id: state.idCounters.row,
                 mapId: state.id,
                 index: action.payload,
                 name: 'New Row',
@@ -23,6 +40,9 @@ export const mapSlice = createSlice({
                     index: i
                 }
             });
+
+            // Updating the incremental ids
+            state.idCounters.row--;
         },
 
         changeRowName: (state, action: PayloadAction<{
@@ -82,14 +102,15 @@ export const mapSlice = createSlice({
         }>) => {
             // Inserting node
             state.rows[action.payload.rowIndex].nodes.splice(action.payload.nodeIndex, 0, {
-                id: -1,
+                id: state.idCounters.node,
                 rowId: state.rows[action.payload.rowIndex].id,
                 name: 'New Node',
                 index: action.payload.nodeIndex,
                 thumbnail: '',
                 htmlContent: '',
                 action: 'content',
-                filter: null    
+                filter: null,
+                tags: []
             });
 
             // Updating the nodes' indeces since they will be wrong
@@ -98,6 +119,9 @@ export const mapSlice = createSlice({
                     index: i
                 }
             });
+
+            // Updating the incremental ids
+            state.idCounters.node--;
         },
 
         moveNode: (state, action: PayloadAction<{
@@ -174,34 +198,67 @@ export const mapSlice = createSlice({
             mapId: number
         }>) => {
             state.tags.push({
-                id: -1,
+                id: state.idCounters.tag,
                 name: action.payload.name,
-                mapId: action.payload.mapId,
-                nodeIds: []
-            })
+                mapId: action.payload.mapId
+            });
+
+            // Updating the incremental ids
+            state.idCounters.tag--;
         },
 
         removeTag: (state, action: PayloadAction<number>) => {
             if(action.payload < 0 || action.payload >= state.tags.length) return state;
-            state.tags.splice(action.payload, 1);
+            const tag = state.tags.splice(action.payload, 1)[0];
+
+            // Now going through all the nodes to remove this tag from them.
+            for(let i = 0; i < state.rows.length; i++) {
+                for(let j = 0; j < state.rows[i].nodes.length; j++) {
+                    // If this node is filtering with this tag, remove it.
+                    if(state.rows[i].nodes[j].filter === tag.id) state.rows[i].nodes[j].filter = null;
+
+                    // Finding the index of the tag in the node's array
+                    const tagIndex = state.rows[i].nodes[j].tags.reduce((previousIndex, nodeTag, i) => {
+                        if(nodeTag.id === tag.id) return i;
+                        else return previousIndex;
+                    }, -1);
+
+                    // If found, remove.
+                    if(tagIndex > -1) state.rows[i].nodes[j].tags.splice(tagIndex, 1);
+                }
+            }
+
         },
 
-        addNodeToTag: (state, action: PayloadAction<{
-            nodeId: number,
-            tagIndex: number
+        addTagToNode: (state, action: PayloadAction<{
+            rowIndex: number,
+            nodeIndex: number,
+            tag: TagDoc
         }>) => {
-            if(!state.tags[action.payload.tagIndex].nodeIds.includes(action.payload.nodeId)) {
-                state.tags[action.payload.tagIndex].nodeIds.push(action.payload.nodeId);
+            // Getting the index of the tag in the node.
+            const tagIndex = state.rows[action.payload.rowIndex].nodes[action.payload.nodeIndex].tags.reduce((previousIndex, tag, i) => {
+                if(tag.id === action.payload.tag.id) return i;
+                else return previousIndex;
+            }, -1);
+
+            if(tagIndex < 0) {
+                state.rows[action.payload.rowIndex].nodes[action.payload.nodeIndex].tags.push(action.payload.tag);
             }
         },
 
-        removeNodeFromTag: (state, action: PayloadAction<{
-            nodeId: number,
-            tagIndex: number
+        removeTagFromNode: (state, action: PayloadAction<{
+            rowIndex: number,
+            nodeIndex: number,
+            tag: TagDoc
         }>) => {
-            const nodeIndex = state.tags[action.payload.tagIndex].nodeIds.indexOf(action.payload.nodeId);
-            if(nodeIndex !== -1) {
-                state.tags[action.payload.tagIndex].nodeIds.splice(nodeIndex, 1);
+            // Getting the index of the tag in the node.
+            const tagIndex = state.rows[action.payload.rowIndex].nodes[action.payload.nodeIndex].tags.reduce((previousIndex, tag, i) => {
+                if(tag.id === action.payload.tag.id) return i;
+                else return previousIndex;
+            }, -1);
+
+            if(tagIndex > -1) {
+                state.rows[action.payload.rowIndex].nodes[action.payload.nodeIndex].tags.splice(tagIndex, 1);
             }
         },
 
@@ -223,4 +280,4 @@ export const mapSlice = createSlice({
     }
 });
 
-export const { changeMapName, insertRow, changeRowName, removeRow, moveRowDown, moveRowUp, insertNode, moveNode, removeNode, changeNodeContent, changeNodeName, setNodeThumbnail, removeNodeThumbnail, setTagName, addTag, removeTag, addNodeToTag, removeNodeFromTag, changeNodeAction, changeNodeFilter } = mapSlice.actions;
+export const { changeMapName, insertRow, changeRowName, removeRow, moveRowDown, moveRowUp, insertNode, moveNode, removeNode, changeNodeContent, changeNodeName, setNodeThumbnail, removeNodeThumbnail, setTagName, addTag, removeTag, addTagToNode, removeTagFromNode, changeNodeAction, changeNodeFilter } = mapSlice.actions;

@@ -18,10 +18,10 @@ export const sessionsSlice = createSlice({
                 }
             }
 
-            // Checking to see if we've already added it since useEffect fires twice.
-            // if(newSessions[sessionIndex].comments[replyId][newSessions[sessionIndex].comments[replyId].length - 1] && newSessions[sessionIndex].comments[replyId][newSessions[sessionIndex].comments[replyId].length - 1].id === newComment.id) {
-            //     return;
-            // }
+            // Checking to see if its already been added.
+            if (state[sessionIndex].comments['' + action.payload.replyId].some(comment => comment.id === action.payload.id)) {
+                return state;
+            }
 
             // Adding the comment to the comment hashmap.
             state[sessionIndex].comments['' + action.payload.replyId].push(action.payload);

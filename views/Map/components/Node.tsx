@@ -61,14 +61,17 @@ const Node: FunctionComponent<Props> = (props) => {
             setIsMoving(false);
 
             // If its a filter node, then set the filter.
-            if(map.rows[props.rowIndex].nodes[props.nodeIndex].action === 'filter' && map.rows[props.rowIndex].nodes[props.nodeIndex].filter !== null) {
-                // Getting the index of the tag in the array based on its id.
-                const tagIndex = map.tags.reduce((previousValue, tag, i) => {
-                    if(tag.id === map.rows[props.rowIndex].nodes[props.nodeIndex].filter!) return i;
-                    else return previousValue;
-                }, -1);
-                // Setting the map filter to the tag.
-                if(tagIndex > -1) dispatch(setFilter(tagIndex));
+            if(map.rows[props.rowIndex].nodes[props.nodeIndex].action === 'filter') {
+                if(!map.rows[props.rowIndex].nodes[props.nodeIndex].filter) return;
+
+                // Getting the tag from the node's array
+                const tag = map.tags.reduce((previousTag: TagDoc | null, tag) => {
+                    if(tag.id === map.rows[props.rowIndex].nodes[props.nodeIndex].filter!) return tag;
+                    else return previousTag;
+                }, null);
+
+                // Setting the map filter to the tag if found.
+                if(tag) dispatch(setFilter(tag));
 
                 // Close the side menu if open
                 dispatch(closeSideMenu());
@@ -161,14 +164,17 @@ const Node: FunctionComponent<Props> = (props) => {
         if(e.key !== 'Enter') return;
 
         // If we're in preview mode and this is a filter node, then set the filter.
-        if(preview && map.rows[props.rowIndex].nodes[props.nodeIndex].action === 'filter' && map.rows[props.rowIndex].nodes[props.nodeIndex].filter !== null) {
-            // Getting the index of the tag in the array based on its id.
-            const tagIndex = map.tags.reduce((previousValue, tag, i) => {
-                if(tag.id === map.rows[props.rowIndex].nodes[props.nodeIndex].filter!) return i;
-                else return previousValue;
-            }, -1);
-            // Setting the map filter to the tag.
-            if(tagIndex > -1) dispatch(setFilter(tagIndex));
+        if(preview && map.rows[props.rowIndex].nodes[props.nodeIndex].action === 'filter') {
+            if(!map.rows[props.rowIndex].nodes[props.nodeIndex].filter) return;
+
+            // Getting the tag from the node's array
+            const tag = map.tags.reduce((previousTag: TagDoc | null, tag) => {
+                if(tag.id === map.rows[props.rowIndex].nodes[props.nodeIndex].filter!) return tag;
+                else return previousTag;
+            }, null);
+
+            // Setting the map filter to the tag if found.
+            if(tag) dispatch(setFilter(tag));
 
             // Close the side menu if open
             dispatch(closeSideMenu());

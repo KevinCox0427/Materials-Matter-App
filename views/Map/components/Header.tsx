@@ -245,10 +245,10 @@ const Header: FunctionComponent<Props> = (props) => {
                 ? <h1>{map.name}</h1>
                 : <input value={map.name} onChange={e => dispatch(changeMapName(e.target.value))}></input>}
         </div>
-        {preview && filter !== null && filter > -1
+        {preview && filter
             ? <div className="Group">
                 <div className="Filter">
-                    <p>Filtering By Tag: <span>{map.tags[filter].name}</span></p>
+                    <p>Filtering By Tag: <span>{filter.name}</span></p>
                     <button onClick={() => dispatch(removeFilter())}><i className="fa-solid fa-x"></i></button>
                 </div>
             </div>

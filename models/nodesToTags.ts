@@ -5,7 +5,8 @@ import { isDBready, knex } from "./__init__";
  */
 declare global {
     interface NodesToTags {
-        nodeId: number
+        nodeId: number,
+        tagId: number
     }
 
     interface NodesToTagsDoc extends NodesToTags {
@@ -30,53 +31,15 @@ export const nodesToTagsTable = (table:any) => {
  */
 const NodesToTags = {
     /**
-     * A get operation using the id as the parameter.
-     * @param id the id of the nodeToTag link.
-     * @returns If successful, returns the nodeToTag link. Otherwise returns false.
+     * A create operation for a nodeToTag.
+     * @param data The data to create the nodeToTag with.
+     * @returns The id of the newly created nodeToTag, or false upon failure
      */
-    getById: async (id: number): Promise<NodesToTagsDoc | false> => {
-        if(!isDBready) return false;
-        
-        try {
-            const result = await knex('nodetotags')
-                .where('id', id)
-                .first();
-
-            return result ? result : false;
-        } catch (e) {
-            console.log(e);
-            return false;
-        }
-    },
-
-    /**
-     * A GET operation for querying tags based on if the fields are equal to the query object
-     * @param query Any amount of fields to query against.
-     * @returns An array of tags.
-     */
-    get: async (query: Partial<NodesToTagsDoc>): Promise<NodesToTagsDoc[]> => {
-        if(!isDBready) return [];
-
-        try {
-            const result = await knex('nodetotags').where(query);
-            return result;
-        }
-        catch(e) {
-            console.log(e);
-            return [];
-        }
-    },
-
-    /**
-     * A create operation for a tag.
-     * @param data The data to create the tag with.
-     * @returns The id of the newly created tag, or false upon failure
-     */
-    create: async (data: NodesToTags): Promise<number | false> => {
+    create: async (data: NodesToTags[]): Promise<number | false> => {
         if(!isDBready) return false;
 
         try {
-            const result = await knex('nodetotags')
+            const result = await knex('nodesToTags')
                 .insert(data);
 
             return result[0] ? result[0] : false;
@@ -88,41 +51,19 @@ const NodesToTags = {
     },
 
     /**
-     * An update operation for a tag that overwrites any data at the given id.
-     * @param id The id of the tag being overwritten
-     * @param data The data to overwrite with.
-     * @returns A boolean representing the success of the operation
-     */
-    update: async (id:number, data: Partial<NodesToTags>): Promise<boolean> => {
-        if(!isDBready) return false;
-
-        try{ 
-            const result = await knex('nodetotags')
-                .where('id', id)
-                .update(data);
-
-            return result === 1;
-        }
-        catch(e) {
-            console.log(e);
-            return false;
-        }
-    },
-
-    /**
-     * A delete operation for the tags specified by the id.
-     * @param id The id of the tags
+     * A delete operation for the nodeToTags specified by the id.
+     * @param id The id of the nodeToTags
      * @returns a boolean representing the success of the operation.
      */
-    delete: async (id:number | number[]): Promise<boolean> => {
+    delete: async (nodesToTags: NodesToTags[]): Promise<boolean> => {
         if(!isDBready) return false;
 
         try {
-            const result = await knex('nodetotags')
-                .where('id', id)
+            const result = await knex('nodesToTags')
+                .whereIn(['nodeId', 'tagId'], nodesToTags.map(nodeToTag => [nodeToTag.nodeId, nodeToTag.tagId]))
                 .del();
             
-            return result !== 0;
+            return true;
         }
         catch(e) {
             console.log(e);
@@ -130,3 +71,5 @@ const NodesToTags = {
         }   
     }
 }
+
+export default NodesToTags;

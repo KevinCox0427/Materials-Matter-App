@@ -1,7 +1,7 @@
-import React, { Fragment, FunctionComponent, useEffect, useState } from "react";
+import React, { FunctionComponent, useState } from "react";
 import { useDispatch, useSelector } from "../store/store";
 import { setNotification } from "../store/notification";
-import { setNodeThumbnail, addNodeToTag, changeNodeAction, changeNodeFilter, changeNodeName, removeNodeThumbnail, removeNode, removeNodeFromTag, changeNodeContent } from "../store/map";
+import { setNodeThumbnail, addTagToNode, changeNodeAction, changeNodeFilter, changeNodeName, removeNodeThumbnail, removeNode, removeTagFromNode, changeNodeContent } from "../store/map";
 import { closeSideMenu } from "../store/sideMenuData";
 import ReactQuill from "react-quill";
 
@@ -71,7 +71,7 @@ const NodeEditor: FunctionComponent<Props> = (props) => {
      */
     async function uploadFile(image: string) {
         // If it's file size is greater than 1MB, do nothing.
-        if(image.length * 0.1 > 1000000) {
+        if(image.length / 1.33 > 1000000) {
             dispatch(setNotification('Image cannot be larger than 1MB.'));
             return false;
         }
@@ -106,7 +106,7 @@ const NodeEditor: FunctionComponent<Props> = (props) => {
 
             // If the upload failures, just notify user.
             if(!response.success) {
-                dispatch(setNotification(response.message));
+                dispatch(setNotification(response.error));
                 return false;
             }
 
@@ -148,9 +148,10 @@ const NodeEditor: FunctionComponent<Props> = (props) => {
      * @param e the change event from the select element.
      */
     function addTag(e: React.ChangeEvent<HTMLSelectElement>) {
-        dispatch(addNodeToTag({
-            tagIndex: parseInt(e.target.value),
-            nodeId: node.id
+        dispatch(addTagToNode({
+            rowIndex: sideMenuData.dataPointer[0],
+            nodeIndex: sideMenuData.dataPointer[1],
+            tag: tags[parseInt(e.target.value)],
         }))
     }
 
@@ -158,10 +159,11 @@ const NodeEditor: FunctionComponent<Props> = (props) => {
      * An event handler to remove a tag from the node.
      * @param tagIndex the index of the tag in the array.
      */
-    function removeTag(tagIndex:number) {
-        dispatch(removeNodeFromTag({
-            tagIndex: tagIndex,
-            nodeId: node.id
+    function removeTag(tag:TagDoc) {
+        dispatch(removeTagFromNode({
+            rowIndex: sideMenuData.dataPointer[0],
+            nodeIndex: sideMenuData.dataPointer[1],
+            tag: tag,
         }))
     }
 
@@ -199,8 +201,8 @@ const NodeEditor: FunctionComponent<Props> = (props) => {
         if(e.includes('<img src="data:')) {
             setIsUploading(true);
 
-            const base64 = e.split('<img src=')[1].split('"/>')[0];
             // Uploading the image to the server.
+            const base64 = 'data:' + e.split('<img src="data:')[1].split('">')[0];
             const image = await uploadFile(base64);
 
             // If upload was success, change the image src.
@@ -209,7 +211,7 @@ const NodeEditor: FunctionComponent<Props> = (props) => {
             }
             // Otherwise remove the image.
             else {
-                e = e.split(`<img src="${base64}"/>`).join("");
+                e = e.split(`<img src="${base64}">`).join("");
             }
 
             setIsUploading(false);
@@ -256,16 +258,13 @@ const NodeEditor: FunctionComponent<Props> = (props) => {
                 {tags.map((tag, i) => <option key={i} value={i}>{tag.name}</option>)}
             </select>
             <div className="TagsWrapper">
-                {tags.map((tag, i) => {
-                    if(tag.nodeIds.includes(node.id)) {
-                        return <div key={i} className="Tag" onClick={() => removeTag(i)}>
-                            <p>{tag.name}</p>
-                            <button>
-                                <i className="fa-solid fa-x"></i>
-                            </button>
-                        </div>
-                    }
-                    return <Fragment key={i}></Fragment>
+                {node.tags.map((tag, i) => {
+                    return <div key={i} className="Tag" onClick={() => removeTag(tag)}>
+                        <p>{tag.name}</p>
+                        <button>
+                            <i className="fa-solid fa-x"></i>
+                        </button>
+                    </div>
                 })}
             </div>
         </div>
@@ -311,9 +310,9 @@ const NodeEditor: FunctionComponent<Props> = (props) => {
                         ]
                     }}
                     onChange={handleContentChange}
+                    readOnly={isUploading}
                     style={{
-                        opacity: isUploading ? 0.5 : 1,
-                        pointerEvents: isUploading ? 'none' : 'all'
+                        opacity: isUploading ? 0.3 : 1
                     }}
                 ></ReactQuill>
             </div>

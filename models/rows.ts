@@ -15,7 +15,7 @@ declare global {
     }
 
     interface FullRowDoc extends RowDoc {
-        nodes: NodeDoc[]
+        nodes: FullNodeDoc[]
     }
 }
 
@@ -90,7 +90,7 @@ const Rows = {
                 .whereIn('id', id)
                 .del();
 
-            return result !== 0;
+            return true;
         }
         catch (e) {
             console.log(e);

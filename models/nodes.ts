@@ -17,6 +17,10 @@ declare global {
     interface NodeDoc extends NodeType {
         id: number
     }
+
+    interface FullNodeDoc extends NodeDoc {
+        tags: TagDoc[]
+    }
 }
 
 /**
@@ -94,7 +98,7 @@ const Nodes = {
                 .whereIn('id', id)
                 .del();
 
-            return result !== 0;
+            return true;
         }
         catch (e) {
             console.log(e);

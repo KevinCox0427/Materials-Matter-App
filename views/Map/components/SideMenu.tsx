@@ -31,7 +31,11 @@ const SideMenu: FunctionComponent<Props> = (props) => {
         }
     }
     
-    return <div className={`SideMenuScroll ${sideMenuData.type === 'closed' ? ' ' : 'Opened'}`}>
+    return <div
+        className="SideMenuScroll"
+        style={{
+            flexBasis: sideMenuData.type === 'closed' ? '0em' : `clamp(25em, 45vw, ${sideMenuData.type === 'comment' || sideMenuData.type === 'sessions' ? 30 : 45}em)`
+        }}>
         {sideMenuData.type === 'closed'
             ? <></>
             : <>
@@ -62,10 +66,12 @@ const SideMenu: FunctionComponent<Props> = (props) => {
                         <h2>Comment Sessions:</h2>
                         {preview 
                             ? <></>
-                            : <button
-                                className="AddSession"
-                                onClick={() => addSession()}
-                            >+ New Session</button>}
+                            : <div className="AddSessionWrapper">
+                                <button
+                                    className="AddSession"
+                                    onClick={() => addSession()}
+                                >+ New Session</button>
+                            </div>}
                         {tempSession
                             ? <SessionOption
                                 index={-1}

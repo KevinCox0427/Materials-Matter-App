@@ -93,7 +93,7 @@ const commentRegex = new RegexTester({
     y: regexStrings.id,
     userId: regexStrings.number,
     commentsessionId: regexStrings.number,
-    replyId: regexStrings.id
+    replyId: /^[\-0-9]{1,6}|^null/
 });
 
 const sessionRegex = new RegexTester({
@@ -112,16 +112,22 @@ const sessionRegex = new RegexTester({
 async function createComment(requestData:any) {
     // Running the regex test to make sure its valid data.
     const regexResult = commentRegex.runTest(requestData);
-    if(typeof regexResult === 'string') {
-        return regexResult;
-    }
+    if(typeof regexResult === 'string') return regexResult;
+    
+    const parsedData = requestData as CommentType;
+
+    // Checking the session to see if it's still active.
+    const sessionResult = await CommentSessions.getById(parsedData.commentsessionId);
+
+    if(!sessionResult) return 'Comment Session not found.';
+    if(new Date() > new Date(sessionResult.expires)) return 'Comment Session has expired.';
+    if(new Date() < new Date(sessionResult.start)) return 'Comment Session hasn\'t started';
+
     // Creating the comment in the db.
-    const createResult = await Comments.create(requestData as CommentType);
+    const createResult = await Comments.create(parsedData);
 
     // Returning the results.
-    if(!createResult) {
-        return 'Comment failed to be inserted into the database';
-    }
+    if(!createResult) return 'Comment failed to be inserted into the database';
 
     const newComment = await Comments.getById(createResult);
     return newComment ? newComment : 'Comment failed to be retrieved from the database';
@@ -135,9 +141,7 @@ async function createComment(requestData:any) {
 async function editSession(requestData: any) {
     // Running a regex test to make sure the data is valid.
     const regexResult = sessionRegex.runTest(requestData);
-    if(typeof regexResult === 'string') {
-        return regexResult;
-    }
+    if(typeof regexResult === 'string') return regexResult;
 
     // If the session's id is -1, that means it's a new session and must be created in the db.
     if(regexResult.id === -1) {

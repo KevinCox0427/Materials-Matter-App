@@ -1,6 +1,4 @@
-/**
- * Intializing our environmental variables.
- */
+// Intializing our environmental variables.
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -12,25 +10,21 @@ import express from "express";
 export const app = express();
 
 
-/**
- * Parsing all endpoints to our server in JSON format.
- * Encoding all URIs.
- * Adding CORS policies
- */
+// Parsing all endpoints to our server in JSON format.
+// Encoding all URIs.
+// Adding CORS policies
 import cors from 'cors';
 
 app.use(express.json({limit: '10mb'}));
 app.use(express.urlencoded({extended:true, limit: '10mb'}));
 app.set('etag', false);
 app.use(cors({
-    origin: '*'
+    origin: process.env.originURL || 'http://localhost:3000'
 }));
 
 
-/**
- * Setting up user sessions via express session.
- * Also storing these sessions in a database.
- */
+// Setting up user sessions via express session.
+// Also storing these sessions in a database.
 import expressSession from "express-session";
 const mySqlStore = require('express-mysql-session')(expressSession);
 
@@ -56,21 +50,15 @@ export const session = expressSession({
 app.use(session);
 
 
-/**
- * Import database configuration
- */
+// Importing database schemas.
 import './models/__init__';
 
 
-/**
- * Importing the authentication and socket.io configuration
- */
+// Importing the authentication middleware.
 import './utils/authentication';
 
 
-/**
- * Declaring server properties types to be passed to the client-side.
- */
+// Declaring server properties types to be passed to the client-side.
 declare global { 
     type ServerPropsType = Partial<{
         homePageProps: HomePageProps,
@@ -79,9 +67,7 @@ declare global {
 }
 
 
-/**
- * Declaring the routes
- */
+// Declaring the routes
 import index from './controllers/index';
 import users from './controllers/users';
 import map from './controllers/map';
@@ -93,15 +79,11 @@ app.use('/map', map);
 app.use('/image', image);
 
 
-/**
- * Declaring static files in the public folder.
- */
+// Declaring static files in the public folder.
 app.use('/public', express.static('dist/public'));
 
 
-/**
- * Importing the server from the socket.io configuration.
- * Listening server to declared port.
- */
+// Importing the server from the socket.io configuration.
+// Listening server to declared port.
 import { server } from './controllers/socketIO';
 server.listen(process.env.PORT || 3000);

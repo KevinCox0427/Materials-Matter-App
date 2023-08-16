@@ -10,8 +10,7 @@ declare global {
     }
 
     interface TagDoc extends Tag {
-        id: number,
-        nodeIds: number[]
+        id: number
     }
 }
 
@@ -30,44 +29,6 @@ export const tagsTable = (table:any) => {
  * A tags model to implement CRUD operations.
  */
 const Tags = {
-    /**
-     * A get operation using the id as the parameter.
-     * @param id the id of the tag.
-     * @returns If successful, returns the tag. Otherwise returns false.
-     */
-    getById: async (id: number): Promise<TagDoc | false> => {
-        if(!isDBready) return false;
-        
-        try {
-            const result = await knex('tags')
-                .where('id', id)
-                .first();
-
-            return result ? result : false;
-        } catch (e) {
-            console.log(e);
-            return false;
-        }
-    },
-
-    /**
-     * A GET operation for querying tags based on if the fields are equal to the query object
-     * @param query Any amount of fields to query against.
-     * @returns An array of tags.
-     */
-    get: async (query: Partial<TagDoc>): Promise<TagDoc[]> => {
-        if(!isDBready) return [];
-
-        try {
-            const result = await knex('tags').where(query);
-            return result;
-        }
-        catch(e) {
-            console.log(e);
-            return [];
-        }
-    },
-
     /**
      * A create operation for a tag.
      * @param data The data to create the tag with.
@@ -115,15 +76,15 @@ const Tags = {
      * @param id The id of the tags
      * @returns a boolean representing the success of the operation.
      */
-    delete: async (id:number | number[]): Promise<boolean> => {
+    delete: async (id: number[]): Promise<boolean> => {
         if(!isDBready) return false;
 
         try {
             const result = await knex('tags')
-                .where('id', id)
+                .whereIn('id', id)
                 .del();
             
-            return result !== 0;
+            return true;
         }
         catch(e) {
             console.log(e);

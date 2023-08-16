@@ -106,7 +106,7 @@ const Images = {
      * @param base64 The base64 encoded image data.
      * @returns The url of the new image. Otherwise return false.
      */
-    create: async (base64:string, nodeId: number): Promise<string | false> => {
+    create: async (base64:string): Promise<string | false> => {
         if(!isDBready) return false;
 
         const extension = base64.split(';base64,')[0].split('data:image/')[1];
@@ -117,14 +117,13 @@ const Images = {
         try{ 
             const createResult = await knex('images')
                 .insert({
-                    extension: extension,
-                    nodeId: nodeId
+                    extension: extension
                 });
 
             if(!createResult[0]) return false;
             
             try {
-                writeFileSync(`./public/assets/${createResult[0]}.${extension}`, Buffer.from(base64Data, 'base64'));
+                writeFileSync(`./dist/public/assets/${createResult[0]}.${extension}`, Buffer.from(base64Data, 'base64'));
 
                 // await s3Client.send(new PutObjectCommand({
                 //     Bucket: process.env.awsBucket || '',
@@ -142,7 +141,7 @@ const Images = {
 
             //return `${process.env.awsUrl || ''}${createResult[0]}.${extension}`;
 
-            return `/assets/${createResult[0]}.${extension}`;
+            return `/public/assets/${createResult[0]}.${extension}`;
         }
         catch(e:any) {
             console.log(e);

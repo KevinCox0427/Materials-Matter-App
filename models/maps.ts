@@ -45,27 +45,11 @@ const Maps = {
                 SELECT
                     m.id,
                     m.name,
-                    IFNULL((
-                        WITH tagData AS (
-                            SELECT 
-                                t.id,
-                                t.name,
-                                t.mapId,
-                                IF(COUNT(n2.id) = 0, JSON_ARRAY(), JSON_ARRAYAGG(n2.id)) as 'nodeIds'
-                            FROM \`tags\` t
-                            LEFT JOIN \`nodesToTags\` nt ON nt.tagId = t.id
-                            LEFT JOIN \`nodes\` n2 ON n2.id = nt.nodeId
-                            GROUP BY t.id
-                        )
-                        SELECT JSON_ARRAYAGG(JSON_OBJECT(
-                            'id', t.id,
-                            'name', t.name,
-                            'mapId', t.mapId,
-                            'nodeIds', t.nodeIds
-                        ))
-                        FROM \`tagData\` t
-                        WHERE t.mapId = m.id
-                    ), JSON_ARRAY()) as 'tags',
+                    CASE WHEN COUNT(t1.id) > 0 THEN JSON_ARRAYAGG(JSON_OBJECT(
+                        'id', t1.id,
+                        'name', t1.name,
+                        'mapId', t1.mapId
+                    )) ELSE JSON_ARRAY() END as 'tags',
                     IFNULL((
                         WITH rowData AS (
                             SELECT
@@ -95,8 +79,15 @@ const Maps = {
                                                 n.htmlContent,
                                                 n.action,
                                                 n.filter,
+                                                CASE WHEN COUNT(t2.id) > 0 THEN JSON_ARRAYAGG(JSON_OBJECT(
+                                                    'id', t2.id,
+                                                    'name', t2.name,
+                                                    'mapId', t2.mapId
+                                                )) ELSE JSON_ARRAY() END as 'tags',
                                                 ROW_NUMBER() OVER(PARTITION BY n.index ORDER BY n.index) AS array_index
                                             FROM \`nodes\` n
+                                            LEFT JOIN \`nodesToTags\` nt ON nt.nodeId = n.id
+                                            LEFT JOIN \`tags\` t2 ON t2.id = nt.tagId
                                             WHERE n.rowId = r.id
                                             GROUP BY n.id
                                         )
@@ -109,7 +100,8 @@ const Maps = {
                                             'thumbnail', n.thumbnail,
                                             'htmlContent', n.htmlContent,
                                             'action', n.action,
-                                            'filter', n.filter
+                                            'filter', n.filter,
+                                            'tags', n.tags
                                         )) as 'nodes'
                                     FROM \`nodeData\` n
                                     WHERE n.rowId = r.id
@@ -124,6 +116,7 @@ const Maps = {
                         ORDER BY r.array_index
                     ), JSON_ARRAY()) as 'rows'
                 FROM \`maps\` m
+                LEFT JOIN \`tags\` t1 ON t1.mapId = m.id
                 WHERE m.id = ?
                 GROUP BY m.id
                 LIMIT 1
@@ -239,7 +232,7 @@ const Maps = {
                 .where('id', id)
                 .del();
 
-            return result !== 0;
+            return true;
         }
         catch(e) {
             console.log(e);

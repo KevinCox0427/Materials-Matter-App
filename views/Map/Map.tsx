@@ -1,22 +1,24 @@
-import React, { Fragment, FunctionComponent, useEffect, useRef, useState } from "react";
+import React, { Fragment, FunctionComponent, useEffect, useRef } from "react";
 import { createRoot } from "react-dom/client";
 import { Provider, useDispatch } from 'react-redux';
-import { store, useSelector} from './store/store';
+import { store, useSelector } from './store/store';
 
 // Importing Components.
 import Row from "./components/Row";
 import MapComment from "./components/MapComment";
 import Header from "./components/Header";
 
-// Setting up the socket.io server.
-import io from "socket.io-client";
+// Importing Redux reducers
 import { setNotification } from "./store/notification";
 import { addComment, removeSession, saveSession } from "./store/sessions";
 import { closeSideMenu } from "./store/sideMenuData";
 import SideMenu from "./components/SideMenu";
 import { removeNewSession } from "./store/tempSession";
 import { removeSelectedSession } from "./store/selectedSession";
-export const socket = io("localhost:3000");
+
+// Setting up the socket.io server.
+import io from "socket.io-client";
+export const socket = io(window.ServerProps.mapPageProps!.originUrl);
 
 /**
  * Declaring globally what properties this page should inherited from the server under "MapPageProps".
@@ -25,7 +27,8 @@ declare global {
     type MapPageProps = {
         map: FullMapDoc,
         sessions: FullSessionDoc[],
-        userData: UserData
+        userData: UserData,
+        originUrl: string
     }
 
     type UserData = {
@@ -60,6 +63,7 @@ const Map: FunctionComponent<Props> = (props) => {
     const tempComment = useSelector(state => state.tempComment);
     const action = useSelector(state => state.action);
     const notification = useSelector(state => state.notification);
+    const preview = useSelector(state => state.preview);
 
     const dispatch = useDispatch();
 
@@ -212,7 +216,7 @@ const Map: FunctionComponent<Props> = (props) => {
                 }}
             >
                 <div className="Body">
-                    <div className="Rows">
+                    <div className={`Rows ${preview ? 'Preview' : ''}`}>
                         {map.rows.length > 0 ?
                             map.rows.map((_, i) => {
                                 return <Fragment key={i}>
@@ -229,7 +233,7 @@ const Map: FunctionComponent<Props> = (props) => {
                             commentIndex={-1}
                         ></MapComment> 
                         : <></>}
-                    {selectedSession > -1 && sessions[selectedSession].comments['0'] ? sessions[selectedSession].comments['0'].map((comment, i) => {
+                    {selectedSession > -1 && sessions[selectedSession] && sessions[selectedSession].comments['0'] ? sessions[selectedSession].comments['0'].map((comment, i) => {
                         return <Fragment key={i}>
                             <MapComment
                                 commentData={comment}

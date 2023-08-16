@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useEffect, useRef, useState } from "react";
+import React, { FunctionComponent } from "react";
 import parse from "html-react-parser";
 import { useSelector } from "../store/store";
 
@@ -11,13 +11,12 @@ const NodeViewer: FunctionComponent = () => {
     const sideMenuData = useSelector(state => state.sideMenuData);
     if(sideMenuData.type !== 'node') return <></>;
     const node = useSelector(state => state.map.rows[sideMenuData.dataPointer[0]].nodes[sideMenuData.dataPointer[1]]);
-    const tags = useSelector(state => state.map.tags.filter(tag => tag.nodeIds.includes(node.id)));
     
     return <div className="node">
         <h2 className="Title">{node.name}</h2>
-        {tags.length > 0 
+        {node.tags.length > 0 
             ? <div className="TagsWrapper">
-                {tags.map((tag, i) => <div key={i} className="Tag">{tag.name}</div>)}
+                {node.tags.map((tag, i) => <div key={i} className="Tag">{tag.name}</div>)}
             </div>
             : <></>}
         {node.thumbnail

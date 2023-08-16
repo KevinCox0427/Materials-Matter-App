@@ -31,6 +31,7 @@ const Comment: FunctionComponent<Props> = (props) => {
     const [showReplies, setShowReplies] = useState(true);
     const selectedSession = useSelector(state => state.sessions[state.selectedSession]);
     const tempComment = useSelector(state => state.tempComment);
+    const sideMenuData = useSelector(state => state.sideMenuData);
 
     /**
      * Event handler to change the text of a comment.
@@ -78,12 +79,14 @@ const Comment: FunctionComponent<Props> = (props) => {
         });
 
         // Deleting the temp comment that was uploaded.
-        dispatch(removeTempComment());
+        cancelTempComment();
     }
 
     function cancelTempComment() {
         dispatch(removeTempComment());
-        dispatch(closeSideMenu());
+        if(sideMenuData.dataPointer[1] < 0) {
+            dispatch(closeSideMenu());
+        }
     }
 
     /**
