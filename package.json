@@ -4,7 +4,7 @@
   "description": "Re-done application",
   "main": "dist/server.js",
   "scripts": {
-    "build": "npm i && tsc && sass styles:dist/public/css && vite build",
+    "build": "tsc && sass styles:dist/public/css && vite build",
     "dev": "vite",
     "start": "node dist/server.js",
     "nodemon": "nodemon server.ts --exec 'tsc && vite build && node dist/server.js' -e ts,tsx --ignore node_modules/ --ignore dist/",

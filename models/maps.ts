@@ -51,13 +51,6 @@ const Maps = {
                         'mapId', t1.mapId
                     )) ELSE JSON_ARRAY() END as 'tags',
                     IFNULL((
-                        WITH rowData AS (
-                            SELECT
-                                r.id, r.name, r.index, r.mapId,
-                                ROW_NUMBER() OVER(PARTITION BY r.index ORDER BY r.index) AS array_index
-                            FROM \`rows\` r
-                            WHERE r.mapId = ?
-                        )
                         SELECT JSON_ARRAYAGG(
                             JSON_INSERT(
                                 JSON_OBJECT(
@@ -68,29 +61,6 @@ const Maps = {
                                 ),
                                 '$.nodes',
                                 IFNULL ((
-                                    WITH
-                                        nodeData as (
-                                            SELECT
-                                                n.id,
-                                                n.name,
-                                                n.index,
-                                                n.rowId,
-                                                n.thumbnail,
-                                                n.htmlContent,
-                                                n.action,
-                                                n.filter,
-                                                CASE WHEN COUNT(t2.id) > 0 THEN JSON_ARRAYAGG(JSON_OBJECT(
-                                                    'id', t2.id,
-                                                    'name', t2.name,
-                                                    'mapId', t2.mapId
-                                                )) ELSE JSON_ARRAY() END as 'tags',
-                                                ROW_NUMBER() OVER(PARTITION BY n.index ORDER BY n.index) AS array_index
-                                            FROM \`nodes\` n
-                                            LEFT JOIN \`nodesToTags\` nt ON nt.nodeId = n.id
-                                            LEFT JOIN \`tags\` t2 ON t2.id = nt.tagId
-                                            WHERE n.rowId = r.id
-                                            GROUP BY n.id
-                                        )
                                     SELECT 
                                         JSON_ARRAYAGG(JSON_OBJECT(
                                             'id', n.id,
@@ -103,24 +73,48 @@ const Maps = {
                                             'filter', n.filter,
                                             'tags', n.tags
                                         )) as 'nodes'
-                                    FROM \`nodeData\` n
-                                    WHERE n.rowId = r.id
+                                    FROM (
+                                        SELECT
+                                            n2.id,
+                                            n2.name,
+                                            n2.index,
+                                            n2.rowId,
+                                            n2.thumbnail,
+                                            n2.htmlContent,
+                                            n2.action,
+                                            n2.filter,
+                                            CASE WHEN COUNT(t2.id) > 0 THEN JSON_ARRAYAGG(JSON_OBJECT(
+                                                'id', t2.id,
+                                                'name', t2.name,
+                                                'mapId', t2.mapId
+                                            )) ELSE JSON_ARRAY() END as 'tags',
+                                            ROW_NUMBER() OVER(PARTITION BY n2.index ORDER BY n2.index) AS array_index
+                                        FROM \`nodes\` n2
+                                        LEFT JOIN \`nodesToTags\` nt ON nt.nodeId = n2.id
+                                        LEFT JOIN \`tags\` t2 ON t2.id = nt.tagId
+                                        WHERE n2.rowId = r.id
+                                        GROUP BY n2.id
+                                    ) n
                                     GROUP BY n.rowId
                                     ORDER BY n.array_index
                                 ), JSON_ARRAY())
                             )
                         ) as 'rows'
-                        FROM \`rowData\` r
-                        WHERE r.mapId = ?
+                        FROM (
+                            SELECT
+                                r2.id, r2.name, r2.index, r2.mapId,
+                                ROW_NUMBER() OVER(PARTITION BY r2.index ORDER BY r2.index) AS array_index
+                            FROM \`rows\` r2
+                            WHERE r2.mapId = ?
+                        ) r
                         GROUP BY r.mapId
                         ORDER BY r.array_index
                     ), JSON_ARRAY()) as 'rows'
                 FROM \`maps\` m
                 LEFT JOIN \`tags\` t1 ON t1.mapId = m.id
                 WHERE m.id = ?
-                GROUP BY m.id
-                LIMIT 1
-            `, [id, id, id]);
+                LIMIT 1;
+            `, [id, id]);
             
             if(result[0].length === 0) {
                 return false;

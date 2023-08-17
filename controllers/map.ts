@@ -87,7 +87,7 @@ map.route('/new')
                     image: req.user.image,
                     isAdmin: req.user.admin
                 } : undefined,
-                originUrl: process.env.originUrl || 'http://localhost:3000'
+                originUrl: process.env.originURL || 'http://localhost:3000'
             }
         }
 
@@ -343,7 +343,7 @@ map.route('/:id')
                     image: req.user.image,
                     isAdmin: req.user.admin
                 } : undefined,
-                originUrl: process.env.originUrl || 'http://localhost:3000'
+                originUrl: process.env.originURL || 'http://localhost:3000'
             }
         }
 

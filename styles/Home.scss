@@ -82,15 +82,15 @@ main {
         flex-direction: row;
         flex-basis: 100%;
         align-items: center;
+        justify-content: space-between;
         border-bottom: 0.2em dashed var(--black);
         padding-bottom: 0.5em;
+        gap: 0em 2em;
 
         h2 {
             font-weight: 400;
             font-size: 3em;
             width: fit-content;
-            margin: 0 auto;
-            transform: translateX(1.25em);
         }
 
         a {

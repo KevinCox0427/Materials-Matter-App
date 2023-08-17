@@ -32,12 +32,12 @@ export const nodesTable = (table:any) => {
     table.string('name');
     table.integer('index').unsigned();
     table.text('htmlContent');
-    table.json('gallery');
+    table.string('thumbnail');
     table.integer('rowId').unsigned().nullable();
     table.foreign('rowId').references('id').inTable('rows').onDelete('CASCADE').onUpdate('CASCADE');
     table.string('action').defaultTo('content');
     table.integer('filter').unsigned().nullable();
-    table.foreign('filter').references('id').inTable('tags').onDelete('SET_NULL').onUpdate('SET_NULL');
+    table.foreign('filter').references('id').inTable('tags').onDelete('SET NULL').onUpdate('SET NULL');
 }
 
 /**
