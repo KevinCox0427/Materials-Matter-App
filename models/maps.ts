@@ -88,27 +88,27 @@ const Maps = {
                                                 'name', t2.name,
                                                 'mapId', t2.mapId
                                             )) ELSE JSON_ARRAY() END as 'tags',
-                                            ROW_NUMBER() OVER(PARTITION BY n2.index ORDER BY n2.index) AS array_index
+                                            @rn := @rn+1
                                         FROM \`nodes\` n2
                                         LEFT JOIN \`nodesToTags\` nt ON nt.nodeId = n2.id
                                         LEFT JOIN \`tags\` t2 ON t2.id = nt.tagId
                                         WHERE n2.rowId = r.id
                                         GROUP BY n2.id
+                                        ORDER BY n2.index
                                     ) n
                                     GROUP BY n.rowId
-                                    ORDER BY n.array_index
                                 ), JSON_ARRAY())
                             )
                         ) as 'rows'
                         FROM (
                             SELECT
                                 r2.id, r2.name, r2.index, r2.mapId,
-                                ROW_NUMBER() OVER(PARTITION BY r2.index ORDER BY r2.index) AS array_index
+                                @rn := @rn+1
                             FROM \`rows\` r2
                             WHERE r2.mapId = ?
+                            ORDER BY r2.index
                         ) r
                         GROUP BY r.mapId
-                        ORDER BY r.array_index
                     ), JSON_ARRAY()) as 'rows'
                 FROM \`maps\` m
                 LEFT JOIN \`tags\` t1 ON t1.mapId = m.id
