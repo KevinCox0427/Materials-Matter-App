@@ -133,7 +133,9 @@ export const mapSlice = createSlice({
             // Removing node
             const currentNode = state.rows[action.payload.fromRowIndex].nodes.splice(action.payload.fromNodeIndex, 1)[0];
             // Inserting the new node.
-            state.rows[action.payload.toRowIndex].nodes.splice(action.payload.toNodeIndex, 0, currentNode);
+            state.rows[action.payload.toRowIndex].nodes.splice(action.payload.toNodeIndex, 0, {...currentNode,
+                rowId: state.rows[action.payload.toRowIndex].id
+            });
 
             // Updating the nodes' indeces since they will be wrong
             state.rows[action.payload.fromRowIndex].nodes = state.rows[action.payload.fromRowIndex].nodes.map((node, i) => {
