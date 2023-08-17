@@ -92,10 +92,10 @@ const Maps = {
                                         FROM \`nodes\` n2
                                         LEFT JOIN \`nodesToTags\` nt ON nt.nodeId = n2.id
                                         LEFT JOIN \`tags\` t2 ON t2.id = nt.tagId
-                                        WHERE n2.rowId = r.id
                                         GROUP BY n2.id
                                         ORDER BY n2.index
                                     ) n
+                                    WHERE n.rowId = r.id
                                     GROUP BY n.rowId
                                 ), JSON_ARRAY())
                             )
