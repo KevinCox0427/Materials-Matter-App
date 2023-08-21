@@ -11,20 +11,23 @@ export const sessionsSlice = createSlice({
             }, -1);
             if(sessionIndex === -1) return state;
 
+            // If the reply id is null, then it's stored as '0' in the comment hashmap.
+            const replyId = '' + (action.payload.replyId === null ? 0 : action.payload.replyId);
+
             // If the array to reply to this comment doesn't exist, add it.
-            if(!state[sessionIndex].comments['' + action.payload.replyId]) {
+            if(!state[sessionIndex].comments[replyId]) {
                 state[sessionIndex].comments = {...state[sessionIndex].comments,
-                    ['' + action.payload.replyId]: []
+                    [replyId]: []
                 }
             }
 
             // Checking to see if its already been added.
-            if (state[sessionIndex].comments['' + action.payload.replyId].some(comment => comment.id === action.payload.id)) {
-                return state;
+            for (let i = 0;  i < state[sessionIndex].comments[replyId].length; i++) {
+                if(state[sessionIndex].comments[replyId][i].id === action.payload.id) return state;
             }
 
             // Adding the comment to the comment hashmap.
-            state[sessionIndex].comments['' + action.payload.replyId].push(action.payload);
+            state[sessionIndex].comments[replyId].push(action.payload);
         },
 
         saveSession: (state, action: PayloadAction<FullSessionDoc>) => {
@@ -49,7 +52,7 @@ export const sessionsSlice = createSlice({
         },
 
         removeSession: (state, action: PayloadAction<number>) => {
-            if(action.payload < 0 || action.payload >= state.length - 1) return state;
+            if(action.payload < 0 || action.payload > state.length - 1) return state;
             state.splice(action.payload, 1);
         }
     }

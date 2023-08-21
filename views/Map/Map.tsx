@@ -67,44 +67,6 @@ const Map: FunctionComponent<Props> = (props) => {
 
     const dispatch = useDispatch();
 
-    // Callback function to remove the temp comment if it wasn't posted when the side menu or comment session changes.
-    // Also will remove temp session if it wasn't finished being saved.
-    // useEffect(() => {
-    //     const newSessions = [...sessions];
-
-    //     // Removing temp session if it exists.
-    //     if(
-    //         newSessions[newSessions.length-1] &&
-    //         newSessions[newSessions.length-1].id === -1 && (
-    //             !sideMenuData || (
-    //                 sideMenuData &&
-    //                 sideMenuData.type !== 'sessions'
-    //             )
-    //         )
-    //     ) {
-    //         newSessions.splice(newSessions.length-1, 1);
-    //     }
-
-    //     // If we're not editting the temp comment, remove it.
-    //     if(
-    //         newSessions[selectedSession] &&
-    //         tempComment && (
-    //             !sideMenuData || (
-    //                 sideMenuData && (
-    //                     sideMenuData.type !== 'comment' ||
-    //                     sideMenuData.dataPointer[0] !== tempComment.replyId ||
-    //                     sideMenuData.dataPointer[1] !== tempComment.commentIndex
-    //                 )
-    //             )
-    //         )
-    //     ) {
-    //         newSessions[selectedSession].comments[tempComment.replyId].splice(tempComment.commentIndex, 1);
-    //         setTempComment(null);
-    //     }
-
-    //     setSessions(newSessions);
-    // }, [sideMenuData, selectedSession]);
-
     // Automatically closing the notification after 10s.
     const notificationTimeout = useRef<NodeJS.Timeout | null>(null);
     useEffect(() => {
@@ -122,9 +84,9 @@ const Map: FunctionComponent<Props> = (props) => {
 
     // Callback function for when the client recieves a new comment from the server.
     useEffect(() => {
-        socket.on('recieveComment', addServerComment);
-        socket.on('recieveSession', addSession);
-        socket.on('recieveDeleteSession', confirmDeleteSession);
+        socket.on('recieveComment', message => addServerComment(message));
+        socket.on('recieveSession', message => addSession(message));
+        socket.on('recieveDeleteSession', message => confirmDeleteSession(message));
     }, [socket, addServerComment, addSession, confirmDeleteSession]);
 
     /**
@@ -150,6 +112,7 @@ const Map: FunctionComponent<Props> = (props) => {
         // If it's a string, that means it's an error message.
         if(typeof newSession === 'string') {
             dispatch(setNotification(newSession));
+            if(tempSession) dispatch(removeNewSession());
             return;
         }
         else {

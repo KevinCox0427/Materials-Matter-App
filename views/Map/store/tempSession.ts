@@ -30,7 +30,7 @@ export const tempSessionSlice = createSlice({
 export const { addNewSession, removeNewSession } = tempSessionSlice.actions;
 
 /**
- * A helper function to convert HH:MM:SS AM/PM to HH:MM:SS
+ * A helper function to convert MM:DD:YYYY HH:MM:SS AM/PM to YYYY:MM:DD HH:MM:SS
  * @param time The inputted time string
  */
 function convertDatetime(datetime:string) {
@@ -39,7 +39,16 @@ function convertDatetime(datetime:string) {
     const dateString = dateArray.map(value => value.padStart(2, '0')).join('-');
 
     const time = datetime.split(', ')[1];
-    const timeString = time.split(':').map((timeSection, i) => (parseInt(timeSection) + (i == 0 && time.slice(-2) === 'PM' ? 12 : 0)).toString().padStart(2, '0')).join(':');
+    const timeSections = time.split(':');
 
-    return `${dateString} ${timeString}`;
+    if(time.slice(-2) === 'PM' && timeSections[0] !== '12') {
+        timeSections[0] = (parseInt(timeSections[0]) + 12).toString().padStart(2, '0');
+    }
+    if(time.slice(-2) === 'AM' && timeSections[0] === '00') {
+        timeSections[0] = (parseInt(timeSections[0]) + 12).toString().padStart(2, '0');
+    }
+
+    timeSections[2] = timeSections[2].split(' ')[0];
+
+    return `${dateString} ${timeSections.join(':')}`;
 }

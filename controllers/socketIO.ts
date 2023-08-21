@@ -62,6 +62,7 @@ io.on("connect", (socket) => {
      * Socket for saving a new session
      */
     socket.on("saveSession", async (requestData) => {
+        console.log(requestData)
         const newSession = await editSession(requestData);
 
         if(typeof newSession === 'string') socket.emit("recieveSession", newSession);

@@ -24,7 +24,6 @@ type Props = {
 const SessionOption: FunctionComponent<Props> = (props) => {
     const sessions = useSelector(state => state.sessions);
     const selectedSession = useSelector(state => state.selectedSession);
-    const tempSession = useSelector(state => state.tempSession)
     const preview = useSelector(state => state.preview);
     const dispatch = useDispatch();
 
@@ -129,6 +128,7 @@ const SessionOption: FunctionComponent<Props> = (props) => {
     function toLocalTime(time:string) {
         return time.split(':').map((value, i) => Math.abs(parseInt(value) - (i === 0 && (parseInt(value) > 12 || parseInt(value) === 0) ? 12 : 0)).toString().padStart(2, '0')).join(':') + (parseInt(time.substring(0, 2)) >= 12 ? ' PM' : ' AM')
     }
+
     /**
      * A helper function to convert YYYY-MM-DD to MM:DD:YYYY
      * @param time The inputted date string.
