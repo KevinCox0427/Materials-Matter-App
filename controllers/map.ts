@@ -444,8 +444,6 @@ map.route('/:id')
             }
         }
 
-        console.log(addedDataHashMap.tags);
-
         // Then adding the new nodes.
         if(edits.nodes.add.length > 0) {   
             const firstInsertedNodeId = await Nodes.create(edits.nodes.add.map((node, i) => {
