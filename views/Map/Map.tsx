@@ -125,7 +125,7 @@ const Map: FunctionComponent<Props> = (props) => {
         socket.on('recieveComment', addServerComment);
         socket.on('recieveSession', addSession);
         socket.on('recieveDeleteSession', confirmDeleteSession);
-    }, [socket, addServerComment]);
+    }, [socket, addServerComment, addSession, confirmDeleteSession]);
 
     /**
      * Helper function to add a new comment to the correct session from the server.
