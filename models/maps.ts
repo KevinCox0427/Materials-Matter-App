@@ -120,12 +120,17 @@ const Maps = {
                 return false;
             }
 
-            const parseResult = {...result[0][0],
+            const parsedResult = {...result[0][0],
                 rows: JSON.parse(result[0][0].rows),
                 tags: JSON.parse(result[0][0].tags)
             };
 
-            return parseResult;
+            parsedResult.rows.sort((a:FullRowDoc, b:FullRowDoc) => {
+                if(a.index === b.index) return 0;
+                else return a.index > b.index ? 1 : -1;
+            });
+
+            return parsedResult;
         } catch(e) {
             console.log(e);
             return false;

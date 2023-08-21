@@ -274,7 +274,7 @@ body {
                                 font-family: var(--rubik);
                                 font-size: 1.45em;
                                 font-weight: 500;
-                                text-shadow: -2px -2px 0 var(--yellow), 2px -2px 0 var(--yellow), -2px 2px 0 var(--yellow), 2px 2px 0 var(--yellow);
+                                text-shadow: -2px 0px 0 var(--yellow), 2px 0px 0 var(--yellow), 0px 2px 0 var(--yellow), 0px -2px 0 var(--yellow), -2px -2px 0 var(--yellow), 2px -2px 0 var(--yellow), 2px 2px 0 var(--yellow), -2px 2px 0 var(--yellow);
                                 margin-top: 0.15em;
                             }
         
@@ -282,7 +282,7 @@ body {
                                 font-family: var(--rubik);
                                 font-size: 1.4em;
                                 font-weight: 500;
-                                text-shadow: -2px -2px 0 var(--yellow), 2px -2px 0 var(--yellow), -2px 2px 0 var(--yellow), 2px 2px 0 var(--yellow);
+                                text-shadow: -2px 0px 0 var(--yellow), 2px 0px 0 var(--yellow), 0px 2px 0 var(--yellow), 0px -2px 0 var(--yellow), -2px -2px 0 var(--yellow), 2px -2px 0 var(--yellow), 2px 2px 0 var(--yellow), -2px 2px 0 var(--yellow);
                                 width: fit-content;
                                 background: none;
                                 border-bottom: 0.1em dashed var(--black);
@@ -360,7 +360,7 @@ body {
                                     pointer-events: none;
                                     font-size: 1.4em;
                                     font-weight: 500;
-                                    text-shadow: -2px -2px 0 var(--yellow), 2px -2px 0 var(--yellow), -2px 2px 0 var(--yellow), 2px 2px 0 var(--yellow);
+                                    text-shadow: -2px 0px 0 var(--yellow), 2px 0px 0 var(--yellow), 0px 2px 0 var(--yellow), 0px -2px 0 var(--yellow), -2px -2px 0 var(--yellow), 2px -2px 0 var(--yellow), 2px 2px 0 var(--yellow), -2px 2px 0 var(--yellow);
                                     margin: auto;
                                     text-align: center;
                                 }

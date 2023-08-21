@@ -220,16 +220,16 @@ map.route('/new')
         }
 
         // Then adding the new nodes.
-        if(newNodes.length > 0) {   
+        if(newNodes.length > 0) {
             const firstInsertedNodeId = await Nodes.create(newNodes.map((node, i) => {
                 return {
                     name: node.name,
                     index: node.index,
-                    rowId: node.rowId < 0 ? addedDataHashMap.rows[node.rowId]: node.rowId,
+                    rowId: node.rowId < 0 ? addedDataHashMap.rows[node.rowId] : node.rowId,
                     thumbnail: node.thumbnail,
                     htmlContent: node.htmlContent,
                     action: node.action,
-                    filter: node.filter ? node.filter < 0 ? addedDataHashMap.tags[node.filter] : node.filter : node.filter
+                    filter: node.filter === null ? null : node.filter < 0 ? addedDataHashMap.tags[node.filter] : node.filter
                 }
             }));
 
@@ -444,6 +444,8 @@ map.route('/:id')
             }
         }
 
+        console.log(addedDataHashMap.tags);
+
         // Then adding the new nodes.
         if(edits.nodes.add.length > 0) {   
             const firstInsertedNodeId = await Nodes.create(edits.nodes.add.map((node, i) => {
@@ -454,7 +456,7 @@ map.route('/:id')
                     thumbnail: node.thumbnail,
                     htmlContent: node.htmlContent,
                     action: node.action,
-                    filter: node.filter ? node.filter < 0 ? addedDataHashMap.tags[node.filter] : node.filter : node.filter
+                    filter: node.filter === null ? null : node.filter < 0 ? addedDataHashMap.tags[node.filter] : node.filter
                 }
             }));
 
@@ -522,7 +524,8 @@ map.route('/:id')
         if(edits.nodes.update.length > 0) {
             if(!(await Promise.all(edits.nodes.update.map(async node => {
                 return await Nodes.update(node.id, {...node,
-                    rowId: node.rowId < 0 ? addedDataHashMap.rows[node.rowId]: node.rowId
+                    rowId: node.rowId < 0 ? addedDataHashMap.rows[node.rowId]: node.rowId,
+                    filter: node.filter === null ? null : node.filter < 0 ? addedDataHashMap.tags[node.filter] : node.filter
                 });
             }))).every(nodeSuccess => nodeSuccess)) {
                 res.status(500).send({
