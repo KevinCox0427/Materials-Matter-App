@@ -92,4 +92,6 @@ const sslConfig = {
 import https from 'https';
 export const server = https.createServer(sslConfig, app);
 
+import './controllers/socketIO';
+
 server.listen(process.env.PORT || 3000);
