@@ -3,9 +3,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 
-/**
- * Initializing our express server.
- */
+// Initializing our express server.
 import express from "express";
 export const app = express();
 
@@ -82,8 +80,16 @@ app.use('/image', image);
 // Declaring static files in the public folder.
 app.use('/public', express.static('dist/public'));
 
+import { readFileSync } from 'fs';
 
-// Importing the server from the socket.io configuration.
-// Listening server to declared port.
-import { server } from './controllers/socketIO';
+// Installing the SSL certificates with the node server.
+const sslConfig = {
+    key: readFileSync(process.env.sslKeyPath || '').toString(),
+    cert: readFileSync(process.env.sslCertPath || '').toString()
+};
+
+// Creating the server and listening to declared port.
+import https from 'https';
+export const server = https.createServer(sslConfig, app);
+
 server.listen(process.env.PORT || 3000);

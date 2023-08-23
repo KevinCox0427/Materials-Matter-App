@@ -1,6 +1,5 @@
 import { Server } from 'socket.io';
-import http from 'http';
-import { app, session } from '../server';
+import { server, session } from '../server';
 import passport from 'passport';
 import { Session } from 'express-session';
 import RegexTester from "../utils/regexTester";
@@ -8,9 +7,7 @@ import CommentSessions from "../models/commentSessions";
 import Comments from "../models/comments";
 import { regexStrings } from './map';
 
-/**
- * Declaration merging the incoming requests to include express's sessions and passport's user objects.
- */
+// Declaration merging the incoming requests to include express's sessions and passport's user objects.
 declare module "http" {
     interface IncomingMessage {
         session: Session,
@@ -21,7 +18,6 @@ declare module "http" {
 /**
  * Intantiating our Socket.io server and the http server to use it with.
  */
-export const server = http.createServer(app);
 export const io = new Server(server, {
     cors: {
         origin: process.env.originURL || "localhost:3000",
@@ -29,28 +25,20 @@ export const io = new Server(server, {
     }
 });
 
-/**
- * Using the express session and passport sessions as middleware functions in Socket.io
- */
+// Using the express session and passport sessions as middleware functions in Socket.io
 io.engine.use(session);
 io.engine.use(passport.initialize());
 io.engine.use(passport.session());
 
-/**
- * Only allowing authenticated users to use the socket.io server.
- */
+// Only allowing authenticated users to use the socket.io server.
 io.use((socket, next) => {
     if(socket.request.user) next();
     else next(new Error('Unauthenticated'));
 });
 
-/**
- * Creating a socket.io connection to post and recieve comments.
- */
+// Creating a socket.io connection to post and recieve comments.
 io.on("connect", (socket) => {
-    /**
-     * Socket for posting a new comment
-     */
+    // Socket for posting a new comment.
     socket.on("postComment", async (requestData) => {
         const newComment = await createComment(requestData);
 
@@ -58,9 +46,7 @@ io.on("connect", (socket) => {
         else io.emit("recieveComment", newComment);
     });
 
-    /**
-     * Socket for saving a new session
-     */
+    // Socket for saving a new session.
     socket.on("saveSession", async (requestData) => {
         console.log(requestData)
         const newSession = await editSession(requestData);
@@ -69,9 +55,7 @@ io.on("connect", (socket) => {
         else io.emit("recieveSession", newSession);
     });
 
-    /**
-     * Socket for deleting sesions.
-     */
+    // Socket for deleting sesions.
     socket.on("deleteSession", async (requestData) => {
         if(typeof requestData !== 'number') {
             socket.emit("recieveDeleteSession", 'Comment session id must be a number.');
