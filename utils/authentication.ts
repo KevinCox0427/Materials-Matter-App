@@ -21,10 +21,11 @@ declare global {
 }
 
 // Intiating the Google oauth2 configuation.
+console.log(`${process.env.originURL}/users/callback`)
 passport.use(new Strategy({
         clientID: process.env.googleClientId || '',
         clientSecret: process.env.googleClientSecret || '',
-        callbackURL: `${process.env.originURL}/users/callback` || '',
+        callbackURL: `${process.env.originURL}/users/callback`,
         passReqToCallback: true
     },
     async (request:any, accessToken:any, refreshToken:any, profile:any, done:any) => {
