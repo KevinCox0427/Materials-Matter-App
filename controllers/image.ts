@@ -14,7 +14,7 @@ const postRegex = new RegexTester({
 });
 
 const deleteRegex = new RegexTester({
-    urls: new RegExp(`${process.env.awsUrl}[0-9]{1,10}.(jpg|jpeg|png|gif|webp|svg)`)
+    urls: new RegExp(`${process.env.awsUrl || '/public/assets/'}[0-9]{1,10}.(jpg|jpeg|png|gif|webp|svg)`)
 })
 
 image.route('/')

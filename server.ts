@@ -82,15 +82,16 @@ app.use('/public', express.static('dist/public'));
 
 import { readFileSync } from 'fs';
 
-// Installing the SSL certificates with the node server.
-const sslConfig = {
-    key: readFileSync(process.env.sslKeyPath || '').toString(),
-    cert: readFileSync(process.env.sslCertPath || '').toString()
-};
-
 // Creating the server and listening to declared port.
 import https from 'https';
-export const server = https.createServer(sslConfig, app);
+import http from 'http';
+
+export const server = process.env.sslKeyPath && process.env.sslCertPath
+    ? https.createServer({
+        key: readFileSync(process.env.sslKeyPath).toString(),
+        cert: readFileSync(process.env.sslCertPath).toString()
+    }, app)
+    : http.createServer(app);
 
 import './controllers/socketIO';
 

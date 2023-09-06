@@ -8,3 +8,5 @@ oldbuild
 app
 public/assets/*
 *.bash
+index.html
+Procfile

@@ -18,13 +18,17 @@ declare global {
 /**
  * Creating the s3 client to upload to aws.
  */
-// const s3Client = new S3({
-//     region: process.env.awsRegion,
-//     credentials:{
-//         accessKeyId: process.env.awsKey || '',
-//         secretAccessKey: process.env.awsSecret || ''
-//     }
-// });
+let s3Client: S3;
+
+if(process.env.awsRegion && process.env.awsKey && process.env.awsSecret && process.env.awsBucket && process.env.awsUrl) {
+    s3Client = new S3({
+        region: process.env.awsRegion,
+        credentials:{
+            accessKeyId: process.env.awsKey,
+            secretAccessKey: process.env.awsSecret
+        }
+    });
+}
 
 /**
  * A function to create the SQL schema if not done so.
@@ -123,13 +127,18 @@ const Images = {
             if(!createResult[0]) return false;
             
             try {
-                writeFileSync(`./dist/public/assets/${createResult[0]}.${extension}`, Buffer.from(base64Data, 'base64'));
-
-                // await s3Client.send(new PutObjectCommand({
-                //     Bucket: process.env.awsBucket || '',
-                //     Key: `${createResult[0]}.${extension}`,
-                //     Body: Buffer.from(base64Data, 'base64')
-                // }));
+                if(s3Client) {
+                    // Uploading to aws
+                    await s3Client.send(new PutObjectCommand({
+                        Bucket: process.env.awsBucket,
+                        Key: `${createResult[0]}.${extension}`,
+                        Body: Buffer.from(base64Data, 'base64')
+                    }));
+                }
+                else {
+                    // Saving to file system.
+                    writeFileSync(`./dist/public/assets/${createResult[0]}.${extension}`, Buffer.from(base64Data, 'base64'));
+                }
             }
             catch(e) {
                 console.log(e);
@@ -139,9 +148,7 @@ const Images = {
                 return false;
             }
 
-            //return `${process.env.awsUrl || ''}${createResult[0]}.${extension}`;
-
-            return `/public/assets/${createResult[0]}.${extension}`;
+            return `${process.env.awsUrl || '/public/assets/'}${createResult[0]}.${extension}`;
         }
         catch(e:any) {
             console.log(e);
@@ -158,22 +165,26 @@ const Images = {
         if(!isDBready) return false;
 
         try {
-            // Deleting the file from aws.
-            // await s3Client.send(new DeleteObjectsCommand({
-            //     Bucket: process.env.awsBucket || '',
-            //     Delete: {
-            //         Objects: urls.map(url => {
-            //             return {
-            //                 Key: url.split(process.env.awsUrl || '')[1],
-            //             }
-            //         })
-            //     }
-            // }));
-
-            urls.forEach(url => rmSync(`./public${url}`));
+            if(s3Client) {
+                // Deleting the file from aws.
+                await s3Client.send(new DeleteObjectsCommand({
+                    Bucket: process.env.awsBucket,
+                    Delete: {
+                        Objects: urls.map(url => {
+                            return {
+                                Key: url.split(process.env.awsUrl!)[1],
+                            }
+                        })
+                    }
+                }));
+            }
+            else {
+                // Removing from file system.
+                urls.forEach(url => rmSync(`./public${url}`));
+            }
 
             const result = await knex('images')
-                .whereIn('id', urls.map(url => parseInt(url.split(process.env.awsUrl || '')[1].split('.')[0])))
+                .whereIn('id', urls.map(url => parseInt(url.split(process.env.awsUrl || '/public/assets/')[1].split('.')[0])))
                 .del();
 
             return result !== 0;

@@ -27,7 +27,7 @@ export const regexStrings = {
     id: /^[\-0-9]{1,6}/,
     date: /^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}\ [0-9]{1,2}:[0-9]{1,2}:[0-9]{2}/,
     html:/^(<(li|p|h3|ul|ol|span|strong|em|sub|sup|br|u|s|a|img|iframe)( ?(style|class)=\\?"[\w|\s|\d\-:;]+\\?")*>|[\w\s\d.,!@#$%^&*()\-_+\"\';:,.|\\\/?=<>]*|<\/(p|h3||li|ul|ol|span|strong|em|sub|sup|br|u|s|a|img|iframe)>)+/,
-    image: /^\/public\/assets\/[0-9]{1,10}.(jpg|jpeg|png|gif|webp|svg)|^$/
+    image: RegExp(`^(${process.env.awsUrl}|\/public\/assets\/)[0-9]{1,10}.(jpg|jpeg|png|gif|webp|svg)$|^$`)
 };
 
 /**

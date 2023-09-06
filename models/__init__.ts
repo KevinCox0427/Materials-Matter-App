@@ -19,6 +19,10 @@ export const knex = require('knex')({
         user: process.env.sqlUser,
         password: process.env.sqlPass,
         database: process.env.sqlDatabase
+    },
+    pool: {
+        min: 1,
+        max: 5
     }
 });
 
