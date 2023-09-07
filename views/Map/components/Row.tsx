@@ -12,11 +12,14 @@ type Props = {
  * @param rowIndex The index of the row this node belongs to.
  */
 const Row: FunctionComponent<Props> = (props) => {
+    const dispatch = useDispatch();
+
+    // Getting whether the map is in preview mode, the current filter applied to the map, and the row's data from the store.
     const preview = useSelector(state => state.preview);
     const filter = useSelector(state => state.filter);
     const rowData = useSelector(state => state.map.rows[props.rowIndex]);
-    const dispatch = useDispatch();
     
+    // Only returing the row if there are no filters applied, or if one is applied, that this row contains nodes with that filter.
     return filter && rowData.nodes.filter(node => node.tags.reduce((previousIndex, tag, i) => {
         if(tag.id === filter.id) return i;
         else return previousIndex;

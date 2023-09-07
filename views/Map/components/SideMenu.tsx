@@ -12,8 +12,14 @@ type Props = {
     userData: UserData
 }
 
+/**
+ * A React component to render the side menu and whatever data that's currently being viewed or edited.
+ * @param userData The data of the user that's currently logged in.
+ */
 const SideMenu: FunctionComponent<Props> = (props) => {
     const dispatch = useDispatch();
+
+    // Getting the map's id, the data that's being pointed to by the side menu, any new comments or sessions, all the session data, and whether the map is in preview mode from the store.
     const mapId = useSelector(state => state.map.id);
     const sideMenuData = useSelector(state => state.sideMenuData);
     const tempSession = useSelector(state => state.tempSession);
@@ -22,6 +28,9 @@ const SideMenu: FunctionComponent<Props> = (props) => {
     const selectedSession = useSelector(state => state.selectedSession);
     const preview = useSelector(state => state.preview);
 
+    /**
+     * An event handler to add a new session to the map.
+     */
     function addSession() {
         if(!props.userData) {
             dispatch(setNotification('You must be an administrator to add sessions.'));

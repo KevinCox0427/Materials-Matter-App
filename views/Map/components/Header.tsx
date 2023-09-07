@@ -1,4 +1,5 @@
 import React, { FunctionComponent, useEffect } from "react";
+
 import { useDispatch, useSelector } from "../store/store";
 import { changeMapName, insertNode, insertRow } from "../store/map";
 import { setAction } from "../store/action";
@@ -24,6 +25,8 @@ type Props = {
  */
 const Header: FunctionComponent<Props> = (props) => {
     const dispatch = useDispatch();
+
+    // Getting the map data, selected user action, map preview option, current node filter, the side menu data pointer, and the selected comment session from store.
     const map = useSelector(state => state.map);
     const action = useSelector(state => state.action);
     const preview = useSelector(state => state.preview);

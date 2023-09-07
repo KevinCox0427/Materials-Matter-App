@@ -2,10 +2,17 @@ import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 
 type TempSession = null | FullSessionDoc
 
+/**
+ * A redux slice representing a new session that a user creates.
+ */
 export const tempSessionSlice = createSlice({
     name: 'tempSession',
     initialState: null as TempSession,
     reducers: {
+        /**
+         * A reducer function to add a new session.
+         * @param action The mapId that the new session is being added to.
+         */
         addNewSession: (state, action: PayloadAction<number>) => {
             // Adding an extra day to the expiration date by default.
             const expirationDate = new Date();
@@ -21,6 +28,9 @@ export const tempSessionSlice = createSlice({
             }
         },
 
+        /**
+         * A reducer function to remove the new session.
+         */
         removeNewSession: (state) => {
             return null;
         }

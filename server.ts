@@ -8,11 +8,11 @@ import express from "express";
 export const app = express();
 
 
+import cors from 'cors';
+
 // Parsing all endpoints to our server in JSON format.
 // Encoding all URIs.
 // Adding CORS policies
-import cors from 'cors';
-
 app.use(express.json({limit: '10mb'}));
 app.use(express.urlencoded({extended:true, limit: '10mb'}));
 app.set('etag', false);
@@ -35,7 +35,7 @@ export const session = expressSession({
         maxAge: 24 * 60 * 60 * 1000
     },
     store: new mySqlStore({
-        connectionLimit: 10,
+        connectionLimit: 8,
         host: process.env.sqlHost,
         port: process.env.sqlPort,
         user: process.env.sqlUser,
@@ -86,6 +86,7 @@ import { readFileSync } from 'fs';
 import https from 'https';
 import http from 'http';
 
+// Starting up the socket IO server.
 export const server = process.env.sslKeyPath && process.env.sslCertPath
     ? https.createServer({
         key: readFileSync(process.env.sslKeyPath).toString(),

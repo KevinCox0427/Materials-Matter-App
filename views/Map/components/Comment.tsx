@@ -1,5 +1,6 @@
 import React, { Fragment, FunctionComponent, useEffect, useRef, useState } from "react";
 import { socket } from '../Map';
+
 import { setNotification } from "../store/notification";
 import { addNewComment, removeTempComment, setCommentMessage } from "../store/tempComment";
 import { useDispatch, useSelector } from "../store/store";
@@ -29,6 +30,8 @@ const Comment: FunctionComponent<Props> = (props) => {
 
     // State variables to keep track of a comment's content and whether its replies are visible.
     const [showReplies, setShowReplies] = useState(true);
+
+    // Getting the current session, any temporary comments and the side menu data pointer from the store.
     const selectedSession = useSelector(state => state.sessions[state.selectedSession]);
     const tempComment = useSelector(state => state.tempComment);
     const sideMenuData = useSelector(state => state.sideMenuData);

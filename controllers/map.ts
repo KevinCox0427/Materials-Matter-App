@@ -295,47 +295,13 @@ map.route('/:id')
         }
 
         // Getting the comment sessions from the database.
-        const sessions = await CommentSessions.get({
-            mapId: map.id
-        });
-
-        // And filling the sessions with their comments from the database.
-        const fullSessions:FullSessionDoc[] = await Promise.all(
-            sessions.map(async (session) => {
-                let comments = await Comments.get({
-                    commentsessionId: session.id
-                });
-            
-                // Using a map of ids to store the replies
-                // 0 should always exist since that represents comments on the map.
-                let commentMap:{
-                    [replyId: string]: CommentDoc[]
-                } = {}
-
-                // Adding each comment to the table based on its reply id.
-                comments.forEach(comment => {
-                    const key = '' + (comment.replyId ? comment.replyId : 0);
-
-                    if(!Object.keys(commentMap).includes(key)) {
-                        commentMap = {...commentMap,
-                            [key]: []
-                        }
-                    }
-
-                    commentMap[key].push(comment);
-                });
-
-                return {...session,
-                    comments: commentMap
-                }
-            })
-        );
+        const sessions = await CommentSessions.getByMapId(map.id);
 
         // Loading the server properties to pass to the client.
         const serverProps:ServerPropsType = {
             mapPageProps: {
                 map: map,
-                sessions: fullSessions,
+                sessions: sessions,
                 userData: req.user ? {
                     userId: req.user.id,
                     firstName: req.user.firstName,

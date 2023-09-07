@@ -1,9 +1,10 @@
 import React, { FunctionComponent, useState } from "react";
+import ReactQuill from "react-quill";
+
 import { useDispatch, useSelector } from "../store/store";
 import { setNotification } from "../store/notification";
 import { setNodeThumbnail, addTagToNode, changeNodeAction, changeNodeFilter, changeNodeName, removeNodeThumbnail, removeNode, removeTagFromNode, changeNodeContent } from "../store/map";
 import { closeSideMenu } from "../store/sideMenuData";
-import ReactQuill from "react-quill";
 
 type Props = {
     userData?: {
@@ -22,12 +23,15 @@ type Props = {
 const NodeEditor: FunctionComponent<Props> = (props) => {
     const dispatch = useDispatch();
 
+    // Making sure that the side menu is pointing to a node's data.
     const sideMenuData = useSelector(state => state.sideMenuData);
     if(sideMenuData.type !== 'node') return <></>;
 
+    // Getting this node's data and available tags from the store.
     const node = useSelector(state => state.map.rows[sideMenuData.dataPointer[0]].nodes[sideMenuData.dataPointer[1]]);
     const tags = useSelector(state => state.map.tags);
 
+    // Setting a state variable for when the user is uploading an image. This is to prevent further edits when uploading.
     const [isUploading, setIsUploading] = useState(false);
 
     /**

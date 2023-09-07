@@ -1,4 +1,5 @@
 import React, { FunctionComponent, useRef, useState } from "react";
+
 import { setAction } from "../store/action";
 import { closeSideMenu, setNode } from "../store/sideMenuData";
 import { useSelector, useDispatch } from "../store/store";
@@ -18,9 +19,11 @@ type Props = {
  * @param node The content's data for the node.
  */
 const Node: FunctionComponent<Props> = (props) => {
+    const dispatch = useDispatch();
+
+    // Getting the map data and whether the map is in preview mode from the store.
     const map = useSelector(state => state.map);
     const preview = useSelector(state => state.preview);
-    const dispatch = useDispatch();
 
     // Reference for keeping track of mouse position
     const mousePosition = useRef([-1,-1]);

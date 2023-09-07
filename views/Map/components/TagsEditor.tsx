@@ -3,10 +3,14 @@ import { useDispatch, useSelector } from "../store/store";
 import { addTag, removeTag, setTagName } from "../store/map";
 import { removeFilter } from "../store/filter";
 
+/**
+ * A React component to render all the tags on the map, as well as an editor to edit, remove, or add tags.
+ */
 const TagsEditor: FunctionComponent = () => {
     const dispatch = useDispatch();
+
+    // Getting the tag data and any filters applied to the map from the store.
     const tags = useSelector(state => state.map.tags);
-    const map = useSelector(state => state.map);
     const filter = useSelector(state => state.filter);
 
     /**

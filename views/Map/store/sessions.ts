@@ -1,9 +1,23 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 
+/**
+ * A redux slice representing a session for comments to be gropued under.
+ * Comments are stored under the session as a hashmap to optimize read times.
+ * 
+ * The structure of the comments is as follows:
+ * comments: {
+ *   [0]: Comment[]  -  (for commments that aren't a reply)
+ *   [replyId]: Comment[]
+ * }
+ */
 export const sessionsSlice = createSlice({
     name: 'sessions',
     initialState: window.ServerProps.mapPageProps!.sessions as FullSessionDoc[],
     reducers: {
+        /**
+         * A reducer function to add a comment to a certain session.
+         * @param action The ccmment being added with the sessionId to add it under.
+         */
         addComment: (state, action:PayloadAction<CommentDoc>) => {
             // Finding the session for the new comment.
             const sessionIndex = state.reduce((previousIndex, session, i) => {
@@ -30,6 +44,11 @@ export const sessionsSlice = createSlice({
             state[sessionIndex].comments[replyId].push(action.payload);
         },
 
+        /**
+         * A reducer function to save a new session.
+         * If its id is not found, it will be added to the map, otherwise it will overwrite the previous one.
+         * @param action The session to add / overwrite with.
+         */
         saveSession: (state, action: PayloadAction<FullSessionDoc>) => {
             // Finding the session's index given its id.
             const sessionIndex = state.reduce((previousIndex, session, currentIndex) => {
@@ -51,6 +70,10 @@ export const sessionsSlice = createSlice({
             }
         },
 
+        /**
+         * A reducer function to remove a comment session at a given index.
+         * @param action The index of the session to remove.
+         */
         removeSession: (state, action: PayloadAction<number>) => {
             if(action.payload < 0 || action.payload > state.length - 1) return state;
             state.splice(action.payload, 1);

@@ -1,10 +1,14 @@
 import { isDBready, knex } from "./__init__";
+import Comments from "./comments";
 
 /**
  * Declaring the typing on the data structure for a comment session.
  * Also delcaring a type for a nested object representation of a comment session joined with its comments.
  */
 declare global {
+    /**
+     * 
+     */
     interface CommentSessionType {
         name: string,
         start: string,
@@ -16,6 +20,17 @@ declare global {
         id: number
     }
 
+    /**
+     * Joining the comments on the session when they are passed to the front-end.
+     * They are stored as a hashmap to optimize read times.
+     * 
+     * The structure is as follows:
+     * 
+     * comments: {
+     *   [0]: Comment[]  -  (for commments that aren't a reply)
+     *   [replyId]: Comment[]
+     * }
+     */
     interface FullSessionDoc extends CommentSessionDoc {
         comments: {
             [replyId: string]: CommentDoc[]
@@ -84,16 +99,86 @@ const CommentSessions = {
      * @param query (optional) Any data to query with.
      * @returns An array of found comment sessions. Returns empty array if none found.
      */
-    get: async (query: Partial<CommentSessionDoc> = {}): Promise<CommentSessionDoc[]> => {
+    getByMapId: async (mapId: number): Promise<FullSessionDoc[]> => {
         if(!isDBready) return [];
 
         try {
-            const result = await knex('commentsessions')
-                .where(query)
-                .orderBy('start');
+            // const result: CommentSessionDoc[] = await knex('commentsessions')
+            //     .where({ mapId: mapId })
+            //     .orderBy('start');
+
+            // // And filling the sessions with their comments from the database.
+            // const fullSessions:FullSessionDoc[] = await Promise.all(
+            //     result.map(async (session) => {
+            //         let comments = await Comments.get({
+            //             commentsessionId: session.id
+            //         });
+                
+            //         // Using a map of ids to store the replies
+            //         // 0 should always exist since that represents comments on the map.
+            //         let commentMap:{
+            //             [replyId: string]: CommentDoc[]
+            //         } = {}
+
+            //         // Adding each comment to the table based on its reply id.
+            //         comments.forEach(comment => {
+            //             const key = '' + (comment.replyId ? comment.replyId : 0);
+
+            //             if(!Object.keys(commentMap).includes(key)) {
+            //                 commentMap = {...commentMap,
+            //                     [key]: []
+            //                 }
+            //             }
+
+            //             commentMap[key].push(comment);
+            //         });
+
+            //         return {...session,
+            //             comments: commentMap
+            //         }
+            //     })
+            // );
+
+            const fullSessions: FullSessionDoc[] = knex.raw(`
+                WITH commentArrays AS (
+                    SELECT 
+                        CASE WHEN c.replyId IS NULL THEN 0 ELSE c.replyId END AS "replyId",
+                        s.id as "commentSessionId",
+                        JSON_ARRAYAGG(JSON_OBJECT(
+                            "id", c.id,
+                            "x", c.x,
+                            "y", c.y,
+                            "userId", c.userId,
+                            "commentSessionId", c.commentSessionId,
+                            "replyId", CASE WHEN c.replyId IS NULL THEN 0 ELSE c.replyId END,
+                            "timestamp", c.timestamp,
+                            "firstName", u.firstName,
+                            "lastName", u.lastName,
+                            "image", u.image
+                        )) AS "comments"
+                    FROM commentsessions s
+                    LEFT JOIN comments c ON s.id = c.commentSessionId
+                    LEFT JOIN users u ON c.userId = u.id
+                    GROUP BY c.replyId
+                )
+                SELECT 
+                    s2.id,
+                    s2.name,
+                    s2.start,
+                    s2.expires,
+                    s2.mapId,
+                    JSON_OBJECTAGG(
+                        ca.replyId,
+                        ca.comments
+                    ) AS "comments"
+                FROM commentsessions s2, commentArrays ca
+                WHERE s2.mapId = ?
+                GROUP BY ca.commentSessionId
+                ORDER BY s2.start;
+            `, mapId);
 
             // Converting the timestamps so they're usuable on the front-end.
-            return result.map((session:CommentSessionDoc) => {
+            return fullSessions.map(session => {
                 return {...session,
                     start: convertDatetime(session.start.toLocaleString()),
                     expires: convertDatetime(session.expires.toLocaleString()),

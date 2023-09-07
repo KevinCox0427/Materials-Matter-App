@@ -22,7 +22,7 @@ export const knex = require('knex')({
     },
     pool: {
         min: 1,
-        max: 5
+        max: 8
     }
 });
 

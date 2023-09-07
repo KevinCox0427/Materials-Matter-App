@@ -8,8 +8,11 @@ import { useSelector } from "../store/store";
  * @param node The contents of the node being viewed.
  */
 const NodeViewer: FunctionComponent = () => {
+    // Making sure that the side menu is pointing to a node.
     const sideMenuData = useSelector(state => state.sideMenuData);
     if(sideMenuData.type !== 'node') return <></>;
+
+    // Getting the node's data from the store
     const node = useSelector(state => state.map.rows[sideMenuData.dataPointer[0]].nodes[sideMenuData.dataPointer[1]]);
     
     return <div className="node">

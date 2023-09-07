@@ -1,5 +1,6 @@
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { socket } from "../Map";
+
 import { useDispatch, useSelector } from "../store/store";
 import { setNotification } from "../store/notification";
 import { removeNewSession } from "../store/tempSession";
@@ -22,11 +23,14 @@ type Props = {
  * @param userData (optional) Data of the logged in user.
  */
 const SessionOption: FunctionComponent<Props> = (props) => {
+    const dispatch = useDispatch();
+
+    // Getting the sessions on this map, the selected session's index, and whether the map is in preview mode from the store.
     const sessions = useSelector(state => state.sessions);
     const selectedSession = useSelector(state => state.selectedSession);
     const preview = useSelector(state => state.preview);
-    const dispatch = useDispatch();
 
+    // State varaible to keep track of the edits done this session.
     const [session, setSession] = useState(props.index === -1 ? useSelector(state => state.tempSession!) : sessions[props.index]);
 
     // State variable keeping track of whether the user is editing, and to keep track of the data on the session.

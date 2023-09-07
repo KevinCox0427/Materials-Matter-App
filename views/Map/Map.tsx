@@ -50,12 +50,16 @@ type Props = {
  * @param map The configuration of the map to render its content appropriately.
  * @param sessions All available comment sessions to view and their content.
  * @param userData (optional) Data of the logged in user.
+ * @param originUrl The url for the Socket.io connection.
  */
 const Map: FunctionComponent<Props> = (props) => {
     // Making sure we inherit the properties from the server.
     const pageProps = props.ServerProps.mapPageProps;
     if(!pageProps) return <></>;
 
+    const dispatch = useDispatch();
+
+    // Getting the map data, session data, any new sesions or comments, the selected user's action, any new notifications, and whether the map is in preview mode from the store.
     const map = useSelector(state => state.map);
     const selectedSession = useSelector(state => state.selectedSession);
     const sessions = useSelector(state => state.sessions);
@@ -64,8 +68,6 @@ const Map: FunctionComponent<Props> = (props) => {
     const action = useSelector(state => state.action);
     const notification = useSelector(state => state.notification);
     const preview = useSelector(state => state.preview);
-
-    const dispatch = useDispatch();
 
     // Automatically closing the notification after 10s.
     const notificationTimeout = useRef<NodeJS.Timeout | null>(null);
@@ -213,9 +215,7 @@ const Map: FunctionComponent<Props> = (props) => {
     </main>
 }
 
-/**
- * Rendering our react element to the root element.
- */
+// Rendering our react element to the root element.
 const root = createRoot(document.getElementById('root') as HTMLDivElement);
 root.render(
     <React.StrictMode>

@@ -24,17 +24,14 @@ type Props = {
  * A React page that will render the homepage. This will link to all the map editors.
  * 
  * @param maps The configuration of the maps to render all the options.
+ * @param userData (optional) The data of the logged in user.
  */
 const Home: FunctionComponent<Props> = (props) => {
-    /**
-     * Making sure we inherited the properties from the server.
-     */
+    // Making sure we inherited the properties from the server.
     const pageProps = props.ServerProps.homePageProps;
     if(!pageProps) return <></>;
 
-    /**
-     * State variable so that if a user deletes a map, the UI updates.
-     */
+    // State variable so that if a user deletes a map, the UI updates.
     const [maps, setMaps] = useState(pageProps.maps);
 
     /**
@@ -101,9 +98,7 @@ const Home: FunctionComponent<Props> = (props) => {
     </>
 }
 
-/**
- * Rendering our react element to the root element.
- */
+// Rendering our react element to the root element.
 const root = createRoot(document.getElementById('root') as HTMLDivElement);
 root.render(
     <React.StrictMode>
