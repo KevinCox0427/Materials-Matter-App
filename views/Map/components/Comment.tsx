@@ -82,6 +82,9 @@ const Comment: FunctionComponent<Props> = (props) => {
         cancelTempComment();
     }
 
+    /**
+     * A function to remove a new comment that wasn't uploaded.
+     */
     function cancelTempComment() {
         dispatch(removeTempComment());
         if(sideMenuData.dataPointer[1] < 0) {

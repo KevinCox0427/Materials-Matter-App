@@ -21,7 +21,6 @@ declare global {
 }
 
 // Intiating the Google oauth2 configuation.
-console.log(`${process.env.originURL}/users/callback`)
 passport.use(new Strategy({
         clientID: process.env.googleClientId || '',
         clientSecret: process.env.googleClientSecret || '',

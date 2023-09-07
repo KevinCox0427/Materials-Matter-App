@@ -21,10 +21,9 @@ const TagsEditor: FunctionComponent = () => {
     
     return <div className="tags">
         <h2>Tags:</h2>
-        <button onClick={() => dispatch(addTag({
-            name: 'Untitled',
-            mapId: map.id
-        }))}>+ Add Tag</button>
+        <button
+            onClick={() => dispatch(addTag('Untitled'))}
+        >+ Add Tag</button>
         {tags.map((tag, i) => {
             return <div key={i} className="Tag">
                 <input

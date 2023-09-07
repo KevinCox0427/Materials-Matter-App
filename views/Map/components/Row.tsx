@@ -63,13 +63,13 @@ const Row: FunctionComponent<Props> = (props) => {
             {preview ? 
                 <></>
                 : <div className="LeftButtons">
-                    <button onClick={() => dispatch(moveRowUp({rowIndex: props.rowIndex}))}>
+                    <button onClick={() => dispatch(moveRowUp(props.rowIndex))}>
                         <i className="fa-solid fa-arrow-up"></i>
                     </button>
-                    <button onClick={() => dispatch(removeRow({rowIndex: props.rowIndex}))}>
+                    <button onClick={() => dispatch(removeRow(props.rowIndex))}>
                         <i className="fa-solid fa-trash-can"></i>
                     </button>
-                    <button onClick={() => dispatch(moveRowDown({rowIndex: props.rowIndex}))}>
+                    <button onClick={() => dispatch(moveRowDown(props.rowIndex))}>
                         <i className="fa-solid fa-arrow-down"></i>
                     </button>
                 </div>}

@@ -11,6 +11,7 @@ import { tempSessionSlice } from "./tempSession";
 import { filterSlice } from "./filter";
 import { previewSlice } from "./preview";
 
+// Creating our store with all the Redux slices.
 export const store = configureStore({
     reducer: {
         action: actionSlice.reducer,
